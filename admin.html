@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Судачим · модерация</title>
+<link href="https://fonts.cdnfonts.com/css/opposans" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'OPPO Sans',system-ui,sans-serif}
+body{background:#EDEEF2;color:#15181C;min-height:100vh;padding:20px}
+.box{max-width:560px;margin:0 auto}
+h1{font-size:20px;margin-bottom:14px}
+.card{background:#fff;border-radius:20px;padding:16px;box-shadow:0 12px 34px rgba(20,24,32,.08);margin-bottom:12px}
+input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;font-size:15px;margin-bottom:8px}
+.btn{width:100%;background:#15181C;color:#fff;border:none;border-radius:999px;padding:13px;font-weight:700;font-size:15px}
+.err{color:#D33A2C;font-size:13px;margin-top:6px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{flex:1;background:#fff;border:none;border-radius:999px;padding:11px;font-weight:600;font-size:13px;color:#8A919E}
+.tab.on{color:#15181C;box-shadow:0 6px 18px rgba(201,151,28,.25)}
+.mcat{font-size:11px;color:#8A919E;margin-bottom:6px}
+.mctx{font-size:12px;color:#8A919E;background:#EDEEF2;border-radius:10px;padding:8px 10px;margin-bottom:8px}
+.mtxt{font-size:14px;line-height:1.45;margin-bottom:10px}
+.mbtns{display:flex;gap:8px}
+.mbtns button{flex:1;border:none;border-radius:999px;padding:11px;font-weight:700;font-size:13px}
+.ok{background:#2E9E5B;color:#fff}.no{background:#EDEEF2;color:#D33A2C}
+.empty{text-align:center;color:#8A919E;padding:30px}
+.out{background:none;border:none;color:#8A919E;font-size:12px;margin-top:10px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>⚖️ Модерация</h1>
+<div id="loginBox" class="card hidden">
+  <input id="email" type="email" placeholder="Email админа">
+  <input id="pass" type="password" placeholder="Пароль">
+  <button class="btn" onclick="doLogin()">Войти</button>
+  <div class="err" id="loginErr"></div>
+</div>
+<div id="panel" class="hidden">
+  <div class="tabs">
+    <button class="tab on" id="tabCases" onclick="setTab('cases')"></button>
+    <button class="tab" id="tabComments" onclick="setTab('comments')"></button>
+  </div>
+  <div id="list"></div>
+  <button class="out" onclick="logout()">Выйти из админки</button>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
+let tab = 'cases', pendCases = [], pendComments = [], caseMap = {}, adminId = null;
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sideRu(s){ return s === 'condemn' ? '😡 осуждает' : s === 'justify' ? '👍 не осуждает' : '🤔 жиза'; }
+function whenRu(t){ try { return new Date(t).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); } catch(e){ return ''; } }
+async function boot(){
+  const { data } = await sb.auth.getSession();
+  if (data.session) panel(); else $('loginBox').classList.remove('hidden');
+}
+async function doLogin(){
+  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('pass').value });
+  if (error) { $('loginErr').textContent = 'Неверный email или пароль'; return; }
+  panel();
+}
+async function panel(){
+  adminId = ((await sb.auth.getUser()).data.user || {}).id || null;
+  $('loginBox').classList.add('hidden');
+  $('panel').classList.remove('hidden');
+  await refresh();
+}
+async function refresh(){
+  const [c, cm, cs] = await Promise.all([
+    sb.from('cases').select('*').eq('status','pending').order('created_at'),
+    sb.from('comments').select('*').eq('status','pending').order('created_at'),
+    sb.from('cases').select('id,text,category')
+  ]);
+  pendCases = c.data || []; pendComments = cm.data || [];
+  caseMap = {}; (cs.data || []).forEach(k => caseMap[k.id] = k);
+  $('tabCases').textContent = 'Предложки (' + pendCases.length + ')';
+  $('tabComments').textContent = 'Комментарии (' + pendComments.length + ')';
+  renderList();
+}
+function setTab(t){
+  tab = t;
+  $('tabCases').classList.toggle('on', t === 'cases');
+  $('tabComments').classList.toggle('on', t === 'comments');
+  renderList();
+}
+function renderList(){
+  const box = $('list');
+  if (tab === 'cases') {
+    box.innerHTML = pendCases.length ? pendCases.map(o =>
+      '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · ' + (o.category || 'другое') + (o.user_id ? ' · от пользователя' : ' · без автора → станет твоим') + '</div>' +
+      '<div class="mtxt">' + esc(o.text) + '</div>' +
+      '<div class="mbtns"><button class="ok" onclick="decide(' + o.id + ',true)">✅ одобрить</button>' +
+      '<button class="no" onclick="decide(' + o.id + ',false)">❌ отклонить</button></div></div>'
+    ).join('') : '<div class="empty">Очередь пуста 🎉</div>';
+  } else {
+    box.innerHTML = pendComments.length ? pendComments.map(o => {
+      const cs2 = caseMap[o.case_id];
+      return '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · ' + (cs2 ? (cs2.category || 'другое') : '—') + ' · ' + sideRu(o.side) + '</div>' +
+        '<div class="mctx">история: ' + esc(cs2 ? cs2.text : '—') + '</div>' +
+        '<div class="mtxt">' + esc(o.text) + '</div>' +
+        '<div class="mbtns"><button class="ok" onclick="decide(' + o.id + ',true)">✅ одобрить</button>' +
+        '<button class="no" onclick="decide(' + o.id + ',false)">❌ отклонить</button></div></div>';
+    }).join('') : '<div class="empty">Очередь пуста 🎉</div>';
+  }
+}
+async function decide(id, ok){
+  const table = tab === 'cases' ? 'cases' : 'comments';
+  const patch = { status: ok ? 'approved' : 'rejected' };
+  if (tab === 'cases' && ok) {
+    const obj = pendCases.find(o => o.id === id);
+    if (obj && !obj.user_id && adminId) patch.user_id = adminId;
+  }
+  const { error } = await sb.from(table).update(patch).eq('id', id);
+  if (error) alert(error.message);
+  await refresh();
+}
+async function logout(){ await sb.auth.signOut(); location.reload(); }
+boot();
+</script>
+</body>
+</html>
