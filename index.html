@@ -236,6 +236,13 @@ const card = $('card'), caseText = $('caseText');
 const catOf = c => (c.category || 'другое');
 const catL = c => catOf(c).toLowerCase();
 const isMine = c => !!(me && c.user_id && c.user_id === me.id);
+const ADMIN_EMAILS = ['artixz18@gmail.com'];
+const isAdmin = () => !!(me && me.email && ADMIN_EMAILS.includes(String(me.email).toLowerCase()));
+function votesLabel(total){
+  if (total >= 100) return plural(total);
+  const masked = 'меньше 100 голосов';
+  return isAdmin() ? masked + ' (' + total + ')' : masked;
+}
 
 function avaColor(n){
   let h = 0; for (const ch of (n || 'x')) h = (h * 31 + ch.charCodeAt(0)) % 360;
@@ -474,7 +481,7 @@ async function renderFeed(){
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
     return '<div class="fitem" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-      '<div class="fmeta"><span>' + esc(catOf(c)) + '</span><span>' + plural(total) + '</span></div>' +
+      '<div class="fmeta"><span>' + esc(catOf(c)) + '</span><span>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + esc(c.text) + '</div>' + actions +
       '</div></div>';
   }).join('');
