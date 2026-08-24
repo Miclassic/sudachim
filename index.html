@@ -12,17 +12,29 @@
 body{background:var(--bg);color:var(--ink);min-height:100vh}
 button{transition:transform .15s ease}
 button:active{transform:scale(.95)}
-.topbar{position:fixed;top:0;left:0;right:0;padding:12px 14px;z-index:20;background:var(--bg);box-shadow:0 1px 0 rgba(20,24,32,.06)}
-.topbarIn{max-width:620px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.brand{display:flex;align-items:center;gap:6px;color:var(--gray);font-size:11px;letter-spacing:2px;font-weight:600;user-select:none;cursor:pointer}
-.brand .scale{font-size:14px;display:inline-block;animation:weigh 5.5s ease-in-out infinite;transform-origin:50% 15%}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:20;background:rgba(237,238,242,.72);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);box-shadow:0 1px 0 rgba(20,24,32,.06)}
+.topbarIn{max-width:620px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px 6px}
+.brand{display:flex;align-items:center;gap:7px;user-select:none;cursor:pointer}
+.brand .scale{font-size:16px;display:inline-block;animation:weigh 5.5s ease-in-out infinite;transform-origin:50% 15%}
+.brandCol{display:flex;flex-direction:column;line-height:1.1}
+.brandName{color:var(--gray);font-size:12px;letter-spacing:2px;font-weight:700}
+.brandSlog{color:var(--gray);font-size:8px;letter-spacing:.5px;opacity:.8}
 @keyframes weigh{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
 .tbR{display:flex;gap:8px;align-items:center}
 .miniBtn{background:#fff;border:none;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:600;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.10)}
 .avaBtn{width:34px;height:34px;border:none;border-radius:50%;color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 14px rgba(20,24,32,.18);overflow:hidden;padding:0}
 .avaImg{width:100%;height:100%;object-fit:cover;border-radius:50%}
-main{padding:70px 16px 110px;max-width:620px;width:100%;margin:0 auto}
-.secHead{font-weight:800;font-size:16px;margin:4px 0 12px}
+.tabbar{max-width:620px;margin:0 auto;display:flex;gap:6px;padding:2px 12px 10px;overflow-x:auto;scrollbar-width:none}
+.bn{flex:1;background:none;border:none;border-radius:999px;padding:8px 6px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--gray);font-size:11px;font-weight:700;white-space:nowrap}
+.bn i{font-style:normal;font-size:15px}
+.bn.on{background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.10)}
+.bn.sizzle i{animation:sizzle 1.6s ease-in-out infinite}
+@keyframes sizzle{0%,100%{transform:rotate(0) scale(1);filter:drop-shadow(0 0 0 rgba(211,58,44,0))}50%{transform:rotate(-10deg) scale(1.18);filter:drop-shadow(0 0 6px rgba(211,58,44,.65))}}
+.bn.dailyB i{animation:fireP 2.2s ease-in-out infinite}
+@keyframes fireP{0%,100%{transform:scale(1)}50%{transform:scale(1.14);filter:drop-shadow(0 0 5px rgba(255,138,61,.6))}}
+main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
+.secHead{font-weight:800;font-size:16px;margin:4px 0 4px}
+.secDesc{color:var(--gray);font-size:12px;line-height:1.4;margin-bottom:14px}
 .stack{position:relative}
 .ghost{position:absolute;inset:0;background:#fff;border-radius:44px;box-shadow:0 12px 34px rgba(20,24,32,.08)}
 .ghost.g1{transform:scale(.94) translateY(16px);opacity:.5;z-index:0}
@@ -69,15 +81,18 @@ main{padding:70px 16px 110px;max-width:620px;width:100%;margin:0 auto}
 .crow{display:flex;gap:8px;margin-top:10px}
 .crow input{flex:1;background:var(--card);border:none;border-radius:999px;padding:12px 14px;font-size:14px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
 .crow button{background:var(--gold);border:none;border-radius:999px;padding:0 18px;font-weight:700;color:#fff}
-#feedHead{margin:26px 0 12px;font-weight:800;font-size:15px;color:var(--ink)}
-#trashBanner{margin:0 0 12px;background:linear-gradient(90deg,#1B1E24,#3A2E4A);color:#fff;border-radius:16px;padding:10px 14px;font-size:12px;font-weight:700}
+#feedHead{margin:26px 0 6px;font-weight:800;font-size:15px;color:var(--ink)}
+#trashBanner{margin:0 0 14px;background:linear-gradient(90deg,#1B1E24,#3A2E4A);color:#fff;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:700}
+.tbDesc{font-size:11px;font-weight:500;color:rgba(255,255,255,.72);margin-top:5px;line-height:1.4}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
 .chipBtn{flex:0 0 auto;background:#fff;border:none;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--gray);box-shadow:0 4px 14px rgba(20,24,32,.06)}
 .chipBtn.on{color:var(--ink);box-shadow:0 6px 18px rgba(201,151,28,.25)}
 #feed,#duelsList,#dailyList{display:flex;flex-direction:column;gap:14px}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .fitem{position:relative;overflow:hidden;background:#fff;border-radius:24px;box-shadow:0 12px 34px rgba(20,24,32,.08);animation:rise .45s ease both}
-.fart{position:absolute;top:0;left:0;right:0;height:58%;-webkit-mask-image:linear-gradient(#000 50%,transparent);mask-image:linear-gradient(#000 50%,transparent);animation:drift 26s linear infinite}
+.fitem.hot{box-shadow:0 16px 44px rgba(201,151,28,.20)}
+.fart{display:none;position:absolute;top:0;left:0;right:0;height:58%;-webkit-mask-image:linear-gradient(#000 50%,transparent);mask-image:linear-gradient(#000 50%,transparent);animation:drift 26s linear infinite}
+.fitem.hot .fart{display:block}
 @keyframes drift{to{background-position:192px 96px,0 0}}
 .artF{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='32' opacity='.4' transform='rotate(-12 26 44)'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(10 67 88)'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFD3E0,#FFF0F5)}
 .artM{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='8' y='44' font-size='32' opacity='.45' transform='rotate(-14 24 44)'%3E%F0%9F%92%B5%3C/text%3E%3Ctext x='52' y='88' font-size='26' opacity='.4' transform='rotate(12 65 88)'%3E%F0%9F%AA%99%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#C9F0D4,#FBFFEF)}
@@ -86,6 +101,7 @@ main{padding:70px 16px 110px;max-width:620px;width:100%;margin:0 auto}
 .artR{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%92%94%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%92%8D%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#E6D6FF,#F8F2FF)}
 .artE{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-10 25 44)'%3E%F0%9F%A4%9D%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#C9F0EC,#EFFDFA)}
 .artT{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%94%A5%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 65 88)'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#2A2438,#4A3A5A)}
+.artV{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 65 88)'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFE3C4,#FFF7EC)}
 .artD{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%96%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(10 66 88)'%3E%E2%9D%93%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#F3E3B8,#FBF6EA)}
 .fbody{position:relative;padding:16px}
 .fmeta{font-size:11px;color:var(--gray);display:flex;justify-content:space-between}
@@ -103,12 +119,7 @@ main{padding:70px 16px 110px;max-width:620px;width:100%;margin:0 auto}
 .dTop{font-size:12px;font-weight:800;color:var(--gold);margin-bottom:8px}
 .dTop.dim{color:var(--gray);font-weight:600}
 footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center}
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);box-shadow:0 -1px 0 rgba(20,24,32,.06)}
-.bnavIn{max-width:620px;margin:0 auto;display:flex}
-.bn{flex:1;background:none;border:none;padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--gray);font-size:10px;font-weight:600}
-.bn i{font-style:normal;font-size:18px}
-.bn.on{color:var(--gold)}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:80px;background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-size:13px;z-index:90;max-width:90%;animation:rise .3s ease}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:40px;background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-size:13px;z-index:90;max-width:90%;animation:rise .3s ease}
 #modal{position:fixed;inset:0;background:rgba(20,24,32,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
 #modal .box{background:#fff;border-radius:24px;padding:18px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px;animation:rise .3s ease}
 #modal textarea{background:var(--bg);border:none;border-radius:14px;padding:12px;font-size:15px;min-height:120px}
@@ -155,16 +166,27 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <body>
 <div class="topbar">
   <div class="topbarIn">
-    <div class="brand" onclick="brandTap()"><span class="scale">⚖️</span>судачим</div>
+    <div class="brand" onclick="brandTap()">
+      <span class="scale">⚖️</span>
+      <span class="brandCol"><span class="brandName">судачим</span><span class="brandSlog">народный суд бытовых историй</span></span>
+    </div>
     <div class="tbR">
       <button class="miniBtn" onclick="openForm()">рассуди меня</button>
       <span id="tbUser"></span>
     </div>
   </div>
+  <div class="tabbar">
+    <button class="bn on" data-t="court" onclick="showTab('court')"><i>⚖️</i>суд</button>
+    <button class="bn sizzle" data-t="duels" onclick="showTab('duels')"><i>⚔️</i>дуэли</button>
+    <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><i>🔥</i>дело дня</button>
+    <button class="bn" data-t="profile" onclick="showTab('profile')"><i>👤</i>профиль</button>
+  </div>
 </div>
 <main>
   <section id="tab-court">
-    <div id="trashBanner" class="hidden">🌙 треш-час открыт — до 5:00</div>
+    <div class="secHead">⚖️ суд</div>
+    <div class="secDesc">Свайпай истории и выноси вердикт. Народ решит, кто прав, — и покажет, совпадаешь ли ты с ним.</div>
+    <div id="trashBanner" class="hidden">🌙 треш-час открыт — до 5:00<div class="tbDesc">Треш-час — время самых диких историй. С 23:00 до 5:00: после полуночи правда звучит честнее, а к утру всё можно списать на усталость.</div></div>
     <div id="myCasesMain" style="margin-bottom:14px"></div>
     <div id="cardWrap">
       <div class="stack">
@@ -192,6 +214,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   </section>
   <section id="tab-duels" class="hidden">
     <div class="secHead">⚔️ дуэли · что хуже?</div>
+    <div class="secDesc">Выбери, что хуже, — или предложи свою пару. Сторона с большинством побеждает. Самые жаркие дуэли получают огонь.</div>
     <button class="miniBtn" style="margin-bottom:12px" onclick="toggleDuelForm()">+ предложить дуэль</button>
     <div id="duelForm" class="hidden" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
       <input id="dA" class="aIn" placeholder="вариант А">
@@ -202,19 +225,16 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   </section>
   <section id="tab-daily" class="hidden">
     <div class="secHead">🔥 дело дня</div>
+    <div class="secDesc">Одна история в день. Голосуй до 21:00 — вечером открывается народный вердикт.</div>
     <div id="dailyList"></div>
   </section>
   <section id="tab-profile" class="hidden">
+    <div class="secHead">👤 профиль</div>
+    <div class="secDesc">Твоя статистика, тип судьи, стрики и вердикт-портрет для сторис.</div>
     <div class="pBody" id="pBody"></div>
   </section>
 </main>
 <footer>Судачим — развлекательный сервис. Все ситуации анонимны, мнения — субъективные оценочные суждения. 16+</footer>
-<nav class="bnav"><div class="bnavIn">
-  <button class="bn on" data-t="court" onclick="showTab('court')"><i>⚖️</i>суд</button>
-  <button class="bn" data-t="duels" onclick="showTab('duels')"><i>⚔️</i>дуэли</button>
-  <button class="bn" data-t="daily" onclick="showTab('daily')"><i>🔥</i>дело дня</button>
-  <button class="bn" data-t="profile" onclick="showTab('profile')"><i>👤</i>профиль</button>
-</div></nav>
 <div id="modal" class="hidden">
   <div class="box">
     <h3>Расскажи свою ситуацию</h3>
@@ -258,7 +278,8 @@ function loadVoted(){
 function saveVoted(){ localStorage.setItem(votedKey(), JSON.stringify(voted)); }
 let duelVoted = JSON.parse(localStorage.getItem('sud_duelv') || '{}');
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
-let allCases = [], allComments = [], feedCat = 'все';
+let allCases = [], allComments = [], allDuels = [], feedCat = 'все';
+let hotCases = new Set(), hotDuels = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT' };
 const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'другое':'⚖️' };
@@ -271,13 +292,13 @@ const isMine = c => !!(me && c.user_id && c.user_id === me.id);
 const isAdmin = () => !!(me && me.email && ADMIN_EMAILS.includes(String(me.email).toLowerCase()));
 const trashOpen = () => { const h = new Date().getHours(); return h >= 23 || h < 5; };
 const visibleCase = c => catL(c) !== 'треш' || trashOpen();
+const since24 = () => new Date(Date.now() - 864e5).toISOString();
 function votesLabel(total){
   if (total >= 100) return plural(total);
   const masked = 'меньше 100 голосов';
   return isAdmin() ? masked + ' (' + total + ')' : masked;
 }
 
-/* ---------- вкладки ---------- */
 function showTab(t){
   ['court','duels','daily','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
   document.querySelectorAll('.bn').forEach(b => b.classList.toggle('on', b.dataset.t === t));
@@ -287,7 +308,6 @@ function showTab(t){
   window.scrollTo(0, 0);
 }
 
-/* ---------- теги/типы ---------- */
 function judgeType(s){
   if (!s || s.total < 5) return null;
   if (s.lifeShare >= .5) return { t:'ВСЁ ВИДЕЛ', e:'💀', c:'#8A919E' };
@@ -412,7 +432,6 @@ async function doGoogle(){
   if (r.error) toast('Google: ' + r.error.message);
 }
 
-/* ---------- профиль + wrapped ---------- */
 let lastWrapped = null;
 async function showProfile(){
   if (!me) { openAuth(); return; }
@@ -565,29 +584,89 @@ async function submitDuel(){
   toast(error ? 'Ошибка: ' + error.message : 'Дуэль ушла на модерацию ✅');
 }
 async function renderDuels(){
-  const { data } = await sb.from('duels').select('*').eq('status', 'approved').order('created_at', { ascending: false });
-  const list = data || [];
-  $('duelsList').innerHTML = list.map(duelCard).join('') || '<div class="empty">Пока пусто — предложи первую дуэль ⚔️</div>';
+  const [d, rv] = await Promise.all([
+    sb.from('duels').select('*').eq('status', 'approved').order('created_at', { ascending: false }),
+    sb.from('duel_votes').select('duel_id').gte('created_at', since24())
+  ]);
+  allDuels = d.data || [];
+  const cnt = {}; (rv.data || []).forEach(r => cnt[r.duel_id] = (cnt[r.duel_id] || 0) + 1);
+  hotDuels = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => Number(e[0])));
+  $('duelsList').innerHTML = allDuels.map(duelCard).join('') || '<div class="empty">Пока пусто — предложи первую дуэль ⚔️</div>';
 }
 function duelCard(d){
   const total = (d.a_votes || 0) + (d.b_votes || 0);
   const my = duelVoted[d.id];
+  const hot = hotDuels.has(d.id);
   const pa = total ? Math.round(d.a_votes * 100 / total) : 0;
+  const art = '<div class="fart artV"></div>';
+  let body;
   if (my) {
-    return '<div class="fitem"><div class="fbody"><div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
+    body = '<div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
       '<div class="fbars"><i class="fbar" style="width:' + pa + '%;background:var(--red)"></i><i class="fbar" style="width:' + (100 - pa) + '%;background:var(--grn)"></i></div>' +
-      '<div class="fmeta"><span style="color:var(--red)">' + pa + '%</span><span>' + plural(total) + '</span><span style="color:var(--grn)">' + (100 - pa) + '%</span></div></div></div>';
+      '<div class="fmeta"><span style="color:var(--red)">' + pa + '%</span><span>' + votesLabel(total) + '</span><span style="color:var(--grn)">' + (100 - pa) + '%</span></div>' +
+      '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">📤 Поделиться</button></div>';
+  } else {
+    body = '<div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
+      '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="duelVote(' + d.id + ',\'a\')">👈 хуже</button>' +
+      '<button class="fpill" style="color:var(--grn)" onclick="duelVote(' + d.id + ',\'b\')">хуже 👉</button></div>' +
+      '<div class="dHint">что хуже?</div>' +
+      '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">📤 Поделиться</button></div>';
   }
-  return '<div class="fitem"><div class="fbody"><div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
-    '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="duelVote(' + d.id + ',\'a\')">👈 хуже</button>' +
-    '<button class="fpill" style="color:var(--grn)" onclick="duelVote(' + d.id + ',\'b\')">хуже 👉</button></div>' +
-    '<div class="dHint">что хуже?</div></div></div>';
+  return '<div class="fitem' + (hot ? ' hot' : '') + '">' + (hot ? art : '') + '<div class="fbody">' +
+    '<div class="fmeta"><span>' + (hot ? '🔥 ' : '') + 'дуэль</span><span>' + votesLabel(total) + '</span></div>' + body + '</div></div>';
 }
 async function duelVote(id, side){
   const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
   if (error) { toast(error.message); return; }
   duelVoted[id] = side; localStorage.setItem('sud_duelv', JSON.stringify(duelVoted));
   renderDuels();
+}
+async function shareDuel(id){
+  const d = allDuels.find(x => x.id === id); if (!d) return;
+  await ensureFonts();
+  const blob = await renderCardBlobDuel(d);
+  try {
+    const file = new File([blob], 'sudachim-duel.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Судачим · дуэль', text: 'Что хуже? Реши сам' });
+      return;
+    }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sudachim-duel.png'; a.click();
+  toast('Картинка сохранена — кидай в чат! 📤');
+}
+function renderCardBlobDuel(d){
+  const W = 1080, H = 1080;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const ink = '#15181C', gray = '#8A919E', red = '#D33A2C', grn = '#2E9E5B';
+  x.fillStyle = '#EDEEF2'; x.fillRect(0, 0, W, H);
+  x.save(); x.shadowColor = 'rgba(20,24,32,.14)'; x.shadowBlur = 46; x.shadowOffsetY = 18;
+  x.fillStyle = '#fff'; rr(x, 60, 60, W - 120, H - 120, 60); x.fill(); x.restore();
+  let g = x.createLinearGradient(200, 0, W - 200, 0);
+  g.addColorStop(0, ink); g.addColorStop(.5, '#C9971C'); g.addColorStop(1, ink);
+  x.fillStyle = g; x.textAlign = 'center'; x.font = '600 46px "OPPO Sans", system-ui';
+  x.fillText('С У Д А Ч И М · Д У Э Л Ь', W / 2, 170);
+  x.fillStyle = red; x.font = '700 44px "OPPO Sans", system-ui';
+  wrapCenter(x, d.a, W - 240).forEach((l, i) => x.fillText(l, W / 2, 300 + i * 58));
+  x.fillStyle = '#C9971C'; x.font = '800 60px "OPPO Sans", system-ui';
+  x.fillText('VS', W / 2, 560);
+  x.fillStyle = grn; x.font = '700 44px "OPPO Sans", system-ui';
+  wrapCenter(x, d.b, W - 240).forEach((l, i) => x.fillText(l, W / 2, 660 + i * 58));
+  const total = (d.a_votes || 0) + (d.b_votes || 0) || 1;
+  const pa = Math.round((d.a_votes || 0) * 100 / total);
+  x.fillStyle = '#EDEEF2'; rr(x, 130, 830, W - 260, 24, 12); x.fill();
+  x.fillStyle = red; rr(x, 130, 830, Math.max(24, (W - 260) * pa / 100), 24, 12); x.fill();
+  x.fillStyle = grn; rr(x, 130 + (W - 260) * pa / 100, 830, (W - 260) * (100 - pa) / 100, 24, 12); x.fill();
+  x.textAlign = 'left'; x.fillStyle = red; x.font = '800 36px "OPPO Sans", system-ui'; x.fillText(pa + '%', 130, 905);
+  x.textAlign = 'right'; x.fillStyle = grn; x.fillText((100 - pa) + '%', W - 130, 905);
+  const cg = x.createLinearGradient(240, 0, W - 240, 0);
+  cg.addColorStop(0, '#C9971C'); cg.addColorStop(.5, '#FF8A3D'); cg.addColorStop(1, '#C9971C');
+  x.fillStyle = cg; x.textAlign = 'center'; x.font = '700 40px "OPPO Sans", system-ui';
+  x.fillText('а ты на чьей стороне?', W / 2, 965);
+  x.fillStyle = gray; x.font = '500 30px "OPPO Sans", system-ui';
+  x.fillText('голосуй: miclassic.github.io/sudachim', W / 2, 1010);
+  return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 
 /* ---------- дело дня ---------- */
@@ -691,11 +770,14 @@ async function load(){
   refreshMe();
 }
 async function loadFeed(){
-  const [c, cm] = await Promise.all([
+  const [c, cm, rv] = await Promise.all([
     sb.from('cases').select('*').eq('status','approved'),
-    sb.from('comments').select('*').eq('status','approved')
+    sb.from('comments').select('*').eq('status','approved'),
+    sb.from('votes').select('case_id').gte('created_at', since24())
   ]);
   allCases = c.data || []; allComments = cm.data || [];
+  const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
+  hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   renderChips(); renderFeed();
 }
 function renderChips(){
@@ -713,10 +795,11 @@ async function renderFeed(){
   $('feedHead').classList.toggle('hidden', !list.length);
   $('myCasesMain').innerHTML = me ? myCasesHtml(allCases.filter(c => isMine(c))) : '';
   const nicks = await nicksFor(allComments.map(k => k.user_id));
-  const stats = await userStats(Object.keys(nicks).length ? Object.keys(nicks) : []);
+  const stats = await userStats(Object.keys(nicks));
   $('feed').innerHTML = list.map(({ c, total }, i) => {
     const pct = v => total ? Math.round(v * 100 / total) : 0;
     const votedIt = (c.id in voted);
+    const hot = hotCases.has(c.id);
     const art = ART[catL(c)] || 'artD';
     const cms = allComments.filter(k => k.case_id === c.id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
@@ -733,8 +816,8 @@ async function renderFeed(){
     ) : (
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
-    return '<div class="fitem" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-      '<div class="fmeta"><span>' + esc(catOf(c)) + '</span><span>' + votesLabel(total) + '</span></div>' +
+    return '<div class="fitem' + (hot ? ' hot' : '') + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms">' + (hot ? '<div class="fart ' + art + '"></div>' : '') + '<div class="fbody">' +
+      '<div class="fmeta"><span>' + (hot ? '🔥 ' : '') + esc(catOf(c)) + '</span><span>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + esc(c.text) + '</div>' + actions + '</div></div>';
   }).join('');
 }
