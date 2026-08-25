@@ -276,10 +276,14 @@ function loadVoted(){
   if (Array.isArray(voted)) { const m = {}; voted.forEach(id => m[id] = null); voted = m; }
 }
 function saveVoted(){ localStorage.setItem(votedKey(), JSON.stringify(voted)); }
-let duelVoted = JSON.parse(localStorage.getItem('sud_duelv') || '{}');
+let duelVoted = {};
+function duelKey(){ return 'sud_duelv:' + (me ? me.id : 'anon'); }
+function loadDuelVoted(){ duelVoted = JSON.parse(localStorage.getItem(duelKey()) || '{}'); }
+function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVoted)); }
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
 let allCases = [], allComments = [], allDuels = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
+let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT' };
 const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'другое':'⚖️' };
@@ -297,6 +301,16 @@ function votesLabel(total){
   if (total >= 100) return plural(total);
   const masked = 'меньше 100 голосов';
   return isAdmin() ? masked + ' (' + total + ')' : masked;
+}
+
+function scoreCase(c, total){
+  const act = voteCnt24[c.id] || 0;
+  const ageH = (Date.now() - new Date(c.created_at).getTime()) / 3600000;
+  const recency = Math.exp(-ageH / 48);
+  const pctC = total ? (c.condemn||0) / total : .5;
+  const controversy = 1 - Math.abs(pctC - .5) * 2;
+  const personal = myPrefs.has(catL(c)) ? .5 : 0;
+  return act*2 + recency*3 + controversy*2 + personal + Math.log(total+1)*.5;
 }
 
 function showTab(t){
@@ -378,10 +392,14 @@ async function refreshMe(){
   } else { me = null; myNick = ''; myAva = ''; }
   renderTbUser();
   loadVoted();
+  loadDuelVoted();
   if (me) {
     const vv = await sb.from('votes').select('case_id,verdict').eq('user_id', me.id);
     (vv.data || []).forEach(x => { voted[x.case_id] = x.verdict; });
     saveVoted();
+    const dv = await sb.from('duel_votes').select('duel_id,side').eq('user_id', me.id);
+    (dv.data || []).forEach(r => { duelVoted[r.duel_id] = r.side; });
+    saveDuelVoted();
   }
   requeue();
 }
@@ -618,7 +636,7 @@ function duelCard(d){
 async function duelVote(id, side){
   const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
   if (error) { toast(error.message); return; }
-  duelVoted[id] = side; localStorage.setItem('sud_duelv', JSON.stringify(duelVoted));
+  duelVoted[id] = side; saveDuelVoted();
   renderDuels();
 }
 async function shareDuel(id){
@@ -692,48 +710,55 @@ function renderCardBlobDuel(d){
 
 /* ---------- дело дня ---------- */
 let dailyTimer = null;
-function todayReveal(c){
-  const now = new Date(); const created = new Date(c.created_at);
-  if (created.toDateString() !== now.toDateString()) return true;
-  return now.getHours() >= 21;
+const dailyReveal = () => new Date().getHours() >= 21;
+async function pickDaily(){
+  const [c, rv] = await Promise.all([
+    sb.from('cases').select('*').eq('status','approved'),
+    sb.from('votes').select('case_id').gte('created_at', since24())
+  ]);
+  const cases = c.data || [];
+  if (!cases.length) return null;
+  const flagged = cases.find(x => x.daily);
+  if (flagged) return flagged;
+  const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
+  return cases.slice().sort((a, b) => (cnt[b.id] || 0) - (cnt[a.id] || 0) || b.id - a.id)[0];
 }
 async function renderDaily(){
   if (dailyTimer) { clearInterval(dailyTimer); dailyTimer = null; }
-  const { data } = await sb.from('cases').select('*').eq('daily', true).eq('status', 'approved').order('created_at', { ascending: false });
-  const list = data || [];
-  $('dailyList').innerHTML = list.map((c, i) => dailyCard(c, i === 0)).join('') || '<div class="empty">Скоро будет первое дело дня 🔥</div>';
-  if (list.length) {
-    const top = list[0];
-    const tick = () => {
-      const el = $('dcount_' + top.id); if (!el) return;
-      if (todayReveal(top)) { el.textContent = 'результаты открыты'; return; }
-      const t = new Date(); t.setHours(21, 0, 0, 0);
-      let ms = t - new Date(); if (ms < 0) ms = 0;
-      const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000);
-      el.textContent = 'результаты через ' + h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-    };
-    tick(); dailyTimer = setInterval(tick, 1000);
-  }
+  const today = await pickDaily();
+  const box = $('dailyList');
+  if (!today) { box.innerHTML = '<div class="empty">Скоро будет первое дело дня 🔥</div>'; return; }
+  box.innerHTML = dailyCard(today);
+  const tick = () => {
+    const el = $('dcount_' + today.id); if (!el) return;
+    if (dailyReveal()) { el.textContent = 'результаты открыты'; return; }
+    const t = new Date(); t.setHours(21, 0, 0, 0);
+    let ms = t - new Date(); if (ms < 0) ms = 0;
+    const h = Math.floor(ms/3600000), m = Math.floor(ms%3600000/60000), s = Math.floor(ms%60000/1000);
+    el.textContent = 'результаты через ' + h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  };
+  tick(); dailyTimer = setInterval(tick, 1000);
 }
-function dailyCard(c, isTop){
-  const revealed = todayReveal(c);
+function dailyCard(c){
+  const revealed = dailyReveal();
   const total = (c.condemn||0) + (c.justify||0) + (c.life||0);
   const votedIt = (c.id in voted);
-  const pct = v => total ? Math.round(v * 100 / total) : 0;
+  const pct = v => total ? Math.round(v*100/total) : 0;
   const art = ART[catL(c)] || 'artD';
   let body;
   if (revealed && total > 0) {
-    body = '<div class="fbars"><i class="fbar" style="width:' + pct(c.condemn) + '%;background:var(--red)"></i><i class="fbar" style="width:' + pct(c.life) + '%;background:var(--yel)"></i><i class="fbar" style="width:' + pct(c.justify) + '%;background:var(--grn)"></i></div>' +
-      '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>';
+    body = '<div class="fbars"><i class="fbar" style="width:'+pct(c.condemn)+'%;background:var(--red)"></i><i class="fbar" style="width:'+pct(c.life)+'%;background:var(--yel)"></i><i class="fbar" style="width:'+pct(c.justify)+'%;background:var(--grn)"></i></div>' +
+      '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают '+pct(c.condemn)+'%</span><span style="color:var(--grn)">не осуждают '+pct(c.justify)+'%</span></div>';
   } else if (votedIt) {
-    body = '<div class="fpills"><button class="fpill lockPill" style="flex:1">✅ голос учтён' + (revealed ? '' : ' — результаты в 21:00') + '</button></div>';
+    body = '<div class="fpills"><button class="fpill lockPill" style="flex:1">✅ голос учтён'+(revealed?'':' — результаты в 21:00')+'</button></div>';
   } else {
-    body = '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="voteDaily(' + c.id + ',\'condemn\')">😡 Осуждаю</button>' +
-      '<button class="fpill" style="color:var(--yel)" onclick="voteDaily(' + c.id + ',\'life\')">🤔 Жиза</button>' +
-      '<button class="fpill" style="color:var(--grn)" onclick="voteDaily(' + c.id + ',\'justify\')">👍 Не осуждаю</button></div>';
+    body = '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="voteDaily('+c.id+',\'condemn\')">😡 Осуждаю</button>' +
+      '<button class="fpill" style="color:var(--yel)" onclick="voteDaily('+c.id+',\'life\')">🤔 Жиза</button>' +
+      '<button class="fpill" style="color:var(--grn)" onclick="voteDaily('+c.id+',\'justify\')">👍 Не осуждаю</button></div>';
   }
-  const head = isTop ? '<div class="dTop">🔥 дело дня · <span id="dcount_' + c.id + '"></span></div>' : '<div class="dTop dim">' + new Date(c.created_at).toLocaleDateString('ru-RU') + '</div>';
-  return '<div class="fitem"><div class="fart ' + art + '"></div><div class="fbody">' + head + '<div class="ftxt">' + esc(c.text) + '</div>' + body + '</div></div>';
+  return '<div class="fitem hot"><div class="fart '+art+'"></div><div class="fbody">' +
+    '<div class="dTop">🔥 дело дня · <span id="dcount_'+c.id+'"></span></div>' +
+    '<div class="ftxt">'+esc(c.text)+'</div>'+body+'</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -799,6 +824,13 @@ async function loadFeed(){
   allCases = c.data || []; allComments = cm.data || [];
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
+  voteCnt24 = cnt;
+  myPrefs = new Set();
+  if (me) {
+    const pc = {};
+    Object.keys(voted).forEach(id => { const cc = allById(Number(id)); if (cc) pc[catL(cc)] = (pc[catL(cc)]||0)+1; });
+    myPrefs = new Set(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]));
+  }
   renderChips(); renderFeed();
 }
 function renderChips(){
@@ -812,7 +844,7 @@ async function renderFeed(){
     .filter(visibleCase)
     .filter(c => feedCat === 'все' || catL(c) === feedCat)
     .map(c => ({ c, total: (c.condemn||0) + (c.justify||0) + (c.life||0) }))
-    .sort((a, b) => b.total - a.total || b.c.id - a.c.id);
+    .sort((a, b) => scoreCase(b.c, b.total) - scoreCase(a.c, a.total) || b.c.id - a.c.id);
   $('feedHead').classList.toggle('hidden', !list.length);
   $('myCasesMain').innerHTML = me ? myCasesHtml(allCases.filter(c => isMine(c))) : '';
   const nicks = await nicksFor(allComments.map(k => k.user_id));
