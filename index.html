@@ -384,7 +384,6 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
 let device = localStorage.getItem('sud_device');
 if (!device) { device = 'd' + Math.random().toString(36).slice(2) + Date.now(); localStorage.setItem('sud_device', device); }
-/* аналитика воронки */
 function track(name){ try { sb.from('events').insert({ name, device }).then(() => {}); } catch(e){} }
 let voted = {};
 function votedKey(){ return 'sud_voted:' + (me ? me.id : 'anon'); }
@@ -1235,7 +1234,6 @@ async function profilesFor(ids){
   const m = {}; (r.data || []).forEach(p => m[p.id] = p);
   return m;
 }
-/* жалобы */
 async function reportItem(type, id){
   if (!me) { openAuth(); return; }
   const { error } = await sb.from('reports').insert({ target_type: type, target_id: id, user_id: me.id, reason: 'жалоба' });
@@ -1705,7 +1703,6 @@ function openCaseFromNotif(id){
     feedToggleComments(id, true);
   }, 350);
 }
-/* генератор og.png и иконок: открой ?og=1 */
 function dlCanvas(cv, name){ const a = document.createElement('a'); a.download = name; a.href = cv.toDataURL('image/png'); a.click(); }
 async function maybeOg(){
   if (!new URLSearchParams(location.search).has('og')) return;
