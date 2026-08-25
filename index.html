@@ -96,7 +96,10 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .rbtns{display:flex;gap:8px;flex-wrap:wrap}
 .rbtns button{flex:1;background:var(--ink);border:none;color:#fff;border-radius:999px;padding:12px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
 #comments{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow-y:auto}
-.cmt{background:var(--card);border-radius:16px;padding:10px 12px;font-size:14px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
+.cmt{position:relative;background:var(--card);border-radius:16px;padding:10px 12px;font-size:14px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
+.cmt .cHead{padding-right:24px}
+.repAbs{position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px}
+.repAbs .icn{width:13px;height:13px}
 .cmt .nick{font-weight:800}
 .cHead{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px}
 .cBody{font-size:14px;line-height:1.45}
@@ -1245,14 +1248,13 @@ function authorHtml(cm,nicks,stats){
 }
 function cmtClass(cm){ return 'cmt' + (isPremiumUser(cm.user_id) ? ' cmt-premium' : ''); }
 function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '">' + authorHtml(cm,nicks,stats) +
+  return '<div class="' + cmtClass(cm) + '"><button class="repAbs" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('flag') + '</button>' + authorHtml(cm,nicks,stats) +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div></div>';
 }
 function cmtBlock(cm,reps,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '">' + authorHtml(cm,nicks,stats) +
+  return '<div class="' + cmtClass(cm) + '"><button class="repAbs" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('flag') + '</button>' + authorHtml(cm,nicks,stats) +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
-   '<button onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('flag') + ' пожаловаться</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
    '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats)).join('') + '</div></div>';
 }
