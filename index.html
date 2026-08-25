@@ -173,6 +173,68 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   .fbtns button{font-size:14px;padding:12px}.pNick{font-size:24px}
   .bubble{box-shadow:0 24px 60px rgba(20,24,32,.14)}
 }
+
+/* ============ ПРЕМИУМ: бейдж ника ============ */
+.ntag{
+  position:relative; overflow:hidden;
+  display:inline-flex; align-items:center; gap:4px;
+  margin-left:6px; padding:3px 10px;
+  border-radius:999px; vertical-align:middle;
+  font-size:10px; font-weight:800; color:#fff; letter-spacing:.8px;
+  background:linear-gradient(90deg,#8C6A1D,#E9C767,#FF8A3D,#8C6A1D);
+  background-size:300% 100%;
+  animation:ntagFlow 3s linear infinite;
+  box-shadow:0 2px 12px rgba(201,151,28,.45);
+  text-transform:uppercase;
+}
+.ntag::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);
+  background-size:220% 100%;
+  animation:ntagShine 2.4s ease-in-out infinite;
+}
+@keyframes ntagFlow{0%{background-position:0 0}100%{background-position:300% 0}}
+@keyframes ntagShine{0%{background-position:120% 0}100%{background-position:-120% 0}}
+
+/* ============ ПРЕМИУМ: узорчатая подложка (как TG, но читается) ============ */
+.fitem-premium{
+  position:relative;
+  background:linear-gradient(180deg,rgba(244,193,74,.07),#fff 60%);
+  box-shadow:0 12px 34px rgba(201,151,28,.20), inset 0 0 0 1.5px rgba(201,151,28,.28);
+}
+.fitem-premium::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:0;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><g fill='%23C9971C' fill-opacity='.55'><path d='M34 12l4 9 9 4-9 4-4 9-4-9-9-4 9-4z'/><path d='M104 78l4 9 9 4-9 4-4 9-4-9-9-4 9-4z'/><circle cx='102' cy='24' r='3'/><circle cx='28' cy='108' r='3'/><path d='M64 52l3 7 7 3-7 3-3 7-3-7-7-3 7-3z' fill-opacity='.4'/></g></svg>") repeat;
+  background-size:140px 140px;
+  opacity:.22;
+  -webkit-mask-image:radial-gradient(135% 125% at 50% 42%,transparent 28%,#000 86%);
+  mask-image:radial-gradient(135% 125% at 50% 42%,transparent 28%,#000 86%);
+}
+.fitem-premium > .fbody{position:relative; z-index:1}
+
+/* ============ РЕЙТИНГ И АЧИВКИ ============ */
+.lbRow{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; background:#fff; margin-bottom:6px; box-shadow:0 2px 8px rgba(20,24,32,.04)}
+.lbRow.me{background:linear-gradient(90deg,rgba(201,151,28,.14),rgba(201,151,28,.04)); border:1.5px solid rgba(201,151,28,.35)}
+.lbRow .pos{width:26px; font-weight:800; color:var(--gray); font-size:12px; text-align:center}
+.lbRow .pos.top3{font-size:18px}
+.lbRow .av{width:30px; height:30px; border-radius:50%; font-size:12px; font-weight:800; color:#fff; display:flex; align-items:center; justify-content:center; flex:none}
+.lbRow .nm{flex:1; font-weight:700; font-size:13px; display:flex; align-items:center; gap:4px; flex-wrap:wrap}
+.lbRow .sc{font-weight:800; font-size:13px; color:var(--gold)}
+.topnote{font-size:11px; color:var(--gray); line-height:1.5; margin:10px 4px 6px; text-align:center}
+
+.achGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:10px; margin-top:6px}
+.achItem{background:#fff; border-radius:16px; padding:12px; box-shadow:0 6px 18px rgba(20,24,32,.06); position:relative; text-align:left}
+.achItem .aIc{font-size:26px}
+.achItem .aN{font-size:12px; font-weight:800; margin-top:6px}
+.achItem .aD{font-size:10.5px; color:var(--gray); margin-top:2px; line-height:1.3}
+.achItem .aT{position:absolute; top:8px; right:8px; font-size:9px; font-weight:800; border-radius:999px; padding:2px 6px; letter-spacing:.5px}
+.achItem .aT.s{background:linear-gradient(90deg,#8C6A1D,#E9C767); color:#fff}
+.achItem .aT.c{background:#EDEEF2; color:var(--gray)}
+.achItem.locked{opacity:.35; filter:grayscale(.6)}
+.achItem.locked .aN::after{content:" 🔒"; font-size:10px}
+
+.secCard{background:#fff; border-radius:18px; box-shadow:0 8px 22px rgba(20,24,32,.06); padding:14px}
+.secCard h4{font-size:13px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:6px}
 </style>
 </head>
 <body>
@@ -303,6 +365,75 @@ let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null;
+
+/* ============ НОВОЕ: ачивки и динамический топ ============ */
+const ACH = {
+  'first':   { ic:'⚖️', name:'Первый вердикт', tier:'c', desc:'Вынеси первый вердикт' },
+  'zhiza':   { ic:'😂', name:'Жиза-детектор', tier:'c', desc:'10+ голосов «жиза»' },
+  'night':   { ic:'🌙', name:'Ночной судья', tier:'c', desc:'Голос в треш-час' },
+  'voice':   { ic:'🎯', name:'Голос народа', tier:'s', desc:'90%+ совпадений · 50+ вердиктов' },
+  'flame':   { ic:'🔥', name:'Огненный дуэлянт', tier:'s', desc:'Угадай исход 10 жарких дуэлей' },
+  'streak30':{ ic:'📆', name:'Стрик 30', tier:'s', desc:'30 дней вердиктов подряд' },
+  'allseen': { ic:'💀', name:'Всё видел', tier:'s', desc:'50%+ жизы за карьеру' },
+  'critic':  { ic:'⚖️', name:'Прокурор', tier:'s', desc:'60%+ «осуждаю» за карьеру' }
+};
+const STRONG_ACHS = new Set(['voice','flame','streak30','allseen','critic']);
+
+/* Динамический размер топа — растёт с активностью народа */
+function topSize(){
+  const total = allCases.reduce((a,c) => a + (c.condemn||0) + (c.justify||0) + (c.life||0), 0);
+  if (total < 100)  return 10;
+  if (total < 500)  return 25;
+  if (total < 2000) return 50;
+  return 100;
+}
+
+/* Рейтинг — кеш. Обновляется после loadFeed */
+const topCache = { list: [], map: {}, size: 0 };
+function userAchs(s){
+  if (!s || s.total < 1) return [];
+  const a = [];
+  if (s.total >= 1) a.push('first');
+  if ((s.life||0) >= 10) a.push('zhiza');
+  if ((s.nightVotes||0) >= 1) a.push('night');
+  if (s.match >= .9 && s.total >= 50) a.push('voice');
+  if (s.streak >= 30) a.push('streak30');
+  if (s.lifeShare >= .5) a.push('allseen');
+  if (s.condemnShare >= .6 && s.total >= 20) a.push('critic');
+  return a;
+}
+function scoreUser(s){
+  if (!s) return 0;
+  return Math.round((s.total||0)*5 + (s.match||0)*(s.total||0)*10 + (s.streak||0)*20 + (s.life||0)*3);
+}
+function isInTop(uid){
+  if (!uid) return false;
+  const pos = topCache.map[uid];
+  return typeof pos === 'number' && pos <= topCache.size;
+}
+function isPremiumUser(uid){
+  if (!isInTop(uid)) return false;
+  const row = topCache.list.find(r => r.id === uid);
+  if (!row) return false;
+  const achs = userAchs(row.stats);
+  return achs.some(a => STRONG_ACHS.has(a));
+}
+async function refreshTop(){
+  const ts = topSize();
+  topCache.size = ts;
+  const votes = await sb.from('votes').select('user_id');
+  const uids = [...new Set((votes.data || []).map(r => r.user_id).filter(Boolean))];
+  if (!uids.length) { topCache.list = []; topCache.map = {}; return; }
+  const stats = await userStats(uids);
+  topCache.list = uids
+    .map(uid => ({ id: uid, score: scoreUser(stats[uid]), stats: stats[uid] }))
+    .filter(x => x.score > 0)
+    .sort((a,b) => b.score - a.score)
+    .slice(0, ts);
+  topCache.map = {};
+  topCache.list.forEach((r, i) => topCache.map[r.id] = i + 1);
+}
+
 const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT' };
 const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'другое':'⚖️' };
 const ADMIN_EMAILS = ['artixz18@gmail.com'];
@@ -354,9 +485,16 @@ function judgeType(s){
   if (s.condemnShare <= .25) return { t:'МИЛОСЕРДНЫЙ', e:'🕊', c:'#2E9E5B' };
   return { t:'НАРОДНЫЙ СУДЬЯ', e:'🤝', c:'#C9971C' };
 }
-function badgeHtml(s){
+/* Обновлённый badgeHtml: прем-бейдж + тег судьи + стрик */
+function badgeHtml(uid, s){
+  if (!s) return '';
   const t = judgeType(s); if (!t) return '';
-  let h = '<span class="tag" style="background:linear-gradient(90deg,' + t.c + ',' + t.c + 'CC)">' + t.e + ' ' + t.t + '</span>';
+  const premium = isPremiumUser(uid);
+  let h = '';
+  if (premium) {
+    h += '<span class="ntag" title="сильная ачивка · топ-' + topCache.size + '">✦ TOP-' + topCache.size + '</span>';
+  }
+  h += '<span class="tag" style="background:linear-gradient(90deg,' + t.c + ',' + t.c + 'CC)">' + t.e + ' ' + t.t + '</span>';
   if (s.streak >= 3) h += '<span class="tag" style="background:linear-gradient(90deg,#FF8A3D,#D33A2C)">🔥 ' + s.streak + '</span>';
   return h;
 }
@@ -367,24 +505,34 @@ function calcStreak(rows){
   while (days.includes(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
   return streak;
 }
+/* Обновлённый userStats: добавил userId, life (абс.) и nightVotes */
 async function userStats(ids){
   const res = {}; if (!ids.length) return res;
   const v = await sb.from('votes').select('user_id,verdict,case_id,created_at').in('user_id', ids);
   const rows = v.data || [];
   const caseIds = [...new Set(rows.map(r => r.case_id))];
-  const cs = await sb.from('cases').select('id,condemn,justify,life').in('id', caseIds);
+  const cs = await sb.from('cases').select('id,condemn,justify,life,category').in('id', caseIds);
   const byId = {}; (cs.data || []).forEach(c => byId[c.id] = c);
   const per = {}; rows.forEach(r => (per[r.user_id] = per[r.user_id] || []).push(r));
   for (const uid in per) {
     const list = per[uid]; const total = list.length;
-    let cond = 0, life = 0, match = 0;
+    let cond = 0, life = 0, match = 0, nightVotes = 0;
     list.forEach(r => {
       if (r.verdict === 'condemn') cond++;
       if (r.verdict === 'life') life++;
+      const h = new Date(r.created_at).getHours();
+      if (h >= 23 || h < 5) nightVotes++;
       const k = byId[r.case_id];
       if (k) { const m = Math.max(k.condemn, k.justify, k.life); const maj = k.condemn === m ? 'condemn' : k.justify === m ? 'justify' : 'life'; if (r.verdict === maj) match++; }
     });
-    res[uid] = { total, condemnShare: cond/total, lifeShare: life/total, match: match/total, streak: calcStreak(list) };
+    res[uid] = {
+      userId: uid, total,
+      condemnShare: total ? cond/total : 0,
+      lifeShare: total ? life/total : 0,
+      match: total ? match/total : 0,
+      streak: calcStreak(list),
+      life, nightVotes
+    };
   }
   return res;
 }
@@ -519,11 +667,45 @@ async function showProfile(){
   }
   const pctMatch = votes.length ? Math.round(match * 100 / votes.length) : null;
   const since = new Date(me.created_at).toLocaleDateString('ru-RU');
-  const myStats = votes.length ? { total: votes.length, condemnShare: votes.filter(x=>x.verdict==='condemn').length/votes.length, lifeShare: votes.filter(x=>x.verdict==='life').length/votes.length, match: (match||0)/votes.length, streak: calcStreak(votes) } : null;
+  const myStats = votes.length ? { userId: me.id, total: votes.length, condemnShare: votes.filter(x=>x.verdict==='condemn').length/votes.length, lifeShare: votes.filter(x=>x.verdict==='life').length/votes.length, match: (match||0)/votes.length, streak: calcStreak(votes), life: votes.filter(x=>x.verdict==='life').length, nightVotes: votes.filter(x=>{const h=new Date(x.created_at).getHours();return h>=23||h<5}).length } : null;
+
+  /* ============ АЧИВКИ ============ */
+  const myAchs = new Set(userAchs(myStats));
+  const achsHtml = Object.entries(ACH).map(([id, a]) => {
+    const got = myAchs.has(id);
+    return '<div class="achItem' + (got ? '' : ' locked') + '">' +
+      '<span class="aT ' + a.tier + '">' + (a.tier === 's' ? 'сильная' : 'обычная') + '</span>' +
+      '<div class="aIc">' + a.ic + '</div><div class="aN">' + esc(a.name) + '</div>' +
+      '<div class="aD">' + esc(a.desc) + '</div></div>';
+  }).join('');
+  const ts = topCache.size;
+  const myRank = topCache.map[me.id] || null;
+  const inTop = myRank && myRank <= ts;
+  const achsNote = !myStats
+    ? 'Сделай хотя бы 1 голос, чтобы начать получать ачивки.'
+    : (!inTop
+      ? 'Ачивки (особенно сильные) активны только у судей из топа-' + ts + '. Ты сейчас #' + (myRank||'—') + '. Голосуй активнее, чтобы попасть в топ!'
+      : 'Сильные ачивки ✦ дают премиум-бейдж ника и узор под твоими сообщениями.');
+
+  /* ============ РЕЙТИНГ (таблица) ============ */
+  const topNicks = await nicksFor(topCache.list.map(r => r.id));
+  const lbHtml = topCache.list.length
+    ? topCache.list.slice(0, 15).map((r, i) => {
+      const pos = i + 1;
+      const nm = topNicks[r.id] || 'аноним';
+      const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+      return '<div class="lbRow' + (r.id === me.id ? ' me' : '') + '">' +
+        '<span class="pos' + (pos <= 3 ? ' top3' : '') + '">' + medal + '</span>' +
+        '<span class="av" style="background:' + avaColor(nm) + '">' + avaInitials(nm) + '</span>' +
+        '<span class="nm">' + esc(nm) + badgeHtml(r.id, r.stats) + '</span>' +
+        '<span class="sc">' + r.score + ' оч.</span></div>';
+    }).join('')
+    : '<div class="empty">Пока нет активных судей</div>';
+
   $('pBody').innerHTML =
     '<div class="avaBig" style="background:' + (myAva ? '#fff' : avaColor(myNick)) + '">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</div>' +
-    '<div class="pNick">' + esc(myNick) + (myStats ? badgeHtml(myStats) : '') + '</div>' +
-    '<div class="pSub">на судачим с ' + since + '</div>' +
+    '<div class="pNick">' + esc(myNick) + badgeHtml(me.id, myStats) + '</div>' +
+    '<div class="pSub">на судачим с ' + since + (myRank ? ' · #' + myRank + ' в рейтинге' : '') + '</div>' +
     myCasesHtml(c.data || []) +
     '<div class="pCard">' +
       '<div class="pRow"><span class="ic" style="background:rgba(47,111,232,.12)">🗳</span><span class="lb">Голосов</span><span class="vl">' + votes.length + '</span></div>' +
@@ -533,6 +715,9 @@ async function showProfile(){
     '</div>' +
     '<button class="pBtn" style="background:linear-gradient(90deg,#8C6A1D,#E9C767);color:#14161A" onclick="showWrapped()">🎴 Мой вердикт-портрет</button>' +
     '<div id="wrappedBox"></div>' +
+    '<div class="secCard"><h4>🏆 рейтинг судей · топ-' + ts + '</h4>' + lbHtml +
+      '<div class="topnote">Размер топа растёт с активностью народа: сейчас топ-' + ts + '. Ачивки активны только у судей из топа.</div></div>' +
+    '<div class="secCard"><h4>★ ачивки</h4><div class="achGrid">' + achsHtml + '</div><div class="topnote">' + achsNote + '</div></div>' +
     '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="pickAva()">📷 Сменить фото</button>' +
     '<input type="file" id="avaFile" accept="image/*" style="display:none" onchange="uploadAva()">' +
     '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="renameMe()">Сменить никнейм</button>' +
@@ -881,7 +1066,8 @@ async function nicksFor(ids){
 /* ---------- комментарии: ветки ---------- */
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
 function authorHtml(cm,nicks,stats){
-  return '<div class="cHead">' + (nicks[cm.user_id] ? '<span class="nick">' + esc(nicks[cm.user_id]) + '</span>' : '<span class="nick">аноним</span>') + (stats[cm.user_id] ? badgeHtml(stats[cm.user_id]) : '') + '</div>';
+  const s = stats[cm.user_id];
+  return '<div class="cHead">' + (nicks[cm.user_id] ? '<span class="nick">' + esc(nicks[cm.user_id]) + '</span>' : '<span class="nick">аноним</span>') + (s ? badgeHtml(cm.user_id, s) : '') + '</div>';
 }
 function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
   return '<div class="cmt">' + authorHtml(cm,nicks,stats) +
@@ -937,6 +1123,7 @@ async function loadFeed(){
     Object.keys(voted).forEach(id => { const cc = allById(Number(id)); if (cc) pc[catL(cc)] = (pc[catL(cc)]||0)+1; });
     myPrefs = new Set(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]));
   }
+  await refreshTop();
   renderChips(); renderFeed();
 }
 function renderChips(){
@@ -959,6 +1146,7 @@ async function renderFeed(){
     const pct = v => total ? Math.round(v * 100 / total) : 0;
     const votedIt = (c.id in voted);
     const hot = hotCases.has(c.id);
+    const premium = isPremiumUser(c.user_id);   /* ← прем-подложка */
     const art = ART[catL(c)] || 'artD';
     const cms = allComments.filter(k => k.case_id === c.id && !k.parent_id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
@@ -975,8 +1163,9 @@ async function renderFeed(){
     ) : (
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
-    return '<div class="fitem' + (hot ? ' hot' : '') + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms">' + (hot ? '<div class="fart ' + art + '"></div>' : '') + '<div class="fbody">' +
-      '<div class="fmeta"><span>' + (hot ? '🔥 ' : '') + esc(catOf(c)) + '</span><span>' + votesLabel(total) + '</span></div>' +
+    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
+    return '<div class="' + itemClass + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms">' + (hot ? '<div class="fart ' + art + '"></div>' : '') + '<div class="fbody">' +
+      '<div class="fmeta"><span>' + (hot ? '🔥 ' : '') + esc(catOf(c)) + (premium ? ' · ✦ прем' : '') + '</span><span>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + esc(c.text) + '</div>' + actions + '</div></div>';
   }).join('');
 }
