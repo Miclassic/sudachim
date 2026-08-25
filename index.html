@@ -4,6 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Судачим — народный суд</title>
+<meta name="description" content="Судачим — народный суд бытовых историй. Свайпай, выноси вердикт, смотри, совпадаешь ли с народом.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Судачим">
+<meta property="og:title" content="Судачим — народный суд бытовых историй">
+<meta property="og:description" content="Свайпай истории и выноси вердикт. Народ решит, кто прав.">
+<meta property="og:url" content="https://miclassic.github.io/sudachim/">
+<meta property="og:image" content="https://miclassic.github.io/sudachim/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#C9971C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
 <link href="https://fonts.cdnfonts.com/css/opposans" rel="stylesheet">
 <style>
@@ -129,6 +145,8 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .fbtns button{flex:1;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:10px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
 .fbtns .icn{width:14px;height:14px}
 .fcom{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.repBtn{background:none;border:none;color:var(--gray);font-size:11px;font-weight:700;padding:2px 4px;opacity:.7}
+.repBtn .icn{width:12px;height:12px}
 .dVs{font-size:15px;font-weight:700;text-align:center;margin:6px 0 12px;line-height:1.4}
 .dVs b{color:var(--gold);margin:0 6px}
 .dHint{text-align:center;color:var(--gray);font-size:11px;margin-top:8px}
@@ -193,15 +211,15 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 .ntag::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:220% 100%;animation:ntagShine 2.4s ease-in-out infinite}
 @keyframes ntagFlow{0%{background-position:0 0}100%{background-position:300% 0}}
 @keyframes ntagShine{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.premTag{margin-left:6px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);vertical-align:middle}
 .fitem-premium{position:relative;background:linear-gradient(180deg,rgba(244,193,74,.07),#fff 60%);box-shadow:0 12px 34px rgba(201,151,28,.20), inset 0 0 0 1.5px rgba(201,151,28,.28)}
 .fitem-premium::before,.cmt-premium::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><g fill='%23C9971C' fill-opacity='.55'><path d='M34 12l4 9 9 4-9 4-4 9-4-9-9-4 9-4z'/><path d='M104 78l4 9 9 4-9 4-4 9-4-9-9-4 9-4z'/><circle cx='102' cy='24' r='3'/><circle cx='28' cy='108' r='3'/><path d='M64 52l3 7 7 3-7 3-3 7-3-7-7-3 7-3z' fill-opacity='.4'/></g></svg>") repeat;background-size:140px 140px;opacity:.22;-webkit-mask-image:radial-gradient(135% 125% at 50% 42%,transparent 28%,#000 86%);mask-image:radial-gradient(135% 125% at 50% 42%,transparent 28%,#000 86%)}
 .fitem-premium > .fbody{position:relative;z-index:1}
+.fitem-premium::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 6px 26px rgba(201,151,28,.28),inset 0 0 0 1.5px rgba(201,151,28,.45);opacity:.4;animation:premPulse 3.2s ease-in-out .5s infinite}
+@keyframes premPulse{0%,100%{opacity:.3}50%{opacity:.85}}
 .cmt-premium{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(244,193,74,.08),#fff 60%);box-shadow:0 8px 22px rgba(20,24,32,.06), inset 0 0 0 1px rgba(201,151,28,.35)}
 .cmt-premium::before{opacity:.14}
 .cmt-premium > *{position:relative;z-index:1}
-.premTag{margin-left:6px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);vertical-align:middle}
-.fitem-premium::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 6px 26px rgba(201,151,28,.28),inset 0 0 0 1.5px rgba(201,151,28,.45);opacity:.4;animation:premPulse 3.2s ease-in-out .5s infinite}
-@keyframes premPulse{0%,100%{opacity:.3}50%{opacity:.85}}
 .lbRow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#fff;margin-bottom:6px;box-shadow:0 2px 8px rgba(20,24,32,.04)}
 .lbRow.me{background:linear-gradient(90deg,rgba(201,151,28,.14),rgba(201,151,28,.04));border:1.5px solid rgba(201,151,28,.35)}
 .lbRow .pos{width:26px;font-weight:800;color:var(--gray);font-size:12px;text-align:center}
@@ -251,7 +269,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <symbol id="i-doc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></g></symbol>
 <symbol id="i-vote" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 12h14v8H5z"/><path d="M9 12l1.5-6h3L15 12M10.5 9h3M10 16h4"/></g></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
-<symbol id="i-spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2h2v20H5z"/><path fill="currentColor" d="M9 3h11l-3 4.5L20 12H9z"/></symbol>
 </svg>
 <div class="topbar">
   <div class="topbarIn">
@@ -363,6 +381,8 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
 let device = localStorage.getItem('sud_device');
 if (!device) { device = 'd' + Math.random().toString(36).slice(2) + Date.now(); localStorage.setItem('sud_device', device); }
+/* аналитика воронки */
+function track(name){ try { sb.from('events').insert({ name, device }).then(() => {}); } catch(e){} }
 let voted = {};
 function votedKey(){ return 'sud_voted:' + (me ? me.id : 'anon'); }
 function loadVoted(){
@@ -631,6 +651,7 @@ async function doAuth(){
     if (r.error) { toast(r.error.message); return; }
     const s = await sb.auth.getSession();
     if (s.data.session) await sb.from('profiles').insert({ id: s.data.session.user.id, nick });
+    track('reg');
     toast('Добро пожаловать, ' + nick + '!');
   } else {
     const r = await sb.auth.signInWithPassword({ email, password: pass });
@@ -925,6 +946,7 @@ function dataURLtoBlob(u){
 }
 async function shareWrapped(){
   if (!lastWrapped) return;
+  track('share');
   const blob = dataURLtoBlob(lastWrapped);
   try {
     const file = new File([blob], 'sudachim-wrapped.png', { type: 'image/png' });
@@ -993,10 +1015,12 @@ async function duelVote(id, side){
   const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
   if (error) { toast(error.message); return; }
   duelVoted[id] = side; saveDuelVoted();
+  track('duel');
   renderDuels();
 }
 async function shareDuel(id){
   const d = allDuels.find(x => x.id === id); if (!d) return;
+  track('share');
   await ensureFonts();
   const blob = await renderCardBlobDuel(d);
   try {
@@ -1166,6 +1190,7 @@ async function voteDaily(id, v){
   const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
   if (error) { toast(error.message); return; }
   voted[id] = v; saveVoted();
+  track('swipe');
   renderDaily();
 }
 let brandTaps = 0, brandTimer = null;
@@ -1207,6 +1232,12 @@ async function profilesFor(ids){
   const m = {}; (r.data || []).forEach(p => m[p.id] = p);
   return m;
 }
+/* жалобы */
+async function reportItem(type, id){
+  if (!me) { openAuth(); return; }
+  const { error } = await sb.from('reports').insert({ target_type: type, target_id: id, user_id: me.id, reason: 'жалоба' });
+  toast(error ? 'Жалоба уже отправлена' : '🚩 Жалоба принята. После 3 жалоб запись скрывается');
+}
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
 function authorHtml(cm,nicks,stats){
   const s = stats[cm.user_id];
@@ -1221,6 +1252,7 @@ function cmtBlock(cm,reps,nicks,stats){ const [lab,col]=sideInfo(cm);
   return '<div class="' + cmtClass(cm) + '">' + authorHtml(cm,nicks,stats) +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
+   '<button onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('flag') + ' пожаловаться</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
    '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats)).join('') + '</div></div>';
 }
@@ -1248,9 +1280,10 @@ async function load(){
   loadVoted();
   const { data, error } = await sb.from('cases').select('*').eq('status','approved');
   if (error) { toast('Ошибка: ' + error.message); return; }
-  allCases = data || [];
+  allCases = (data || []).filter(c => !c.hidden);
   queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c));
   $('trashBanner').classList.toggle('hidden', !trashOpen());
+  if (!sessionStorage.getItem('sud_open')) { sessionStorage.setItem('sud_open', '1'); track('open'); }
   next();
   loadFeed();
   refreshMe();
@@ -1261,7 +1294,8 @@ async function loadFeed(){
     sb.from('comments').select('*').eq('status','approved'),
     sb.from('votes').select('case_id').gte('created_at', since24())
   ]);
-  allCases = c.data || []; allComments = cm.data || [];
+  allCases = (c.data || []).filter(x => !x.hidden);
+  allComments = (cm.data || []).filter(x => !x.hidden);
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
@@ -1320,7 +1354,7 @@ async function renderFeed(){
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-      '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span>' + votesLabel(total) + '</span></div>' +
+      '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span style="display:flex;align-items:center;gap:6px"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('flag') + '</button>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + esc(c.text) + '</div>' + actions + '</div></div>';
   }).join('');
 }
@@ -1333,6 +1367,7 @@ async function feedVote(id, v){
   c[v] = (c[v] || 0) + 1;
   voted[id] = v; saveVoted();
   queue = queue.filter(q => q.id !== id);
+  track('swipe');
   renderFeed();
 }
 async function feedToggleComments(id, force){
@@ -1341,7 +1376,7 @@ async function feedToggleComments(id, force){
   const { data } = await sb.from('comments').select('*').eq('case_id', id).eq('status','approved').order('created_at');
   const nicks = await nicksFor((data || []).map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
-  box.innerHTML = buildComments(data || [], nicks, stats) + commentInput('ci_' + id, 'feedSendComment(' + id + ')', 'replyTagFeed');
+  box.innerHTML = buildComments((data || []).filter(k => !k.hidden), nicks, stats) + commentInput('ci_' + id, 'feedSendComment(' + id + ')', 'replyTagFeed');
   box.classList.remove('hidden');
 }
 async function feedSendComment(id){
@@ -1350,7 +1385,7 @@ async function feedSendComment(id){
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
   const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
   inp.value = ''; clearReply();
-  if (!error) await feedToggleComments(id, true);
+  if (!error) { track('comment'); await feedToggleComments(id, true); }
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
 function next(){
@@ -1383,6 +1418,7 @@ async function vote(v){
   voted[cur.id] = v; saveVoted();
   queue = queue.filter(q => q.id !== cur.id);
   const ac = allById(cur.id); if (ac) ac[v] = (ac[v] || 0) + 1;
+  track('swipe');
   const c = cur, total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
   const pct = x => Math.round(x * 100 / total);
   $('pills').innerHTML =
@@ -1404,7 +1440,7 @@ async function loadComments(force){
   const { data } = await sb.from('comments').select('*').eq('case_id', cur.id).eq('status','approved').order('created_at');
   const nicks = await nicksFor((data || []).map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
-  box.innerHTML = buildComments(data || [], nicks, stats) + commentInput('cIn', 'sendComment()', 'replyTagTop');
+  box.innerHTML = buildComments((data || []).filter(k => !k.hidden), nicks, stats) + commentInput('cIn', 'sendComment()', 'replyTagTop');
   box.classList.remove('hidden');
 }
 async function sendComment(){
@@ -1414,7 +1450,7 @@ async function sendComment(){
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
   const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
   inp.value = ''; clearReply();
-  if (!error) await loadComments(true);
+  if (!error) { track('comment'); await loadComments(true); }
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
 function openForm(){ if (!me) { openAuth(); return; } $('modal').classList.remove('hidden'); }
@@ -1425,6 +1461,7 @@ async function submitCase(){
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
   const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id });
   $('fText').value = ''; closeForm();
+  if (!error) track('story');
   toast(error ? 'Ошибка: ' + error.message : 'Принято! Появится после проверки ✅');
 }
 let speakSession = 0, speakStopFn = null, curAudio = null;
@@ -1613,6 +1650,7 @@ function renderCardBlob(c){
 }
 async function shareCase(c){
   if (!c) return;
+  track('share');
   await ensureFonts();
   const blob = await renderCardBlob(c);
   try {
@@ -1650,7 +1688,6 @@ function apply(){
   $('stR').style.opacity = Math.max(0, Math.min(1, dx / 90));
   $('stU').style.opacity = Math.max(0, Math.min(1, -dy / 90));
 }
-/* переход к записи из уведомления */
 function openCaseFromNotif(id){
   closeNotifs();
   showTab('court');
@@ -1666,10 +1703,44 @@ function openCaseFromNotif(id){
     feedToggleComments(id, true);
   }, 350);
 }
-/* автообновление ленты */
+/* генератор og.png и иконок: открой ?og=1 */
+function dlCanvas(cv, name){ const a = document.createElement('a'); a.download = name; a.href = cv.toDataURL('image/png'); a.click(); }
+async function maybeOg(){
+  if (!new URLSearchParams(location.search).has('og')) return;
+  await ensureFonts();
+  const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const bg = x.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#15181C'); bg.addColorStop(1, '#3A2E4A');
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(233,199,103,.25)';
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 6; j++) { x.beginPath(); x.arc(80 + j * 30 + i * 8, 80 + i * 26, 2.5, 0, 7); x.fill(); }
+  drawScales(x, 170, 300, 90);
+  let g = x.createLinearGradient(320, 0, W - 100, 0);
+  g.addColorStop(0, '#E9C767'); g.addColorStop(1, '#C9971C');
+  x.fillStyle = g; x.textAlign = 'left'; x.font = '800 96px "OPPO Sans", system-ui';
+  x.fillText('СУДАЧИМ', 320, 300);
+  x.fillStyle = '#EDEEF2'; x.font = '500 40px "OPPO Sans", system-ui';
+  x.fillText('народный суд бытовых историй', 320, 370);
+  x.fillStyle = '#C9971C'; x.font = '700 34px "OPPO Sans", system-ui';
+  x.fillText('свайпай · решай · делись', 320, 470);
+  x.fillStyle = 'rgba(237,238,242,.6)'; x.font = '500 28px "OPPO Sans", system-ui';
+  x.fillText('miclassic.github.io/sudachim', 320, 540);
+  dlCanvas(cv, 'og.png');
+  [512, 192].forEach(s => {
+    const c2 = document.createElement('canvas'); c2.width = s; c2.height = s;
+    const y = c2.getContext('2d');
+    y.fillStyle = '#15181C'; rr(y, 0, 0, s, s, s * 0.22); y.fill();
+    drawScales(y, s / 2, s * 0.52, s * 0.34);
+    dlCanvas(c2, 'icon-' + s + '.png');
+  });
+  toast('OG-картинка и иконки скачаны — закинь их в корень репозитория');
+}
 document.addEventListener('visibilitychange', () => { if (!document.hidden) loadFeed(); });
 setInterval(() => { if (!document.hidden) loadFeed(); }, 30000);
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 load();
+maybeOg();
 </script>
 </body>
 </html>

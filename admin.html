@@ -27,6 +27,8 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
 .empty{text-align:center;color:#8A919E;padding:30px}
 .out{background:none;border:none;color:#8A919E;font-size:12px;margin-top:10px}
 .hidden{display:none!important}
+.statRow{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(20,24,32,.05)}
+.statRow b{color:#C9971C}
 </style>
 </head>
 <body>
@@ -43,6 +45,8 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
     <button class="tab on" id="tabCases" onclick="setTab('cases')"></button>
     <button class="tab" id="tabComments" onclick="setTab('comments')"></button>
     <button class="tab" id="tabDuels" onclick="setTab('duels')"></button>
+    <button class="tab" id="tabReports" onclick="setTab('reports')"></button>
+    <button class="tab" id="tabStats" onclick="setTab('stats')"></button>
   </div>
   <div id="list"></div>
   <button class="out" onclick="logout()">Выйти из админки</button>
@@ -52,6 +56,7 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
 <script>
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
 let tab = 'cases', pendCases = [], pendComments = [], pendDuels = [], caseMap = {}, adminId = null;
+let hidCases = [], hidComments = [], evNames = [];
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sideRu(s){ return s === 'condemn' ? '😡 осуждает' : s === 'justify' ? '👍 не осуждает' : '🤔 жиза'; }
@@ -72,25 +77,35 @@ async function panel(){
   await refresh();
 }
 async function refresh(){
-  const [c, cm, d, cs] = await Promise.all([
+  const [c, cm, d, cs, hc, hcm, ev] = await Promise.all([
     sb.from('cases').select('*').eq('status','pending').order('created_at'),
     sb.from('comments').select('*').eq('status','pending').order('created_at'),
     sb.from('duels').select('*').eq('status','pending').order('created_at'),
-    sb.from('cases').select('id,text,category')
+    sb.from('cases').select('id,text,category'),
+    sb.from('cases').select('*').eq('hidden',true).eq('status','approved').order('created_at', { ascending: false }),
+    sb.from('comments').select('*').eq('hidden',true).order('created_at', { ascending: false }),
+    sb.from('events').select('name').gte('created_at', new Date(Date.now() - 7*864e5).toISOString())
   ]);
   pendCases = c.data || []; pendComments = cm.data || []; pendDuels = d.data || [];
+  hidCases = hc.data || []; hidComments = hcm.data || []; evNames = (ev.data || []).map(r => r.name);
   caseMap = {}; (cs.data || []).forEach(k => caseMap[k.id] = k);
   $('tabCases').textContent = 'Истории (' + pendCases.length + ')';
   $('tabComments').textContent = 'Комменты (' + pendComments.length + ')';
   $('tabDuels').textContent = 'Дуэли (' + pendDuels.length + ')';
+  $('tabReports').textContent = '🚩 Жалобы (' + (hidCases.length + hidComments.length) + ')';
+  $('tabStats').textContent = '📊 Статистика';
   renderList();
 }
 function setTab(t){
   tab = t;
-  $('tabCases').classList.toggle('on', t === 'cases');
-  $('tabComments').classList.toggle('on', t === 'comments');
-  $('tabDuels').classList.toggle('on', t === 'duels');
+  ['Cases','Comments','Duels','Reports','Stats'].forEach(k => $('tab'+k).classList.toggle('on', t === k.toLowerCase()));
   renderList();
+}
+function repCard(type, o, cat){
+  return '<div class="card"><div class="mcat">🚩 ' + (type === 'case' ? 'история' : 'комментарий') + ' · ' + cat + ' · скрыта жалобами</div>' +
+    '<div class="mtxt">' + esc(o.text) + '</div>' +
+    '<div class="mbtns"><button class="ok" onclick="unhide(\'' + type + '\',' + o.id + ')">↩ вернуть</button>' +
+    '<button class="no" onclick="kill(\'' + type + '\',' + o.id + ')">❌ удалить</button></div></div>';
 }
 function renderList(){
   const box = $('list');
@@ -111,13 +126,23 @@ function renderList(){
         '<div class="mbtns"><button class="ok" onclick="decideComment(' + o.id + ',true)">✅ одобрить</button>' +
         '<button class="no" onclick="decideComment(' + o.id + ',false)">❌ отклонить</button></div></div>';
     }).join('') : '<div class="empty">Очередь пуста 🎉</div>';
-  } else {
+  } else if (tab === 'duels') {
     box.innerHTML = pendDuels.length ? pendDuels.map(o =>
       '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · дуэль</div>' +
       '<div class="mtxt">' + esc(o.a) + ' <b>VS</b> ' + esc(o.b) + '</div>' +
       '<div class="mbtns"><button class="ok" onclick="decideDuel(' + o.id + ',true)">✅ одобрить</button>' +
       '<button class="no" onclick="decideDuel(' + o.id + ',false)">❌ отклонить</button></div></div>'
     ).join('') : '<div class="empty">Очередь пуста 🎉</div>';
+  } else if (tab === 'reports') {
+    const items = hidCases.map(o => repCard('case', o, o.category || 'другое'))
+      .concat(hidComments.map(o => repCard('comment', o, 'комментарий')));
+    box.innerHTML = items.join('') || '<div class="empty">Жалоб нет 🎉</div>';
+  } else {
+    const order = [['open','Открытий сайта'],['swipe','Голосов (свайпы)'],['reg','Регистраций'],['comment','Комментариев'],['story','Историй отправлено'],['share','Шаров'],['duel','Голосов в дуэлях']];
+    const cnt = {}; evNames.forEach(n => cnt[n] = (cnt[n] || 0) + 1);
+    box.innerHTML = '<div class="card">' + order.map(r =>
+      '<div class="statRow"><span>' + r[1] + '</span><b>' + (cnt[r[0]] || 0) + '</b></div>').join('') +
+      '<div class="mctx" style="margin-top:10px">за последние 7 дней</div></div>';
   }
 }
 async function decide(id, ok){
@@ -132,6 +157,18 @@ async function decide(id, ok){
 }
 async function decideComment(id, ok){
   const { error } = await sb.from('comments').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id);
+  if (error) alert(error.message);
+  await refresh();
+}
+async function unhide(type, id){
+  const t = type === 'case' ? 'cases' : 'comments';
+  const { error } = await sb.from(t).update({ hidden: false }).eq('id', id);
+  if (error) alert(error.message);
+  await refresh();
+}
+async function kill(type, id){
+  const t = type === 'case' ? 'cases' : 'comments';
+  const { error } = await sb.from(t).update({ status: 'rejected', hidden: false }).eq('id', id);
   if (error) alert(error.message);
   await refresh();
 }
