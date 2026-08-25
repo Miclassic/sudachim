@@ -24,6 +24,8 @@ button:active{transform:scale(.95)}
 .miniBtn{background:#fff;border:none;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:600;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.10)}
 .avaBtn{width:34px;height:34px;border:none;border-radius:50%;color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 14px rgba(20,24,32,.18);overflow:hidden;padding:0}
 .avaImg{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bell{position:relative;background:#fff;border:none;border-radius:999px;width:34px;height:34px;font-size:16px;box-shadow:0 4px 14px rgba(20,24,32,.10)}
+.bell .bdg{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;border-radius:999px;padding:2px 5px}
 .tabbar{max-width:620px;margin:0 auto;display:flex;gap:6px;padding:2px 12px 10px;overflow-x:auto;scrollbar-width:none}
 .bn{flex:1;background:none;border:none;border-radius:999px;padding:8px 6px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--gray);font-size:11px;font-weight:700;white-space:nowrap}
 .bn i{font-style:normal;font-size:15px}
@@ -73,11 +75,16 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 #myLabel{font-weight:800;font-size:15px;margin:0 0 12px}
 .rbtns{display:flex;gap:8px;flex-wrap:wrap}
 .rbtns button{flex:1;background:var(--ink);border:none;color:#fff;border-radius:999px;padding:12px;font-size:14px;font-weight:600}
-#comments{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:32vh;overflow-y:auto}
+#comments{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow-y:auto}
 .cmt{background:var(--card);border-radius:16px;padding:10px 12px;font-size:14px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
-.cmt .side{font-size:11px;font-weight:700;border-radius:999px;padding:3px 8px;margin-right:6px}
-.cmt .nick{font-weight:700;margin-right:2px}
+.cmt .nick{font-weight:800}
+.cHead{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px}
+.cBody{font-size:14px;line-height:1.45}
+.cmt .side{font-size:11px;font-weight:700;border-radius:999px;padding:3px 8px;margin-right:6px;white-space:nowrap;vertical-align:middle}
 .tag{display:inline-block;color:#fff;font-size:9px;font-weight:800;letter-spacing:1px;padding:3px 8px;border-radius:999px;text-transform:uppercase;vertical-align:middle;margin-left:4px}
+.cActions{display:flex;gap:12px;margin-top:6px}
+.cActions button{background:none;border:none;color:var(--gray);font-size:11px;font-weight:700}
+.replies{margin-top:8px;display:flex;flex-direction:column;gap:6px;padding-left:12px;border-left:2px solid rgba(20,24,32,.06)}
 .crow{display:flex;gap:8px;margin-top:10px}
 .crow input{flex:1;background:var(--card);border:none;border-radius:999px;padding:12px 14px;font-size:14px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
 .crow button{background:var(--gold);border:none;border-radius:999px;padding:0 18px;font-weight:700;color:#fff}
@@ -137,6 +144,11 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 .aDiv::before,.aDiv::after{content:'';flex:1;height:1px;background:rgba(20,24,32,.10)}
 .gBtn{background:#fff;border:none;border-radius:999px;padding:13px;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(20,24,32,.08)}
 .aNote{color:var(--gray);font-size:11px;text-align:center}
+#notifs{position:fixed;inset:0;background:var(--bg);z-index:70;overflow-y:auto}
+.nHead{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;gap:12px;padding:14px 16px;font-weight:700;z-index:2}
+.nItem{background:#fff;border-radius:16px;padding:12px 14px;margin:0 16px 10px;font-size:13px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
+.nItem.unread{border-left:3px solid var(--gold)}
+.pBack{border:none;background:none;font-size:20px;color:var(--ink)}
 .pBody{max-width:560px;margin:0 auto;padding:10px 0 20px;display:flex;flex-direction:column;gap:14px;animation:rise .35s ease}
 .pNick{text-align:center;font-weight:800;font-size:20px}
 .pSub{text-align:center;color:var(--gray);font-size:12px}
@@ -172,6 +184,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     </div>
     <div class="tbR">
       <button class="miniBtn" onclick="openForm()">рассуди меня</button>
+      <button class="bell hidden" id="bellBtn" onclick="openNotifs()">🔔<span class="bdg hidden" id="bellBdg"></span></button>
       <span id="tbUser"></span>
     </div>
   </div>
@@ -263,6 +276,10 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     <button class="swap" onclick="closeAuth()">Позже</button>
   </div>
 </div>
+<div id="notifs" class="hidden">
+  <div class="nHead"><button class="pBack" onclick="closeNotifs()">←</button><span>уведомления</span></div>
+  <div id="nList" style="padding-top:6px"></div>
+</div>
 <div id="toast" class="hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -285,9 +302,17 @@ let allCases = [], allComments = [], allDuels = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
+let replyTo = null;
 const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT' };
 const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'другое':'⚖️' };
 const ADMIN_EMAILS = ['artixz18@gmail.com'];
+const QUOTES = {
+  'НАРОДНЫЙ СУДЬЯ':'Судишь по совести — к тебе прислушиваются.',
+  'ПРОКУРОР':'Строг, но справедлив.',
+  'МИЛОСЕРДНЫЙ':'Сердце вместо молотка.',
+  'КОНТРАРИАНЕЦ':'Идёшь против течения — и это стиль.',
+  'ВСЁ ВИДЕЛ':'Тебя уже ничем не удивить.'
+};
 const $ = id => document.getElementById(id);
 const card = $('card'), caseText = $('caseText');
 const catOf = c => (c.category || 'другое');
@@ -302,7 +327,6 @@ function votesLabel(total){
   const masked = 'меньше 100 голосов';
   return isAdmin() ? masked + ' (' + total + ')' : masked;
 }
-
 function scoreCase(c, total){
   const act = voteCnt24[c.id] || 0;
   const ageH = (Date.now() - new Date(c.created_at).getTime()) / 3600000;
@@ -374,7 +398,28 @@ function renderTbUser(){
   $('tbUser').innerHTML = me
     ? '<button class="avaBtn" style="background:' + avaColor(myNick) + '" onclick="showTab(\'profile\')">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</button>'
     : '<button class="miniBtn" onclick="openAuth()">войти</button>';
+  $('bellBtn').classList.toggle('hidden', !me);
+  if (me) fetchUnread();
 }
+async function fetchUnread(){
+  const { count } = await sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', me.id).eq('read', false);
+  const b = $('bellBdg');
+  if (count > 0) { b.textContent = count > 9 ? '9+' : count; b.classList.remove('hidden'); } else b.classList.add('hidden');
+}
+async function openNotifs(){
+  $('notifs').classList.remove('hidden');
+  const { data } = await sb.from('notifications').select('*').eq('user_id', me.id).order('created_at', { ascending: false }).limit(50);
+  const nicks = await nicksFor((data || []).map(n => n.actor_id));
+  $('nList').innerHTML = (data || []).map(n => {
+    const who = nicks[n.actor_id] || 'кто-то';
+    const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : 'прокомментировал(а) твою историю';
+    return '<div class="nItem' + (n.read ? '' : ' unread') + '"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + '»</div>' : '') + '</div>';
+  }).join('') || '<div class="empty">Пока тихо 🔕</div>';
+  await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false);
+  fetchUnread();
+}
+function closeNotifs(){ $('notifs').classList.add('hidden'); }
+
 async function refreshMe(){
   const { data } = await sb.auth.getSession();
   const u = data.session ? data.session.user : null;
@@ -520,43 +565,72 @@ function renderWrappedCanvas(s, t){
   const W = 1080, H = 1350;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
+  const ink = '#15181C', gray = '#8A919E', gold = '#C9971C', red = '#D33A2C';
   x.fillStyle = '#EDEEF2'; x.fillRect(0, 0, W, H);
   x.save(); x.shadowColor = 'rgba(20,24,32,.14)'; x.shadowBlur = 46; x.shadowOffsetY = 18;
-  x.fillStyle = '#fff'; rr(x, 60, 70, W - 120, 1150, 60); x.fill(); x.restore();
-  x.save(); x.globalAlpha = .10; x.font = '220px system-ui'; x.textAlign = 'right'; x.fillText(t.e, W - 90, 330); x.restore();
+  x.fillStyle = '#FBFBFD'; rr(x, 50, 40, W - 100, 1270, 52); x.fill(); x.restore();
+  x.save(); x.globalAlpha = .3; x.fillStyle = gold;
+  for (let i = 0; i < 7; i++) for (let j = 0; j < 7 - i; j++) { x.beginPath(); x.arc(90 + j * 22 + i * 6, 80 + i * 22, 3, 0, 7); x.fill(); }
+  x.restore();
+  x.save(); x.shadowColor = 'rgba(20,24,32,.12)'; x.shadowBlur = 20; x.shadowOffsetY = 8;
+  x.fillStyle = '#fff'; rr(x, 90, 110, 150, 150, 38); x.fill(); x.restore();
+  x.textAlign = 'center'; x.font = '80px system-ui'; x.fillText('⚖️', 165, 215);
+  x.save(); x.shadowColor = 'rgba(20,24,32,.10)'; x.shadowBlur = 20; x.shadowOffsetY = 8;
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(880, 180, 100, 0, 7); x.fill(); x.restore();
+  x.font = '110px system-ui'; x.fillText('🤝', 880, 218);
   let g = x.createLinearGradient(200, 0, W - 200, 0);
-  g.addColorStop(0, '#15181C'); g.addColorStop(.5, '#C9971C'); g.addColorStop(1, '#15181C');
-  x.fillStyle = g; x.textAlign = 'center'; x.font = '600 46px "OPPO Sans", system-ui';
-  x.fillText('С У Д А Ч И М', W / 2, 190);
-  x.fillStyle = '#8A919E'; x.font = '500 30px "OPPO Sans", system-ui';
-  x.fillText('VERDICT WRAPPED · ' + new Date().getFullYear(), W / 2, 240);
-  const tg = x.createLinearGradient(200, 0, W - 200, 0);
-  tg.addColorStop(0, t.c); tg.addColorStop(1, '#C9971C');
-  x.fillStyle = tg; x.font = '800 92px "OPPO Sans", system-ui';
-  x.fillText(t.t, W / 2, 470);
-  x.fillStyle = '#15181C'; x.font = '500 40px "OPPO Sans", system-ui';
-  x.fillText(t.e + ' твой тип судьи', W / 2, 540);
+  g.addColorStop(0, '#8C6A1D'); g.addColorStop(.5, '#E9C767'); g.addColorStop(1, '#8C6A1D');
+  x.fillStyle = g; x.font = '600 52px "OPPO Sans", system-ui';
+  x.fillText('С У Д А Ч И М', W / 2, 200);
+  x.fillStyle = gray; x.font = '500 32px "OPPO Sans", system-ui';
+  x.fillText('VERDICT WRAPPED · ' + new Date().getFullYear(), W / 2, 250);
+  x.strokeStyle = gold; x.lineWidth = 2; x.fillStyle = 'rgba(201,151,28,.06)';
+  rr(x, W/2 - 160, 320, 320, 62, 31); x.fill(); x.stroke();
+  x.fillStyle = gold; x.font = '700 28px "OPPO Sans", system-ui';
+  x.fillText('★  Д О С Т И Ж Е Н И Е', W / 2, 360);
+  const tg = x.createLinearGradient(0, 430, 0, 540);
+  tg.addColorStop(0, '#15181C'); tg.addColorStop(.5, '#3a2f00'); tg.addColorStop(1, '#15181C');
+  x.fillStyle = tg; x.font = '800 96px "OPPO Sans", system-ui';
+  x.fillText(t.t, W / 2, 500);
+  x.strokeStyle = 'rgba(201,151,28,.5)'; x.lineWidth = 2;
+  x.beginPath(); x.moveTo(220, 560); x.lineTo(400, 560); x.moveTo(680, 560); x.lineTo(860, 560); x.stroke();
+  x.fillStyle = ink; x.font = '600 34px "OPPO Sans", system-ui';
+  x.fillText(t.e + '  твой тип судьи', W / 2, 570);
+  x.save(); x.shadowColor = 'rgba(20,24,32,.08)'; x.shadowBlur = 24; x.shadowOffsetY = 10;
+  x.fillStyle = '#fff'; rr(x, 100, 630, W - 200, 400, 36); x.fill(); x.restore();
   const rows = [
-    ['совпадение с народом', Math.round(s.match * 100), '#C9971C'],
-    ['строгость', Math.round(s.condemnShare * 100), '#D33A2C'],
-    ['жиза-рейтинг', Math.round(s.lifeShare * 100), '#E0A400']
+    ['👥', 'совпадение с народом', Math.round(s.match * 100), gold],
+    ['🛡️', 'строгость', Math.round(s.condemnShare * 100), red],
+    ['⭐', 'жиза-рейтинг', Math.round(s.lifeShare * 100), gray]
   ];
-  let y = 660;
+  let y = 700;
   rows.forEach(r => {
-    x.textAlign = 'left'; x.fillStyle = '#8A919E'; x.font = '500 32px "OPPO Sans", system-ui';
-    x.fillText(r[0], 130, y);
-    x.textAlign = 'right'; x.fillStyle = '#15181C'; x.font = '800 36px "OPPO Sans", system-ui';
-    x.fillText(r[1] + '%', W - 130, y);
-    x.fillStyle = '#EDEEF2'; rr(x, 130, y + 22, W - 260, 20, 10); x.fill();
-    x.fillStyle = r[2]; rr(x, 130, y + 22, Math.max(20, (W - 260) * r[1] / 100), 20, 10); x.fill();
-    y += 110;
+    x.fillStyle = 'rgba(201,151,28,.08)'; rr(x, 140, y - 45, 88, 88, 24); x.fill();
+    x.textAlign = 'center'; x.font = '44px system-ui'; x.fillText(r[0], 184, y + 12);
+    x.textAlign = 'left'; x.fillStyle = gray; x.font = '500 30px "OPPO Sans", system-ui';
+    x.fillText(r[1], 260, y - 6);
+    x.textAlign = 'right'; x.fillStyle = r[3]; x.font = '800 44px "OPPO Sans", system-ui';
+    x.fillText(r[2] + '%', 940, y);
+    x.textAlign = 'left';
+    x.fillStyle = '#EDEEF2'; rr(x, 260, y + 16, 680, 16, 8); x.fill();
+    x.fillStyle = r[3]; rr(x, 260, y + 16, Math.max(16, 680 * r[2] / 100), 16, 8); x.fill();
+    y += 130;
   });
-  if (s.streak >= 3) {
-    x.textAlign = 'center'; x.fillStyle = '#D33A2C'; x.font = '700 40px "OPPO Sans", system-ui';
-    x.fillText('🔥 ' + s.streak + ' дней подряд', W / 2, y + 30);
-  }
-  x.textAlign = 'center'; x.fillStyle = '#8A919E'; x.font = '500 30px "OPPO Sans", system-ui';
-  x.fillText('miclassic.github.io/sudachim', W / 2, 1160);
+  const mg = x.createRadialGradient(200, 1140, 20, 200, 1140, 95);
+  mg.addColorStop(0, '#F6E7B8'); mg.addColorStop(1, '#C9971C');
+  x.fillStyle = mg; x.beginPath(); x.arc(200, 1140, 90, 0, 7); x.fill();
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(200, 1140, 66, 0, 7); x.fill();
+  x.font = '64px system-ui'; x.fillText('⚖️', 200, 1162);
+  x.save(); x.shadowColor = 'rgba(20,24,32,.08)'; x.shadowBlur = 18; x.shadowOffsetY = 8;
+  x.fillStyle = '#fff'; rr(x, 430, 1070, 540, 150, 28); x.fill(); x.restore();
+  x.fillStyle = gold; x.font = '800 60px "OPPO Sans", system-ui';
+  x.textAlign = 'left'; x.fillText('“', 455, 1130);
+  x.textAlign = 'right'; x.fillText('”', 950, 1200);
+  x.fillStyle = ink; x.font = '500 30px "OPPO Sans", system-ui'; x.textAlign = 'left';
+  const q = QUOTES[t.t] || QUOTES['НАРОДНЫЙ СУДЬЯ'];
+  wrapCenter(x, q, 420).slice(0, 2).forEach((l, i) => x.fillText(l, 500, 1130 + i * 44));
+  x.textAlign = 'center'; x.fillStyle = gray; x.font = '500 30px "OPPO Sans", system-ui';
+  x.fillText('miclassic.github.io/sudachim', W / 2, 1280);
   return cv.toDataURL('image/png');
 }
 function dataURLtoBlob(u){
@@ -708,7 +782,7 @@ function renderCardBlobDuel(d){
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 
-/* ---------- дело дня ---------- */
+/* ---------- дело дня (авто) ---------- */
 let dailyTimer = null;
 const dailyReveal = () => new Date().getHours() >= 21;
 async function pickDaily(){
@@ -804,6 +878,38 @@ async function nicksFor(ids){
   return m;
 }
 
+/* ---------- комментарии: ветки ---------- */
+function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
+function authorHtml(cm,nicks,stats){
+  return '<div class="cHead">' + (nicks[cm.user_id] ? '<span class="nick">' + esc(nicks[cm.user_id]) + '</span>' : '<span class="nick">аноним</span>') + (stats[cm.user_id] ? badgeHtml(stats[cm.user_id]) : '') + '</div>';
+}
+function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
+  return '<div class="cmt">' + authorHtml(cm,nicks,stats) +
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div></div>';
+}
+function cmtBlock(cm,reps,nicks,stats){ const [lab,col]=sideInfo(cm);
+  return '<div class="cmt">' + authorHtml(cm,nicks,stats) +
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div>' +
+   '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
+   (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')">открыть ответы (' + reps.length + ')</button>' : '') + '</div>' +
+   '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats)).join('') + '</div></div>';
+}
+function buildComments(all,nicks,stats){
+  const tops = all.filter(c => !c.parent_id);
+  const byP = {}; all.filter(c => c.parent_id).forEach(c => { (byP[c.parent_id] = byP[c.parent_id] || []).push(c); });
+  return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats)).join('');
+}
+function commentInput(inputId, fn, tagId){
+  return me ? '<div class="crow"><input id="' + inputId + '" placeholder="Твой аргумент…"><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
+   : '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button>';
+}
+function setReply(id, nick){
+  replyTo = { id };
+  document.querySelectorAll('[id^=replyTag]').forEach(t => { t.classList.remove('hidden'); t.innerHTML = 'ответ <b>@' + esc(nick) + '</b> · <span style="color:var(--red)" onclick="clearReply()">отмена</span>'; });
+}
+function clearReply(){ replyTo = null; document.querySelectorAll('[id^=replyTag]').forEach(t => t.classList.add('hidden')); }
+function toggleReplies(id){ const el = $('rep_' + id); if (el) el.classList.toggle('hidden'); }
+
 async function load(){
   loadVoted();
   const { data, error } = await sb.from('cases').select('*').eq('status','approved');
@@ -854,7 +960,7 @@ async function renderFeed(){
     const votedIt = (c.id in voted);
     const hot = hotCases.has(c.id);
     const art = ART[catL(c)] || 'artD';
-    const cms = allComments.filter(k => k.case_id === c.id).slice(0, 1);
+    const cms = allComments.filter(k => k.case_id === c.id && !k.parent_id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
     const actions = votedIt ? (
       '<div class="fbars"><i class="fbar" style="width:' + pct(c.condemn) + '%;background:var(--red)"></i><i class="fbar" style="width:' + pct(c.life) + '%;background:var(--yel)"></i><i class="fbar" style="width:' + pct(c.justify) + '%;background:var(--grn)"></i></div>' +
@@ -874,12 +980,6 @@ async function renderFeed(){
       '<div class="ftxt">' + esc(c.text) + '</div>' + actions + '</div></div>';
   }).join('');
 }
-function cmtRow(cm, nicks, stats){
-  const col = cm.side === 'condemn' ? 'var(--red)' : cm.side === 'justify' ? 'var(--grn)' : 'var(--yel)';
-  const lab = cm.side === 'condemn' ? 'осуждает' : cm.side === 'justify' ? 'не осуждает' : 'жиза';
-  return '<div class="cmt">' + (nicks[cm.user_id] ? '<span class="nick">' + esc(nicks[cm.user_id]) + '</span>' + (stats[cm.user_id] ? badgeHtml(stats[cm.user_id]) : '') : '') +
-    '<span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span>' + esc(cm.text) + '</div>';
-}
 async function feedVote(id, v){
   if (!me) { openAuth(); return; }
   const c = allById(id); if (!c) return;
@@ -897,18 +997,15 @@ async function feedToggleComments(id, force){
   const { data } = await sb.from('comments').select('*').eq('case_id', id).eq('status','approved').order('created_at');
   const nicks = await nicksFor((data || []).map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
-  box.innerHTML = (data || []).map(cm => cmtRow(cm, nicks, stats)).join('')
-    + (me
-      ? '<div class="crow"><input id="ci_' + id + '" placeholder="Твой аргумент…"><button onclick="feedSendComment(' + id + ')">→</button></div>'
-      : '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button>');
+  box.innerHTML = buildComments(data || [], nicks, stats) + commentInput('ci_' + id, 'feedSendComment(' + id + ')', 'replyTagFeed');
   box.classList.remove('hidden');
 }
 async function feedSendComment(id){
   if (!me) { openAuth(); return; }
   const inp = $('ci_' + id), t = inp.value.trim(); if (!t) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-  const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved' });
-  inp.value = '';
+  const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
+  inp.value = ''; clearReply();
   if (!error) await feedToggleComments(id, true);
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
@@ -966,10 +1063,7 @@ async function loadComments(force){
   const { data } = await sb.from('comments').select('*').eq('case_id', cur.id).eq('status','approved').order('created_at');
   const nicks = await nicksFor((data || []).map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
-  box.innerHTML = (data || []).map(cm => cmtRow(cm, nicks, stats)).join('')
-    + (me
-      ? '<div class="crow"><input id="cIn" placeholder="Твой аргумент…"><button onclick="sendComment()">→</button></div>'
-      : '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button>');
+  box.innerHTML = buildComments(data || [], nicks, stats) + commentInput('cIn', 'sendComment()', 'replyTagTop');
   box.classList.remove('hidden');
 }
 async function sendComment(){
@@ -977,8 +1071,8 @@ async function sendComment(){
   const inp = $('cIn'), t = inp.value.trim();
   if (!t) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved' });
-  inp.value = '';
+  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
+  inp.value = ''; clearReply();
   if (!error) await loadComments(true);
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
@@ -1104,6 +1198,15 @@ async function ensureFonts(){
   } catch(e){}
 }
 function rr(x, X, Y, W, H, R){ x.beginPath(); if (x.roundRect) x.roundRect(X, Y, W, H, R); else x.rect(X, Y, W, H); }
+function wrapCenter(ctx, text, maxW){
+  const words = text.split(/\s+/); const lines = []; let line = '';
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
 function drawWatermark(x, W, top, bottom){
   x.save();
   x.globalAlpha = .05;
@@ -1120,15 +1223,6 @@ function drawWatermark(x, W, top, bottom){
   }
   x.restore();
 }
-function wrapCenter(ctx, text, maxW){
-  const words = text.split(/\s+/); const lines = []; let line = '';
-  for (const w of words) {
-    const t = line ? line + ' ' + w : w;
-    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
-  }
-  if (line) lines.push(line);
-  return lines;
-}
 function renderCardBlob(c){
   const W = 1080, H = 1350;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -1137,9 +1231,9 @@ function renderCardBlob(c){
   x.fillStyle = '#EDEEF2'; x.fillRect(0, 0, W, H);
   x.save(); x.shadowColor = 'rgba(20,24,32,.14)'; x.shadowBlur = 46; x.shadowOffsetY = 18;
   x.fillStyle = '#fff'; rr(x, 60, 90, W - 120, 1020, 90); x.fill(); x.restore();
+  drawWatermark(x, W, 130, 1080);
   x.save(); x.globalAlpha = .12; x.font = '170px system-ui'; x.textAlign = 'right';
   x.fillText(EMO[catL(c)] || '⚖️', W - 100, 270); x.restore();
-  drawWatermark(x, W, 130, 1080);
   let g = x.createLinearGradient(200, 0, W - 200, 0);
   g.addColorStop(0, ink); g.addColorStop(.5, '#C9971C'); g.addColorStop(1, ink);
   x.fillStyle = g; x.textAlign = 'center';
