@@ -328,7 +328,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <div id="modal" class="hidden">
   <div class="box">
     <h3>Расскажи свою ситуацию</h3>
-    <textarea id="fText" placeholder="например: свекровь приходит без звонка и переставляет вещи. я стала запирать дверь. кто не прав?"></textarea>
+    <textarea id="fText" maxlength="2000" placeholder="например: свекровь приходит без звонка и переставляет вещи. я стала запирать дверь. кто не прав?"></textarea>
     <select id="fCat">
       <option>семья</option><option>деньги</option><option>соседи</option><option>работа</option><option>отношения</option><option>этикет</option><option>треш</option><option>другое</option>
     </select>
@@ -1230,7 +1230,7 @@ function buildComments(all,nicks,stats){
   return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats)).join('');
 }
 function commentInput(inputId, fn, tagId){
-  return me ? '<div class="crow"><input id="' + inputId + '" placeholder="Твой аргумент…"><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
+  return me ? '<div class="crow"><input id="' + inputId + '" maxlength="500" placeholder="Твой аргумент…"><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
    : '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button>';
 }
 function setReply(id, nick){
