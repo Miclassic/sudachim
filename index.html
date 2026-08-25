@@ -643,6 +643,7 @@ function renderCardBlobDuel(d){
   x.fillStyle = '#EDEEF2'; x.fillRect(0, 0, W, H);
   x.save(); x.shadowColor = 'rgba(20,24,32,.14)'; x.shadowBlur = 46; x.shadowOffsetY = 18;
   x.fillStyle = '#fff'; rr(x, 60, 90, W - 120, 1020, 90); x.fill(); x.restore();
+  drawWatermark(x, W, 130, 1080);
   x.save(); x.globalAlpha = .12; x.font = '170px system-ui'; x.textAlign = 'right';
   x.fillText('⚔️', W - 100, 270); x.restore();
   let g = x.createLinearGradient(200, 0, W - 200, 0);
@@ -659,8 +660,10 @@ function renderCardBlobDuel(d){
     const w = maxW + 90, h = lines.length * lh + 44;
     x.save(); x.shadowColor = glow; x.shadowBlur = 30; x.shadowOffsetY = 10;
     x.fillStyle = '#fff'; rr(x, W/2 - w/2, top, w, h, h/2); x.fill(); x.restore();
-    x.fillStyle = color;
-    lines.forEach((l, i) => x.fillText(l, W / 2, top + 42 + i * lh));
+    x.fillStyle = color; x.textBaseline = 'middle';
+    const cy = top + h/2;
+    lines.forEach((l, i) => x.fillText(l, W/2, cy - (lines.length-1)*lh/2 + i*lh));
+    x.textBaseline = 'alphabetic';
     return h;
   }
   const hA = drawPill(d.a, red, 'rgba(211,58,44,.35)', 400);
@@ -684,8 +687,6 @@ function renderCardBlobDuel(d){
   cg.addColorStop(0, gold); cg.addColorStop(.5, '#FF8A3D'); cg.addColorStop(1, gold);
   x.fillStyle = cg; x.textAlign = 'center'; x.font = '700 46px "OPPO Sans", system-ui';
   x.fillText('А ты на чьей стороне?', W/2, 1020);
-  x.fillStyle = gray; x.font = '500 34px "OPPO Sans", system-ui';
-  x.fillText('голосуй: miclassic.github.io/sudachim', W/2, 1260);
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 
@@ -1071,6 +1072,22 @@ async function ensureFonts(){
   } catch(e){}
 }
 function rr(x, X, Y, W, H, R){ x.beginPath(); if (x.roundRect) x.roundRect(X, Y, W, H, R); else x.rect(X, Y, W, H); }
+function drawWatermark(x, W, top, bottom){
+  x.save();
+  x.globalAlpha = .05;
+  x.fillStyle = '#8C6A1D';
+  x.font = '700 30px "OPPO Sans", system-ui';
+  x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  let row = 0;
+  for (let y = top; y < bottom; y += 84){
+    const off = (row % 2) ? -70 : 0;
+    for (let xx = off; xx < W; xx += 230){
+      x.save(); x.translate(xx, y); x.rotate(-0.16); x.fillText('sudachim', 0, 0); x.restore();
+    }
+    row++;
+  }
+  x.restore();
+}
 function wrapCenter(ctx, text, maxW){
   const words = text.split(/\s+/); const lines = []; let line = '';
   for (const w of words) {
@@ -1090,6 +1107,7 @@ function renderCardBlob(c){
   x.fillStyle = '#fff'; rr(x, 60, 90, W - 120, 1020, 90); x.fill(); x.restore();
   x.save(); x.globalAlpha = .12; x.font = '170px system-ui'; x.textAlign = 'right';
   x.fillText(EMO[catL(c)] || '⚖️', W - 100, 270); x.restore();
+  drawWatermark(x, W, 130, 1080);
   let g = x.createLinearGradient(200, 0, W - 200, 0);
   g.addColorStop(0, ink); g.addColorStop(.5, '#C9971C'); g.addColorStop(1, ink);
   x.fillStyle = g; x.textAlign = 'center';
@@ -1129,8 +1147,6 @@ function renderCardBlob(c){
   cg.addColorStop(0, '#C9971C'); cg.addColorStop(.5, '#FF8A3D'); cg.addColorStop(1, '#C9971C');
   x.fillStyle = cg; x.font = '700 46px "OPPO Sans", system-ui';
   x.fillText('А ты на чьей стороне?', W / 2, 1020);
-  x.fillStyle = gray; x.font = '500 34px "OPPO Sans", system-ui';
-  x.fillText('голосуй: miclassic.github.io/sudachim', W / 2, 1260);
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 async function shareCase(c){
