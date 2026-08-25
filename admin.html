@@ -108,8 +108,8 @@ function renderList(){
       return '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · ' + (cs2 ? (cs2.category || 'другое') : '—') + ' · ' + sideRu(o.side) + '</div>' +
         '<div class="mctx">история: ' + esc(cs2 ? cs2.text : '—') + '</div>' +
         '<div class="mtxt">' + esc(o.text) + '</div>' +
-        '<div class="mbtns"><button class="ok" onclick="decide(' + o.id + ',true)">✅ одобрить</button>' +
-        '<button class="no" onclick="decide(' + o.id + ',false)">❌ отклонить</button></div></div>';
+        '<div class="mbtns"><button class="ok" onclick="decideComment(' + o.id + ',true)">✅ одобрить</button>' +
+        '<button class="no" onclick="decideComment(' + o.id + ',false)">❌ отклонить</button></div></div>';
     }).join('') : '<div class="empty">Очередь пуста 🎉</div>';
   } else {
     box.innerHTML = pendDuels.length ? pendDuels.map(o =>
@@ -127,6 +127,11 @@ async function decide(id, ok){
     if (obj && !obj.user_id && adminId) patch.user_id = adminId;
   }
   const { error } = await sb.from('cases').update(patch).eq('id', id);
+  if (error) alert(error.message);
+  await refresh();
+}
+async function decideComment(id, ok){
+  const { error } = await sb.from('comments').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id);
   if (error) alert(error.message);
   await refresh();
 }

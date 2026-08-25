@@ -158,7 +158,8 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 .aNote{color:var(--gray);font-size:11px;text-align:center}
 #notifs{position:fixed;inset:0;background:var(--bg);z-index:70;overflow-y:auto}
 .nHead{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;gap:12px;padding:14px 16px;font-weight:700;z-index:2}
-.nItem{background:#fff;border-radius:16px;padding:12px 14px;margin:0 16px 10px;font-size:13px;box-shadow:0 8px 22px rgba(20,24,32,.06)}
+.nItem{background:#fff;border-radius:16px;padding:12px 14px;margin:0 16px 10px;font-size:13px;box-shadow:0 8px 22px rgba(20,24,32,.06);cursor:pointer;transition:transform .15s}
+.nItem:hover{transform:translateX(4px)}
 .nItem.unread{border-left:3px solid var(--gold)}
 .pBack{border:none;background:none;font-size:20px;color:var(--ink)}
 .pBody{max-width:560px;margin:0 auto;padding:10px 0 20px;display:flex;flex-direction:column;gap:14px;animation:rise .35s ease}
@@ -188,19 +189,16 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   .fbtns button{font-size:14px;padding:12px}.pNick{font-size:24px}
   .bubble{box-shadow:0 24px 60px rgba(20,24,32,.14)}
 }
-/* ============ ПРЕМИУМ: бейдж ника ============ */
 .ntag{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 10px;border-radius:999px;vertical-align:middle;font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;background:linear-gradient(90deg,#8C6A1D,#E9C767,#FF8A3D,#8C6A1D);background-size:300% 100%;animation:ntagFlow 3s linear infinite;box-shadow:0 2px 12px rgba(201,151,28,.45);text-transform:uppercase}
 .ntag::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:220% 100%;animation:ntagShine 2.4s ease-in-out infinite}
 @keyframes ntagFlow{0%{background-position:0 0}100%{background-position:300% 0}}
 @keyframes ntagShine{0%{background-position:120% 0}100%{background-position:-120% 0}}
-/* ============ ПРЕМИУМ: узор постов и комментов ============ */
 .fitem-premium{position:relative;background:linear-gradient(180deg,rgba(244,193,74,.07),#fff 60%);box-shadow:0 12px 34px rgba(201,151,28,.20), inset 0 0 0 1.5px rgba(201,151,28,.28)}
 .fitem-premium::before,.cmt-premium::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><g fill='%23C9971C' fill-opacity='.55'><path d='M34 12l4 9 9 4-9 4-4 9-4-9-9-4 9-4z'/><path d='M104 78l4 9 9 4-9 4-4 9-4-9-9-4 9-4z'/><circle cx='102' cy='24' r='3'/><circle cx='28' cy='108' r='3'/><path d='M64 52l3 7 7 3-7 3-3 7-3-7-7-3 7-3z' fill-opacity='.4'/></g></svg>") repeat;background-size:140px 140px;opacity:.22;-webkit-mask-image:radial-gradient(135% 125% at 50% 42%,transparent 28%,#000 86%);mask-image:radial-gradient(135% 125% at 50% 42%,transparent 28%,#000 86%)}
 .fitem-premium > .fbody{position:relative;z-index:1}
 .cmt-premium{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(244,193,74,.08),#fff 60%);box-shadow:0 8px 22px rgba(20,24,32,.06), inset 0 0 0 1px rgba(201,151,28,.35)}
 .cmt-premium::before{opacity:.14}
 .cmt-premium > *{position:relative;z-index:1}
-/* ============ РЕЙТИНГ И АЧИВКИ ============ */
 .lbRow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#fff;margin-bottom:6px;box-shadow:0 2px 8px rgba(20,24,32,.04)}
 .lbRow.me{background:linear-gradient(90deg,rgba(201,151,28,.14),rgba(201,151,28,.04));border:1.5px solid rgba(201,151,28,.35)}
 .lbRow .pos{width:26px;font-weight:800;color:var(--gray);font-size:12px;text-align:center}
@@ -227,7 +225,6 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 </style>
 </head>
 <body>
-<!-- ============ ФИРМЕННЫЕ ИКОНКИ ============ -->
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
 <symbol id="i-scale" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M9 19.5h6M5.5 6.5h13"/><circle cx="12" cy="4" r="1.1" fill="currentColor" stroke="none"/></g><path fill="currentColor" d="M5.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L5.5 7zM18.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L18.5 7z"/></symbol>
 <symbol id="i-swords" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l13.5 13.5M20 4L6.5 17.5"/><path d="M15 18l3-3M9 18l-3-3"/><path d="M18.5 18.5l2 2M5.5 18.5l-2 2"/></g></symbol>
@@ -380,9 +377,7 @@ let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null;
-/* фирменные иконки */
 const ic = n => '<svg class="icn"><use href="#i-' + n + '"/></svg>';
-/* ============ ачивки и динамический топ ============ */
 const ACH = {
   'first':   { ic:'i-scale', name:'Первый вердикт', tier:'c', desc:'Вынеси первый вердикт' },
   'zhiza':   { ic:'i-bolt', name:'Жиза-детектор', tier:'c', desc:'10+ голосов «жиза»' },
@@ -563,7 +558,7 @@ async function openNotifs(){
   $('nList').innerHTML = (data || []).map(n => {
     const who = nicks[n.actor_id] || 'кто-то';
     const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : 'прокомментировал(а) твою историю';
-    return '<div class="nItem' + (n.read ? '' : ' unread') + '"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + '»</div>' : '') + '</div>';
+    return '<div class="nItem' + (n.read ? '' : ' unread') + '" onclick="openCaseFromNotif(' + (n.case_id || 0) + ')"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + '»</div>' : '') + '</div>';
   }).join('') || '<div class="empty">Пока тихо 🔕</div>';
   await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false);
   fetchUnread();
@@ -618,7 +613,6 @@ function syncAuthMode(){
   $('aGo').textContent = authMode === 'reg' ? 'Создать аккаунт' : 'Войти';
   $('aSwap').textContent = authMode === 'reg' ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Регистрация';
 }
-/* проверка ника без учёта регистра */
 async function nickTaken(nick, exceptId){
   const r = await sb.from('profiles').select('id,nick').ilike('nick', nick);
   return (r.data || []).some(p => p.id !== exceptId && p.nick.toLowerCase() === nick.toLowerCase());
@@ -671,7 +665,6 @@ async function showProfile(){
   const pctMatch = votes.length ? Math.round(match * 100 / votes.length) : null;
   const since = new Date(me.created_at).toLocaleDateString('ru-RU');
   const myStats = votes.length ? { userId: me.id, total: votes.length, condemnShare: votes.filter(x=>x.verdict==='condemn').length/votes.length, lifeShare: votes.filter(x=>x.verdict==='life').length/votes.length, match: (match||0)/votes.length, streak: calcStreak(votes), life: votes.filter(x=>x.verdict==='life').length, nightVotes: votes.filter(x=>{const h=new Date(x.created_at).getHours();return h>=23||h<5}).length } : null;
-  /* портрет сразу, перед статистикой */
   let wrappedHtml = '';
   if (myStats && votes.length >= 5) {
     const t = judgeType(myStats);
@@ -951,7 +944,6 @@ async function renameMe(){
   myNick = nick; renderTbUser(); showProfile();
 }
 async function logoutMe(){ await sb.auth.signOut(); showTab('court'); await refreshMe(); renderFeed(); toast('Ты вышел'); }
-/* ---------- дуэли ---------- */
 function toggleDuelForm(){ const f = $('duelForm'); f.classList.toggle('hidden'); f.style.display = f.classList.contains('hidden') ? 'none' : 'flex'; }
 async function submitDuel(){
   if (!me) { openAuth(); return; }
@@ -1014,7 +1006,6 @@ async function shareDuel(id){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sudachim-duel.png'; a.click();
   toast('Картинка сохранена — кидай в чат! 📤');
 }
-/* шар-карточка дуэли v2 (как в макете) */
 function drawSparkle(x, cx, cy, s, col){
   x.fillStyle = col;
   x.beginPath();
@@ -1114,7 +1105,6 @@ function renderCardBlobDuel(d){
   x.fillText('А ты на чьей стороне?', W / 2, 1235);
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
-/* ---------- дело дня (авто) ---------- */
 let dailyTimer = null;
 const dailyReveal = () => new Date().getHours() >= 21;
 async function pickDaily(){
@@ -1175,7 +1165,6 @@ async function voteDaily(id, v){
   voted[id] = v; saveVoted();
   renderDaily();
 }
-/* ---------- базовое ---------- */
 let brandTaps = 0, brandTimer = null;
 function brandTap(){
   brandTaps++;
@@ -1215,7 +1204,6 @@ async function profilesFor(ids){
   const m = {}; (r.data || []).forEach(p => m[p.id] = p);
   return m;
 }
-/* ---------- комментарии ---------- */
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
 function authorHtml(cm,nicks,stats){
   const s = stats[cm.user_id];
@@ -1284,14 +1272,13 @@ async function loadFeed(){
   renderChips(); renderFeed();
 }
 function renderChips(){
-  const cats = ['все', ...new Set(allCases.filter(visibleCase).map(catL))];
+  const cats = ['все', ...new Set(allCases.map(catL))];
   $('chips').classList.toggle('hidden', allCases.length < 2);
   $('chips').innerHTML = cats.map(c => '<button class="chipBtn' + (c === feedCat ? ' on' : '') + '" onclick="setFeedCat(\'' + c + '\')">' + esc(c) + '</button>').join('');
 }
 function setFeedCat(c){ feedCat = c; renderChips(); renderFeed(); }
 async function renderFeed(){
   const list = allCases
-    .filter(visibleCase)
     .filter(c => feedCat === 'все' || catL(c) === feedCat)
     .map(c => ({ c, total: (c.condemn||0) + (c.justify||0) + (c.life||0) }))
     .sort((a, b) => scoreCase(b.c, b.total) - scoreCase(a.c, a.total) || b.c.id - a.c.id);
@@ -1308,6 +1295,13 @@ async function renderFeed(){
     const cmsAll = allComments.filter(k => k.case_id === c.id);
     const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
+    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
+    if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
+      return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fbody">' +
+        '<div class="fmeta"><span>' + ic('moon') + ' треш · откроется с 23:00</span><span>' + votesLabel(total) + '</span></div>' +
+        '<div class="ftxt" style="filter:blur(7px);user-select:none;pointer-events:none">' + esc(c.text) + '</div>' +
+        '<button class="fpill lockPill" style="flex:1">' + ic('lock') + ' треш-час: с 23:00 до 5:00</button></div></div>';
+    }
     const actions = votedIt ? (
       '<div class="fbars"><i class="fbar" style="width:' + pct(c.condemn) + '%;background:var(--red)"></i><i class="fbar" style="width:' + pct(c.life) + '%;background:var(--yel)"></i><i class="fbar" style="width:' + pct(c.justify) + '%;background:var(--grn)"></i></div>' +
       '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>' +
@@ -1321,8 +1315,7 @@ async function renderFeed(){
     ) : (
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
-    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
-    return '<div class="' + itemClass + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms">' + (hot ? '<div class="fart ' + art + '"></div>' : '') + '<div class="fbody">' +
+    return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms">' + (hot ? '<div class="fart ' + art + '"></div>' : '') + '<div class="fbody">' +
       '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + esc(catOf(c)) + (premium ? ' · ✦ прем' : '') + '</span><span>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + esc(c.text) + '</div>' + actions + '</div></div>';
   }).join('');
@@ -1430,7 +1423,6 @@ async function submitCase(){
   $('fText').value = ''; closeForm();
   toast(error ? 'Ошибка: ' + error.message : 'Принято! Появится после проверки ✅');
 }
-/* ================= ОЗВУЧКА ================= */
 let speakSession = 0, speakStopFn = null, curAudio = null;
 function stopSpeak(){
   speakSession++;
@@ -1529,7 +1521,6 @@ function seSpeak(text, onWord, onEnd, onFail){
     })
     .catch(() => onFail());
 }
-/* ================= ШАР-КАРТОЧКА ИСТОРИИ ================= */
 async function ensureFonts(){
   try {
     await Promise.race([
@@ -1631,7 +1622,6 @@ async function shareCase(c){
   toast('Картинка сохранена в загрузки — кидай в чат! 📤');
 }
 function shareCard(){ shareCase(cur); }
-/* ================= СВАЙПЫ ================= */
 let dx = 0, dy = 0, dragging = false, sx = 0, sy = 0;
 function clampDrag(){
   const w = card.offsetWidth || 320, h = card.offsetHeight || 320;
@@ -1656,6 +1646,25 @@ function apply(){
   $('stR').style.opacity = Math.max(0, Math.min(1, dx / 90));
   $('stU').style.opacity = Math.max(0, Math.min(1, -dy / 90));
 }
+/* переход к записи из уведомления */
+function openCaseFromNotif(id){
+  closeNotifs();
+  showTab('court');
+  const c = allById(id);
+  if (!c) { toast('Запись не найдена или ещё на модерации'); return; }
+  if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) toast('🌙 Эта запись полностью откроется в треш-час (23:00–5:00)');
+  setTimeout(() => {
+    const el = document.querySelector('[data-case-id="' + id + '"]');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.outline = '2px solid var(--gold)';
+    setTimeout(() => el.style.outline = '', 1600);
+    feedToggleComments(id, true);
+  }, 350);
+}
+/* автообновление ленты */
+document.addEventListener('visibilitychange', () => { if (!document.hidden) loadFeed(); });
+setInterval(() => { if (!document.hidden) loadFeed(); }, 30000);
 load();
 </script>
 </body>
