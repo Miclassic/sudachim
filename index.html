@@ -1929,20 +1929,15 @@ async function shareCase(c){
       toast('Готовим карточку…');
       const prep = document.createElement('style');
       prep.id = 'sharePrep';
-      prep.textContent = '.share-hide{display:none!important}.share-foot{display:flex;justify-content:center;padding:12px 0 2px;color:#8A919E;font-size:10px;font-weight:600;letter-spacing:.14em}';
+      prep.textContent = '.share-hide{display:none!important}';
       document.head.appendChild(prep);
       node.querySelectorAll('.fbtns,.repBtn').forEach(el => el.classList.add('share-hide'));
-      const foot = document.createElement('div');
-      foot.className = 'share-foot';
-      foot.textContent = 'судачим · народный суд · miclassic.github.io/sudachim';
-      node.appendChild(foot);
       const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: '#EDEEF2' });
-      foot.remove(); prep.remove();
+      prep.remove();
       node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
       await downloadOrShare(dataUrl, 'sudachim.png');
       return;
     } catch (e) {
-      const f = document.querySelector('.share-foot'); if (f) f.remove();
       const p = document.getElementById('sharePrep'); if (p) p.remove();
       node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
     }
