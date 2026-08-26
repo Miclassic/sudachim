@@ -143,10 +143,13 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .fmeta{font-size:11px;color:var(--gray);display:flex;justify-content:space-between;align-items:center;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .fmeta .icn{width:12px;height:12px;color:var(--gold)}
 .ftxt{font-size:14px;line-height:1.5;margin:8px 0 4px;color:#1B1E24;font-weight:500;text-shadow:0 1px 0 rgba(255,255,255,.85),0 0 12px rgba(255,255,255,.6)}
-/* вещдок — строгий кадр */
 .evd{position:relative;margin:10px 0 12px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(20,24,32,.16);background:#000}
 .evd img,.evd video{width:100%;display:block;max-height:340px;object-fit:cover;cursor:zoom-in}
+.bubble .evd{margin:6px 0 10px}
+.bubble .evd img,.bubble .evd video{max-height:240px}
 .evdPlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.92);color:#15181C;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none}
+.evdTag{position:absolute;right:8px;bottom:8px;background:rgba(140,106,29,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;font-size:9px;font-weight:800;letter-spacing:.8px;padding:4px 9px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.28);text-transform:uppercase;pointer-events:none;opacity:.9}
+.evdV::after,.plWm{content:"";position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%3E%3Ctext%20x='14'%20y='100'%20font-size='17'%20font-weight='700'%20fill='%23ffffff'%20fill-opacity='.16'%20transform='rotate(-16%2090%2090)'%20font-family='Arial,sans-serif'%3E%D1%81%D1%83%D0%B4%D0%B0%D1%87%D0%B8%D0%BC%20%E2%9A%96%3C/text%3E%3C/svg%3E") repeat;background-size:180px 180px}
 .plWrap{position:relative;width:min(96vw,560px);border-radius:16px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .plWrap video{width:100%;max-height:78vh;display:block;background:#000;object-fit:contain}
 .plBig{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.95);color:#15181C;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 8px 30px rgba(0,0,0,.4);cursor:pointer;transition:opacity .2s}
@@ -158,21 +161,19 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .plCtrl button{background:none;border:none;color:#fff;font-size:14px;padding:4px}
 #plSeek{flex:1;accent-color:#C9971C;height:4px}
 #plTime,#plDur{font-size:10px;font-weight:700;opacity:.9}
-.bubble .evd{margin:6px 0 10px}
-.bubble .evd img,.bubble .evd video{max-height:240px}
-.evdTag{position:absolute;right:8px;bottom:8px;background:rgba(140,106,29,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;font-size:9px;font-weight:800;letter-spacing:.8px;padding:4px 9px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.28);text-transform:uppercase;pointer-events:none;opacity:.9}
-.evdV::after,.plWm{content:"";position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%3E%3Ctext%20x='14'%20y='100'%20font-size='17'%20font-weight='700'%20fill='%23ffffff'%20fill-opacity='.16'%20transform='rotate(-16%2090%2090)'%20font-family='Arial,sans-serif'%3E%D1%81%D1%83%D0%B4%D0%B0%D1%87%D0%B8%D0%BC%20%E2%9A%96%3C/text%3E%3C/svg%3E") repeat;background-size:180px 180px}
-#lb{position:fixed;inset:0;background:rgba(10,10,14,.93);z-index:95;display:flex;align-items:center;justify-content:center;padding:14px}
-#lb img,#lb video{max-width:100%;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.lbX{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:16px;font-weight:800}
-.lbRep{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px}
+/* реакции */
+.reacts{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+.rct{display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;background:rgba(20,24,32,.045);color:var(--gray);font-size:11px;font-weight:700;border:1px solid transparent}
+.rct .icn{width:13px;height:13px}
+.rct.on{color:var(--gold);background:rgba(201,151,28,.12);border-color:rgba(201,151,28,.4)}
 .fpill{flex:1;border:none;background:#fff;border-radius:999px;padding:10px 4px;font-weight:700;font-size:12px;box-shadow:0 6px 18px rgba(20,24,32,.10);white-space:nowrap;overflow:hidden;justify-content:center;display:flex;align-items:center;gap:4px;cursor:pointer}
 .fpill .icn{width:13px;height:13px}
 .fpills{display:flex;gap:6px}
 .fbars{display:flex;gap:4px;height:8px}
 .fbar{display:block;height:100%;border-radius:4px}
-.fbtns{display:flex;gap:8px;margin-top:10px}
-.fbtns button{flex:1;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:10px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.fbtns{display:flex;gap:8px;margin-top:8px}
+.fbtns button{flex:1;background:transparent;color:var(--gray);border:none;border-radius:999px;padding:8px 6px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.fbtns button:active{background:rgba(20,24,32,.06)}
 .fbtns .icn{width:14px;height:14px}
 .fcom{margin-top:10px;display:flex;flex-direction:column;gap:6px}
 .repBtn{background:none;border:none;color:var(--red);font-size:11px;font-weight:700;padding:2px 4px;opacity:.9}
@@ -234,7 +235,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   body{background:radial-gradient(rgba(140,106,29,.06) 2px,transparent 2.5px),var(--bg);background-size:26px 26px}
   #caseText{font-size:18px}.ftxt{font-size:15px}.bSub{font-size:14px}
   .pill{font-size:15px;padding:13px 20px}.fpill{font-size:13px;padding:12px 8px}
-  .fbtns button{font-size:14px;padding:12px}.pNick{font-size:24px}
+  .fbtns button{font-size:13px;padding:10px}.pNick{font-size:24px}
   .bubble{box-shadow:0 24px 60px rgba(20,24,32,.14)}
 }
 .ntag{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 10px;border-radius:999px;vertical-align:middle;font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;background:linear-gradient(90deg,#8C6A1D,#E9C767,#FF8A3D,#8C6A1D);background-size:300% 100%;animation:ntagFlow 3s linear infinite;box-shadow:0 2px 12px rgba(201,151,28,.45);text-transform:uppercase}
@@ -300,6 +301,10 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <symbol id="i-vote" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 12h14v8H5z"/><path d="M9 12l1.5-6h3L15 12M10.5 9h3M10 16h4"/></g></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
 <symbol id="i-flag" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2h2v20H5z"/><path fill="currentColor" d="M9 3h11l-3 4.5L20 12H9z"/></symbol>
+<symbol id="r-lol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7.8 9.6c.5-.9 1.7-.9 2.2 0M14 9.6c.5-.9 1.7-.9 2.2 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7.3 13.2c1.1 2.7 2.8 4 4.7 4s3.6-1.3 4.7-4z" fill="currentColor"/></symbol>
+<symbol id="r-shock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.8" r="1.2" fill="currentColor"/><circle cx="15" cy="9.8" r="1.2" fill="currentColor"/><circle cx="12" cy="15" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="r-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20s-7.2-4.6-9.2-9.2C1.6 8 3.4 4.8 6.6 4.8c2 0 3.5 1.2 5.4 3.5 1.9-2.3 3.4-3.5 5.4-3.5 3.2 0 5 3.2 3.8 6-2 4.6-9.2 9.2-9.2 9.2z"/></symbol>
+<symbol id="r-cry" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.5 16.6q3.5-3.2 7 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.2 12.6c.7 1.3 1.1 2.2 1.1 2.9a1.6 1.6 0 0 1-3.2 0c0-.7.4-1.6 1.1-2.9z" fill="currentColor"/></symbol>
 </svg>
 <div class="topbar">
   <div class="topbarIn">
@@ -388,7 +393,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     </select>
     <button class="go" onclick="submitCase()">Отправить на модерацию</button>
     <button style="background:none;border:none;color:var(--gray)" onclick="closeForm()">Отмена</button>
-    <div style="font-size:11px;color:var(--gray)">Без имён, телефонов, адресов и ссылок. «треш» виден только с 23:00 до 5:00. Фото до 8 МБ, видео до 15 МБ.</div>
+    <div style="font-size:11px;color:var(--gray)">Без имён, телефонов, адресов и ссылок. «треш» виден только с 23:00 до 5:00. Фото до 8 МБ, видео до 15 МБ и до 60 сек.</div>
   </div>
 </div>
 <div id="auth" class="hidden">
@@ -412,9 +417,9 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <div id="nList" style="padding-top:6px"></div>
 </div>
 <div id="lb" class="hidden" onclick="if(event.target.id==='lb')lbHide()">
-  <button class="lbX" onclick="lbHide()">✕</button>
+  <button class="lbX" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:16px;font-weight:800" onclick="lbHide()">✕</button>
   <div id="lbBody"></div>
-  <button class="lbRep" onclick="lbReport()">🚩 пожаловаться</button>
+  <button style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
 <div id="toast" class="hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -435,12 +440,22 @@ function duelKey(){ return 'sud_duelv:' + (me ? me.id : 'anon'); }
 function loadDuelVoted(){ duelVoted = JSON.parse(localStorage.getItem(duelKey()) || '{}'); }
 function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVoted)); }
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
-let allCases = [], allComments = [], allDuels = [], feedCat = 'все';
+let allCases = [], allComments = [], allDuels = [], allReacts = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null, pickedMedia = null;
 const ic = n => '<svg class="icn"><use href="#i-' + n + '"/></svg>';
+const REACTS = [
+  { k:'bolt',  ic:'i-bolt' },
+  { k:'flame', ic:'i-flame' },
+  { k:'lol',   ic:'r-lol' },
+  { k:'shock', ic:'r-shock' },
+  { k:'heart', ic:'r-heart' },
+  { k:'cry',   ic:'r-cry' },
+  { k:'eye',   ic:'i-eye' },
+  { k:'gavel', ic:'i-gavel' }
+];
 const ACH = {
   'first':   { ic:'i-scale', name:'Первый вердикт', tier:'c', desc:'Вынеси первый вердикт' },
   'zhiza':   { ic:'i-bolt', name:'Жиза-детектор', tier:'c', desc:'10+ голосов «жиза»' },
@@ -1221,7 +1236,7 @@ function dailyCard(c){
   }
   return '<div class="fitem hot"><div class="fart '+art+'"></div><div class="fbody">' +
     '<div class="dTop">' + ic('flame') + 'дело дня · <span id="dcount_'+c.id+'"></span></div>' +
-    '<div class="ftxt">'+esc(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
+    '<div class="ftxt">'+esc(c.text)+'</div>' + evdHtml(c) + reactsHtml(c.id) + body + '</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -1277,6 +1292,30 @@ async function reportItem(type, id){
   const { error } = await sb.from('reports').insert({ target_type: type, target_id: id, user_id: me.id, reason: 'жалоба' });
   toast(error ? 'Жалоба уже отправлена' : '🚩 Жалоба принята. После 3 жалоб запись скрывается');
 }
+/* реакции */
+function reactsHtml(caseId){
+  const rc = allReacts.filter(r => r.case_id === caseId);
+  const counts = {}; rc.forEach(r => counts[r.kind] = (counts[r.kind]||0)+1);
+  const mine = me ? rc.find(r => r.user_id === me.id) : null;
+  return '<div class="reacts">' + REACTS.map(r => {
+    const n = counts[r.k] || 0;
+    const on = mine && mine.kind === r.k;
+    return '<button class="rct' + (on ? ' on' : '') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')">' + ic(r.ic) + (n ? ' ' + n : '') + '</button>';
+  }).join('') + '</div>';
+}
+async function reactToggle(caseId, kind){
+  if (!me) { openAuth(); return; }
+  const { data } = await sb.from('reactions').select('id,kind').eq('case_id', caseId).eq('user_id', me.id);
+  const cur = (data || [])[0];
+  if (cur && cur.kind === kind) {
+    await sb.from('reactions').delete().eq('id', cur.id);
+  } else {
+    if (cur) await sb.from('reactions').delete().eq('id', cur.id);
+    await sb.from('reactions').insert({ case_id: caseId, kind, user_id: me.id });
+    track('react');
+  }
+  renderFeed();
+}
 /* вещдок */
 function evdHtml(c){
   if (!c || !c.media_url) return '';
@@ -1305,7 +1344,6 @@ async function initPlayer(url){
   const v = $('lbVid'), load = $('plLoad'), pct = $('plPct'), bar = $('plBarI');
   const big = $('plBig'), ctrl = $('plCtrl');
   const play = $('plPlay'), seek = $('plSeek'), tEl = $('plTime'), dEl = $('plDur'), mute = $('plMute'), full = $('plFull');
-  /* качаем файл целиком в память — дальше играем локально, без лагов */
   let ok = false;
   try {
     const r = await fetch(url);
@@ -1469,7 +1507,14 @@ function toggleReplies(id){
 async function load(){
   loadVoted();
   const { data, error } = await sb.from('cases').select('*').eq('status','approved');
-  if (error) { toast('Ошибка: ' + error.message); return; }
+  if (error) {
+    toast('Ошибка: ' + error.message);
+    $('cardWrap').classList.add('hidden');
+    $('hint').classList.add('hidden');
+    $('empty').innerHTML = '😕 База данных не ответила.<br><button class="miniBtn" style="margin-top:12px" onclick="location.reload()">🔄 повторить</button>';
+    $('empty').classList.remove('hidden');
+    return;
+  }
   allCases = (data || []).filter(c => !c.hidden);
   queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c));
   $('trashBanner').classList.toggle('hidden', !trashOpen());
@@ -1484,8 +1529,12 @@ async function loadFeed(){
     sb.from('comments').select('*').eq('status','approved'),
     sb.from('votes').select('case_id').gte('created_at', since24())
   ]);
+  if (c.error || cm.error || rv.error) { toast('Не удалось обновить ленту — база не ответила, повтори позже'); return; }
   allCases = (c.data || []).filter(x => !x.hidden);
   allComments = (cm.data || []).filter(x => !x.hidden);
+  const ids = allCases.map(x => x.id);
+  const rq = ids.length ? await sb.from('reactions').select('case_id,kind,user_id').in('case_id', ids) : { data: [] };
+  allReacts = rq.data || [];
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
@@ -1496,7 +1545,7 @@ async function loadFeed(){
     myPrefs = new Set(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]));
   }
   await refreshTop();
-  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length;
+  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length;
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
 }
 function renderChips(){
@@ -1545,7 +1594,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
       '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span style="display:flex;align-items:center;gap:6px"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('flag') + '</button>' + votesLabel(total) + '</span></div>' +
-      '<div class="ftxt">' + esc(c.text) + '</div>' + evdHtml(c) + actions + '</div></div>';
+      '<div class="ftxt">' + esc(c.text) + '</div>' + evdHtml(c) + reactsHtml(c.id) + actions + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
