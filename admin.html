@@ -30,18 +30,21 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
 .hidden{display:none!important}
 .statRow{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(20,24,32,.05)}
 .statRow b{color:#C9971C}
+.who{font-size:11px;color:#8A919E;margin-bottom:10px}
 </style>
 </head>
 <body>
 <div class="box">
 <h1>⚖️ Модерация</h1>
 <div id="loginBox" class="card hidden">
+  <div class="who">Вход только для администратора сайта.</div>
   <input id="email" type="email" placeholder="Email админа">
   <input id="pass" type="password" placeholder="Пароль">
   <button class="btn" onclick="doLogin()">Войти</button>
   <div class="err" id="loginErr"></div>
 </div>
 <div id="panel" class="hidden">
+  <div class="who" id="adminWho"></div>
   <div class="tabs">
     <button class="tab on" id="tabCases" onclick="setTab('cases')"></button>
     <button class="tab" id="tabComments" onclick="setTab('comments')"></button>
@@ -56,6 +59,7 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
+const ADMIN_EMAIL = 'artixz18@gmail.com';
 let tab = 'cases', pendCases = [], pendComments = [], pendDuels = [], caseMap = {}, adminId = null;
 let hidCases = [], hidComments = [], evNames = [];
 function $(id){ return document.getElementById(id); }
@@ -67,17 +71,34 @@ function mediaHtml(o){
   if (o.media_type === 'video') return '<video class="mmedia" src="' + o.media_url + '" controls preload="metadata"></video>';
   return '<img class="mmedia" src="' + o.media_url + '" loading="lazy">';
 }
+/* проверка прав: RLS молча пропускает 0 строк — ловим это */
+function rowCheck(res){
+  if (res.error) { alert('Ошибка: ' + res.error.message); return false; }
+  if (!res.data || !res.data.length) { alert('Недостаточно прав. Войди под админ-аккаунтом (' + ADMIN_EMAIL + ').'); return false; }
+  return true;
+}
 async function boot(){
   const { data } = await sb.auth.getSession();
-  if (data.session) panel(); else $('loginBox').classList.remove('hidden');
+  if (data.session) {
+    const email = (data.session.user.email || '').toLowerCase();
+    if (email === ADMIN_EMAIL) { panel(); return; }
+    /* сессия от обычного аккаунта — выходим и просим админа */
+    await sb.auth.signOut();
+  }
+  $('loginBox').classList.remove('hidden');
 }
 async function doLogin(){
-  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('pass').value });
+  const email = $('email').value.trim(), pass = $('pass').value;
+  if (email.toLowerCase() !== ADMIN_EMAIL) { $('loginErr').textContent = 'Модерация доступна только администратору'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (error) { $('loginErr').textContent = 'Неверный email или пароль'; return; }
+  $('loginBox').classList.add('hidden');
   panel();
 }
 async function panel(){
-  adminId = ((await sb.auth.getUser()).data.user || {}).id || null;
+  const u = (await sb.auth.getUser()).data.user;
+  adminId = u ? u.id : null;
+  $('adminWho').textContent = '⚖️ админ: ' + (u ? u.email : '');
   $('loginBox').classList.add('hidden');
   $('panel').classList.remove('hidden');
   await refresh();
@@ -157,36 +178,36 @@ async function decide(id, ok){
     const obj = pendCases.find(o => o.id === id);
     if (obj && !obj.user_id && adminId) patch.user_id = adminId;
   }
-  const { error } = await sb.from('cases').update(patch).eq('id', id);
-  if (error) alert(error.message);
+  const res = await sb.from('cases').update(patch).eq('id', id).select();
+  if (!rowCheck(res)) return;
   await refresh();
 }
 async function decideComment(id, ok){
-  const { error } = await sb.from('comments').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id);
-  if (error) alert(error.message);
+  const res = await sb.from('comments').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id).select();
+  if (!rowCheck(res)) return;
   await refresh();
 }
 async function unhide(type, id){
   const t = type === 'case' ? 'cases' : 'comments';
-  const { error } = await sb.from(t).update({ hidden: false }).eq('id', id);
-  if (error) alert(error.message);
+  const res = await sb.from(t).update({ hidden: false }).eq('id', id).select();
+  if (!rowCheck(res)) return;
   await refresh();
 }
 async function kill(type, id){
   const t = type === 'case' ? 'cases' : 'comments';
-  const { error } = await sb.from(t).update({ status: 'rejected', hidden: false }).eq('id', id);
-  if (error) alert(error.message);
+  const res = await sb.from(t).update({ status: 'rejected', hidden: false }).eq('id', id).select();
+  if (!rowCheck(res)) return;
   await refresh();
 }
 async function setDaily(id){
   await sb.from('cases').update({ daily: false }).eq('daily', true);
-  const { error } = await sb.from('cases').update({ daily: true, status: 'approved' }).eq('id', id);
-  if (error) alert(error.message);
+  const res = await sb.from('cases').update({ daily: true, status: 'approved' }).eq('id', id).select();
+  if (!rowCheck(res)) return;
   await refresh();
 }
 async function decideDuel(id, ok){
-  const { error } = await sb.from('duels').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id);
-  if (error) alert(error.message);
+  const res = await sb.from('duels').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id).select();
+  if (!rowCheck(res)) return;
   await refresh();
 }
 async function logout(){ await sb.auth.signOut(); location.reload(); }
