@@ -161,6 +161,8 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .plCtrl button{background:none;border:none;color:#fff;font-size:14px;padding:4px}
 #plSeek{flex:1;accent-color:#C9971C;height:4px}
 #plTime,#plDur{font-size:10px;font-weight:700;opacity:.9}
+#lb{position:fixed;inset:0;background:rgba(10,10,14,.93);z-index:95;display:flex;align-items:center;justify-content:center;padding:14px}
+#lb img{max-width:100%;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 /* реакции */
 .reacts{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
 .rct{display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;background:rgba(20,24,32,.045);color:var(--gray);font-size:11px;font-weight:700;border:1px solid transparent}
@@ -1300,7 +1302,7 @@ function reactsHtml(caseId){
   return '<div class="reacts">' + REACTS.map(r => {
     const n = counts[r.k] || 0;
     const on = mine && mine.kind === r.k;
-    return '<button class="rct' + (on ? ' on' : '') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')">' + ic(r.ic) + (n ? ' ' + n : '') + '</button>';
+    return '<button class="rct' + (on ? ' on' : '') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')"><svg class="icn"><use href="#' + r.ic + '"/></svg>' + (n ? ' ' + n : '') + '</button>';
   }).join('') + '</div>';
 }
 async function reactToggle(caseId, kind){
