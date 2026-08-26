@@ -137,10 +137,17 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .artT{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.5' transform='rotate(-12 25 44)'%3E%F0%9F%94%A5%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.45' transform='rotate(12 65 88)'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#DCD3EC,#F2EEF9)}
 .artB{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%A4%B3%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFD6F2,#FFF3FB)}
 .artG{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%8E%AE%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%95%B9%EF%B8%8F%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#E4F7C9,#F9FFF2)}
+.artMe{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%98%82%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%90%B8%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFF3C9,#FFFBEB)}
+.artSp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%BD%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%8F%86%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#DFF0FF,#F2FAFF)}
+.artRod{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%91%B5%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#F3E3FF,#FBF5FF)}
+.art18{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%94%9E%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%8C%B6%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFE0E6,#FFF3F5)}
 .artV{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 65 88)'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFE3C4,#FFF7EC)}
 .artD{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%96%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(10 66 88)'%3E%E2%9D%93%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#F3E3B8,#FBF6EA)}
 .fbody{position:relative;padding:16px}
-.fmeta{font-size:11px;color:var(--gray);display:flex;justify-content:space-between;align-items:center;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.fmeta{font-size:11px;color:var(--gray);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.fmeta .fmL{justify-self:start;display:flex;align-items:center;gap:6px}
+.fmeta .fmC{justify-self:center;text-align:center;font-weight:600}
+.fmeta .fmR{justify-self:end}
 .fmeta .icn{width:12px;height:12px;color:var(--gold)}
 .ftxt{font-size:14px;line-height:1.5;margin:8px 0 4px;color:#1B1E24;font-weight:500;text-shadow:0 1px 0 rgba(255,255,255,.85),0 0 12px rgba(255,255,255,.6)}
 .evd{position:relative;margin:10px 0 12px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(20,24,32,.16);background:#000}
@@ -166,7 +173,6 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 /* реакции */
 .reacts{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0 2px}
 .rct{display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}
-.rct .icn{width:12px;height:12px}
 .fpill{flex:1;border:none;background:#fff;border-radius:999px;padding:10px 4px;font-weight:700;font-size:12px;box-shadow:0 6px 18px rgba(20,24,32,.10);white-space:nowrap;overflow:hidden;justify-content:center;display:flex;align-items:center;gap:4px;cursor:pointer}
 .fpill .icn{width:13px;height:13px}
 .fpills{display:flex;gap:6px}
@@ -302,10 +308,6 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <symbol id="i-vote" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 12h14v8H5z"/><path d="M9 12l1.5-6h3L15 12M10.5 9h3M10 16h4"/></g></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
 <symbol id="i-flag" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2h2v20H5z"/><path fill="currentColor" d="M9 3h11l-3 4.5L20 12H9z"/></symbol>
-<symbol id="r-lol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7.8 9.6c.5-.9 1.7-.9 2.2 0M14 9.6c.5-.9 1.7-.9 2.2 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7.3 13.2c1.1 2.7 2.8 4 4.7 4s3.6-1.3 4.7-4z" fill="currentColor"/></symbol>
-<symbol id="r-shock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.8" r="1.2" fill="currentColor"/><circle cx="15" cy="9.8" r="1.2" fill="currentColor"/><circle cx="12" cy="15" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
-<symbol id="r-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20s-7.2-4.6-9.2-9.2C1.6 8 3.4 4.8 6.6 4.8c2 0 3.5 1.2 5.4 3.5 1.9-2.3 3.4-3.5 5.4-3.5 3.2 0 5 3.2 3.8 6-2 4.6-9.2 9.2-9.2 9.2z"/></symbol>
-<symbol id="r-cry" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.5 16.6q3.5-3.2 7 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.2 12.6c.7 1.3 1.1 2.2 1.1 2.9a1.6 1.6 0 0 1-3.2 0c0-.7.4-1.6 1.1-2.9z" fill="currentColor"/></symbol>
 </svg>
 <div class="topbar">
   <div class="topbarIn">
@@ -390,7 +392,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     </div>
     <input type="file" id="fMedia" accept="image/*,video/*" style="display:none" onchange="onMediaPick(this)">
     <select id="fCat">
-      <option>семья</option><option>деньги</option><option>соседи</option><option>работа</option><option>отношения</option><option>этикет</option><option>медиа</option><option>гейминг</option><option>треш</option><option>другое</option>
+      <option>семья</option><option>деньги</option><option>соседи</option><option>работа</option><option>отношения</option><option>этикет</option><option>медиа</option><option>гейминг</option><option>мемы</option><option>спорт</option><option>родственники</option><option>18+</option><option>треш</option><option>другое</option>
     </select>
     <button class="go" onclick="submitCase()">Отправить на модерацию</button>
     <button style="background:none;border:none;color:var(--gray)" onclick="closeForm()">Отмена</button>
@@ -418,7 +420,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <div id="nList" style="padding-top:6px"></div>
 </div>
 <div id="lb" class="hidden" onclick="if(event.target.id==='lb')lbHide()">
-  <button class="lbX" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:16px;font-weight:800" onclick="lbHide()">✕</button>
+  <button style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:16px;font-weight:800" onclick="lbHide()">✕</button>
   <div id="lbBody"></div>
   <button style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
@@ -479,22 +481,18 @@ const ICOS = {
 'i-doc':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></g>',
 'i-vote':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 12h14v8H5z"/><path d="M9 12l1.5-6h3L15 12M10.5 9h3M10 16h4"/></g>',
 'i-plus':'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 5v14M5 12h14"/>',
-'i-flag':'<path fill="currentColor" d="M5 2h2v20H5z"/><path fill="currentColor" d="M9 3h11l-3 4.5L20 12H9z"/>',
-'r-lol':'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7.8 9.6c.5-.9 1.7-.9 2.2 0M14 9.6c.5-.9 1.7-.9 2.2 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7.3 13.2c1.1 2.7 2.8 4 4.7 4s3.6-1.3 4.7-4z" fill="currentColor"/>',
-'r-shock':'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.8" r="1.2" fill="currentColor"/><circle cx="15" cy="9.8" r="1.2" fill="currentColor"/><circle cx="12" cy="15" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/>',
-'r-heart':'<path fill="currentColor" d="M12 20s-7.2-4.6-9.2-9.2C1.6 8 3.4 4.8 6.6 4.8c2 0 3.5 1.2 5.4 3.5 1.9-2.3 3.4-3.5 5.4-3.5 3.2 0 5 3.2 3.8 6-2 4.6-9.2 9.2-9.2 9.2z"/>',
-'r-cry':'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.5 16.6q3.5-3.2 7 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.2 12.6c.7 1.3 1.1 2.2 1.1 2.9a1.6 1.6 0 0 1-3.2 0c0-.7.4-1.6 1.1-2.9z" fill="currentColor"/>'
+'i-flag':'<path fill="currentColor" d="M5 2h2v20H5z"/><path fill="currentColor" d="M9 3h11l-3 4.5L20 12H9z"/>'
 };
 const ic = n => '<svg class="icn" viewBox="0 0 24 24">' + (ICOS[n] || '') + '</svg>';
 const REACTS = [
-  { k:'bolt',  ic:'i-bolt' },
-  { k:'flame', ic:'i-flame' },
-  { k:'lol',   ic:'r-lol' },
-  { k:'shock', ic:'r-shock' },
-  { k:'heart', ic:'r-heart' },
-  { k:'cry',   ic:'r-cry' },
-  { k:'eye',   ic:'i-eye' },
-  { k:'gavel', ic:'i-gavel' }
+  { k:'bolt',  e:'🤔' },
+  { k:'flame', e:'🔥' },
+  { k:'lol',   e:'😂' },
+  { k:'shock', e:'😱' },
+  { k:'heart', e:'❤️' },
+  { k:'cry',   e:'😭' },
+  { k:'eye',   e:'👀' },
+  { k:'gavel', e:'👍' }
 ];
 const RCOLORS = { bolt:'#C9971C', flame:'#E2593F', lol:'#E0A400', shock:'#7A5CFF', heart:'#E64980', cry:'#4C86E8', eye:'#2E9E5B', gavel:'#5A6472' };
 const ACH = {
@@ -565,8 +563,8 @@ async function refreshTop(){
   topCache.map = {};
   topCache.list.forEach((r, i) => topCache.map[r.id] = i + 1);
 }
-const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT', 'медиа':'artB', 'гейминг':'artG' };
-const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'медиа':'🤳', 'гейминг':'🎮', 'другое':'⚖️' };
+const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT', 'медиа':'artB', 'гейминг':'artG', 'мемы':'artMe', 'спорт':'artSp', 'родственники':'artRod', '18+':'art18' };
+const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'медиа':'🤳', 'гейминг':'🎮', 'мемы':'😂', 'спорт':'⚽', 'родственники':'👵', '18+':'🔞', 'другое':'⚖️' };
 const ADMIN_EMAILS = ['artixz18@gmail.com'];
 const QUOTES = {
   'НАРОДНЫЙ СУДЬЯ':'Судишь по совести — к тебе прислушиваются.',
@@ -584,6 +582,8 @@ const isAdmin = () => !!(me && me.email && ADMIN_EMAILS.includes(String(me.email
 const trashOpen = () => { const h = new Date().getHours(); return h >= 23 || h < 5; };
 const visibleCase = c => catL(c) !== 'треш' || trashOpen();
 const since24 = () => new Date(Date.now() - 864e5).toISOString();
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nl2br(t){ return esc(t).replace(/\n/g,'<br>'); }
 function votesLabel(total){
   if (total >= 100) return plural(total);
   const masked = 'меньше 100 голосов';
@@ -790,7 +790,7 @@ async function showProfile(){
     const t = judgeType(myStats);
     lastWrapped = renderWrappedCanvas(myStats, t);
     wrappedHtml = '<div><img src="' + lastWrapped + '" style="width:100%;border-radius:24px;box-shadow:0 18px 50px rgba(20,24,32,.15)">' +
-      '<div class="fbtns"><button onclick="shareWrapped()">' + ic('share') + 'Поделиться</button><button onclick="dlWrapped()">' + ic('down') + 'Скачать</button></div></div>';
+      '<div class="fbtns"><button onclick="shareWrapped()">' + ic('i-share') + 'Поделиться</button><button onclick="dlWrapped()">' + ic('i-down') + 'Скачать</button></div></div>';
   } else {
     wrappedHtml = '<div class="secCard"><div class="topnote">Сделай минимум 5 голосов — и здесь появится твой вердикт-портрет для сторис.</div></div>';
   }
@@ -799,8 +799,8 @@ async function showProfile(){
     const got = myAchs.has(id);
     return '<div class="achItem' + (got ? '' : ' locked') + '">' +
       '<span class="aT ' + a.tier + '">' + (a.tier === 's' ? 'сильная' : 'обычная') + '</span>' +
-      '<div class="aIc"><svg class="icn"><use href="#' + a.ic + '"/></svg></div><div class="aN">' + esc(a.name) + '</div>' +
-      '<div class="aD">' + esc(a.desc) + '</div>' + (got ? '' : '<svg class="icn lck"><use href="#i-lock"/></svg>') + '</div>';
+      '<div class="aIc"><svg class="icn" viewBox="0 0 24 24">' + (ICOS[a.ic] || '') + '</svg></div><div class="aN">' + esc(a.name) + '</div>' +
+      '<div class="aD">' + esc(a.desc) + '</div>' + (got ? '' : '<svg class="icn lck" viewBox="0 0 24 24">' + ICOS['i-lock'] + '</svg>') + '</div>';
   }).join('');
   const ts = topCache.size;
   const myRank = topCache.map[me.id] || null;
@@ -832,15 +832,15 @@ async function showProfile(){
     myCasesHtml(c.data || []) +
     wrappedHtml +
     '<div class="pCard">' +
-      '<div class="pRow"><span class="ic">' + ic('vote') + '</span><span class="lb">Голосов</span><span class="vl">' + votes.length + '</span></div>' +
-      '<div class="pRow"><span class="ic">' + ic('doc') + '</span><span class="lb">Историй опубликовано</span><span class="vl">' + (c.data || []).length + '</span></div>' +
-      '<div class="pRow"><span class="ic">' + ic('comment') + '</span><span class="lb">Комментариев</span><span class="vl">' + (cm.data || []).length + '</span></div>' +
-      '<div class="pRow"><span class="ic">' + ic('target') + '</span><span class="lb">Совпадение с народом</span><span class="vl">' + (pctMatch === null ? '—' : pctMatch + '%') + '</span></div>' +
+      '<div class="pRow"><span class="ic">' + ic('i-vote') + '</span><span class="lb">Голосов</span><span class="vl">' + votes.length + '</span></div>' +
+      '<div class="pRow"><span class="ic">' + ic('i-doc') + '</span><span class="lb">Историй опубликовано</span><span class="vl">' + (c.data || []).length + '</span></div>' +
+      '<div class="pRow"><span class="ic">' + ic('i-comment') + '</span><span class="lb">Комментариев</span><span class="vl">' + (cm.data || []).length + '</span></div>' +
+      '<div class="pRow"><span class="ic">' + ic('i-target') + '</span><span class="lb">Совпадение с народом</span><span class="vl">' + (pctMatch === null ? '—' : pctMatch + '%') + '</span></div>' +
     '</div>' +
-    '<div class="secCard"><h4>' + ic('trophy') + 'рейтинг судей · топ-' + ts + '</h4>' + lbHtml +
+    '<div class="secCard"><h4>' + ic('i-trophy') + 'рейтинг судей · топ-' + ts + '</h4>' + lbHtml +
       '<div class="topnote">Размер топа растёт с активностью народа: сейчас топ-' + ts + '. Ачивки активны только у судей из топа.</div></div>' +
-    '<div class="secCard"><h4>' + ic('star') + 'ачивки</h4><div class="achGrid">' + achsHtml + '</div><div class="topnote">' + achsNote + '</div></div>' +
-    '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="pickAva()">' + ic('camera') + 'Сменить фото</button>' +
+    '<div class="secCard"><h4>' + ic('i-star') + 'ачивки</h4><div class="achGrid">' + achsHtml + '</div><div class="topnote">' + achsNote + '</div></div>' +
+    '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="pickAva()">' + ic('i-camera') + 'Сменить фото</button>' +
     '<input type="file" id="avaFile" accept="image/*" style="display:none" onchange="uploadAva()">' +
     '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="renameMe()">Сменить никнейм</button>' +
     '<button class="pBtn" style="background:rgba(211,58,44,.10);color:var(--red)" onclick="logoutMe()">Выйти</button>';
@@ -850,12 +850,12 @@ function myCasesHtml(list){
   const items = list.map(c => {
     const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
     const pct = v => Math.round(v * 100 / total);
-    return '<div class="mcItem"><div class="mcTxt">' + esc(c.text) + '</div><div class="mcPills">' +
+    return '<div class="mcItem"><div class="mcTxt">' + esc(c.text).replace(/\n/g,' ') + '</div><div class="mcPills">' +
       '<span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span>' +
       '<span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span>' +
       '<span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div></div>';
   }).join('');
-  return '<div class="myCases"><div class="mcHead">' + ic('doc') + 'твои истории — решает народ</div>' + items + '</div>';
+  return '<div class="myCases"><div class="mcHead">' + ic('i-doc') + 'твои истории — решает народ</div>' + items + '</div>';
 }
 function renderWrappedCanvas(s, t){
   const W = 1080, H = 1350;
@@ -1096,16 +1096,16 @@ function duelCard(d){
     body = '<div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
       '<div class="fbars"><i class="fbar" style="width:' + pa + '%;background:var(--red)"></i><i class="fbar" style="width:' + (100 - pa) + '%;background:var(--grn)"></i></div>' +
       '<div class="fmeta"><span style="color:var(--red)">' + pa + '%</span><span>' + votesLabel(total) + '</span><span style="color:var(--grn)">' + (100 - pa) + '%</span></div>' +
-      '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('share') + 'Поделиться</button></div>';
+      '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('i-share') + 'Поделиться</button></div>';
   } else {
     body = '<div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
-      '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="duelVote(' + d.id + ',\'a\')">' + ic('gavel') + 'хуже</button>' +
-      '<button class="fpill" style="color:var(--grn)" onclick="duelVote(' + d.id + ',\'b\')">хуже' + ic('gavel') + '</button></div>' +
+      '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="duelVote(' + d.id + ',\'a\')">👈 хуже</button>' +
+      '<button class="fpill" style="color:var(--grn)" onclick="duelVote(' + d.id + ',\'b\')">хуже 👉</button></div>' +
       '<div class="dHint">что хуже?</div>' +
-      '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('share') + 'Поделиться</button></div>';
+      '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('i-share') + 'Поделиться</button></div>';
   }
   return '<div class="fitem' + (hot ? ' hot' : '') + '">' + (hot ? art : '') + '<div class="fbody">' +
-    '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + 'дуэль</span><span>' + votesLabel(total) + '</span></div>' + body + '</div></div>';
+    '<div class="fmeta"><span class="fmL"></span><span class="fmC">' + (hot ? '🔥 ' : '') + 'дуэль</span><span class="fmR">' + votesLabel(total) + '</span></div>' + body + '</div></div>';
 }
 async function duelVote(id, side){
   const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
@@ -1119,15 +1119,8 @@ async function shareDuel(id){
   track('share');
   await ensureFonts();
   const blob = await renderCardBlobDuel(d);
-  try {
-    const file = new File([blob], 'sudachim-duel.png', { type: 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Судачим · дуэль', text: 'Что хуже? Реши сам' });
-      return;
-    }
-  } catch (e) { if (e.name === 'AbortError') return; }
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sudachim-duel.png'; a.click();
-  toast('Картинка сохранена — кидай в чат! 📤');
+  const url = URL.createObjectURL(blob);
+  downloadOrShare(url);
 }
 function drawSparkle(x, cx, cy, s, col){
   x.fillStyle = col;
@@ -1271,13 +1264,13 @@ function dailyCard(c){
   } else if (votedIt) {
     body = '<div class="fpills"><button class="fpill lockPill" style="flex:1">✅ голос учтён'+(revealed?'':' — результаты в 21:00')+'</button></div>';
   } else {
-    body = '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="voteDaily('+c.id+',\'condemn\')">' + ic('gavel') + 'Осуждаю</button>' +
-      '<button class="fpill" style="color:var(--yel)" onclick="voteDaily('+c.id+',\'life\')">' + ic('bolt') + 'Жиза</button>' +
-      '<button class="fpill" style="color:var(--grn)" onclick="voteDaily('+c.id+',\'justify\')">' + ic('shield') + 'Не осуждаю</button></div>';
+    body = '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="voteDaily('+c.id+',\'condemn\')">😡 Осуждаю</button>' +
+      '<button class="fpill" style="color:var(--yel)" onclick="voteDaily('+c.id+',\'life\')">🤔 Жиза</button>' +
+      '<button class="fpill" style="color:var(--grn)" onclick="voteDaily('+c.id+',\'justify\')">👍 Не осуждаю</button></div>';
   }
   return '<div class="fitem hot"><div class="fart '+art+'"></div><div class="fbody">' +
-    '<div class="dTop">' + ic('flame') + 'дело дня · <span id="dcount_'+c.id+'"></span></div>' +
-    '<div class="ftxt">'+esc(c.text)+'</div>' + evdHtml(c) + reactsHtml(c.id) + body + '</div></div>';
+    '<div class="dTop">🔥 дело дня · <span id="dcount_'+c.id+'"></span></div>' +
+    '<div class="ftxt">'+nl2br(c.text)+'</div>' + evdHtml(c) + reactsHtml(c.id) + body + '</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -1303,7 +1296,6 @@ function plural(n){
   return n + ' голосов';
 }
 function toast(m){ const t = $('toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 3000); }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function allById(id){ return allCases.find(c => c.id === id); }
 function checkSafety(t){
   t = t.toLowerCase();
@@ -1333,7 +1325,6 @@ async function reportItem(type, id){
   const { error } = await sb.from('reports').insert({ target_type: type, target_id: id, user_id: me.id, reason: 'жалоба' });
   toast(error ? 'Жалоба уже отправлена' : '🚩 Жалоба принята. После 3 жалоб запись скрывается');
 }
-/* реакции */
 function reactsHtml(caseId){
   const rc = allReacts.filter(r => r.case_id === caseId);
   const counts = {}; rc.forEach(r => counts[r.kind] = (counts[r.kind]||0)+1);
@@ -1343,7 +1334,7 @@ function reactsHtml(caseId){
     const n = counts[r.k] || 0;
     const on = mine && mine.kind === r.k;
     const col = RCOLORS[r.k] || '#8A919E';
-    return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')"><svg class="icn"><use href="#' + r.ic + '"/></svg>' + (n ? ' ' + n : '') + '</button>';
+    return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')"><span style="font-size:13px">' + r.e + '</span>' + (n ? ' ' + n : '') + '</button>';
   }).join('') + '</div>';
 }
 async function reactToggle(caseId, kind){
@@ -1361,7 +1352,6 @@ async function reactToggle(caseId, kind){
   }
   renderFeed();
 }
-/* вещдок */
 function evdHtml(c){
   if (!c || !c.media_url) return '';
   const isV = c.media_type === 'video';
@@ -1377,7 +1367,7 @@ function playerHtml(){
     '<video id="lbVid" playsinline></video>' +
     '<i class="plWm"></i>' +
     '<div class="plBig" id="plBig">▶</div>' +
-    '<div class="plLoad" id="plLoad"><div class="plBar"><i id="plBarI"></i></div><div id="plPct">качаем видео… 0%</div></div>' +
+    '<div class="plLoad" id="plLoad"><div class="plBar"><i id="plBarI"></i></div><div id="plPct">грузим…</div></div>' +
     '<div class="plCtrl" id="plCtrl">' +
       '<button id="plPlay">▶</button><span id="plTime">0:00</span>' +
       '<input type="range" id="plSeek" min="0" max="1000" value="0">' +
@@ -1389,29 +1379,16 @@ async function initPlayer(url){
   const v = $('lbVid'), load = $('plLoad'), pct = $('plPct'), bar = $('plBarI');
   const big = $('plBig'), ctrl = $('plCtrl');
   const play = $('plPlay'), seek = $('plSeek'), tEl = $('plTime'), dEl = $('plDur'), mute = $('plMute'), full = $('plFull');
-  let ok = false;
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw 0;
-    const total = Number(r.headers.get('content-length')) || 0;
-    let blob;
-    if (r.body && total) {
-      const rd = r.body.getReader(); const chunks = []; let loaded = 0;
-      for (;;) {
-        const st = await rd.read();
-        if (st.done) break;
-        if (st.value) { loaded += st.value.length; const p = Math.min(100, Math.round(loaded * 100 / total)); pct.textContent = 'качаем видео… ' + p + '%'; bar.style.width = p + '%'; }
-        chunks.push(st.value);
-      }
-      blob = new Blob(chunks, { type: 'video/mp4' });
-    } else {
-      pct.textContent = 'качаем видео…';
-      blob = await r.blob();
-    }
-    v.src = URL.createObjectURL(blob);
-    ok = true;
-  } catch (e) { v.src = url; }
-  load.style.display = 'none';
+  bar.style.width = '100%'; bar.style.opacity = '.35';
+  pct.textContent = 'грузим…';
+  v.src = url; v.preload = 'auto';
+  const show = () => { load.style.display = 'flex'; pct.textContent = 'буфер…'; };
+  const hide = () => { load.style.display = 'none'; };
+  v.addEventListener('waiting', show);
+  v.addEventListener('stalled', show);
+  v.addEventListener('canplay', hide);
+  v.addEventListener('playing', hide);
+  v.addEventListener('error', () => { pct.textContent = '😕 не удалось загрузить видео'; bar.style.width = '0'; });
   const toggle = () => { if (v.paused) v.play().catch(() => {}); else v.pause(); };
   big.onclick = e => { e.stopPropagation(); toggle(); };
   play.onclick = toggle;
@@ -1422,14 +1399,12 @@ async function initPlayer(url){
   v.addEventListener('pause', () => { big.style.opacity = '1'; big.style.pointerEvents = 'auto'; play.textContent = '▶'; ctrl.style.opacity = '1'; });
   v.addEventListener('loadedmetadata', () => { dEl.textContent = fmtT(v.duration); });
   v.addEventListener('timeupdate', () => { if (v.duration) seek.value = Math.round(v.currentTime * 1000 / v.duration); tEl.textContent = fmtT(v.currentTime); });
-  v.addEventListener('waiting', () => { load.style.display = 'flex'; pct.textContent = 'буфер…'; });
-  v.addEventListener('playing', () => { load.style.display = 'none'; });
   seek.addEventListener('input', () => { if (v.duration) v.currentTime = seek.value * v.duration / 1000; });
   mute.onclick = () => { v.muted = !v.muted; mute.textContent = v.muted ? '🔇' : '🔊'; };
   full.onclick = () => { const w = document.querySelector('.plWrap'); if (document.fullscreenElement) document.exitFullscreen(); else if (w && w.requestFullscreen) w.requestFullscreen(); };
   ctrl.style.transition = 'opacity .3s';
   showCtrl();
-  if (ok) v.play().catch(() => {});
+  v.play().catch(() => {});
 }
 function lbOpen(url, type, caseId){
   lbCaseId = caseId || null;
@@ -1444,7 +1419,7 @@ function lbOpen(url, type, caseId){
 }
 function lbHide(){
   const v = $('lbVid');
-  if (v) { try { v.pause(); } catch (e) {} if (v.src && v.src.indexOf('blob:') === 0) URL.revokeObjectURL(v.src); }
+  if (v) { try { v.pause(); } catch (e) {} }
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   $('lb').classList.add('hidden'); $('lbBody').innerHTML = ''; lbCaseId = null;
 }
@@ -1512,6 +1487,25 @@ function compressImage(f){
     rd.readAsDataURL(f);
   });
 }
+let shareSheetUrl = null;
+function downloadOrShare(dataUrl){
+  shareSheetUrl = dataUrl;
+  $('shareImg').src = dataUrl;
+  $('shareSheet').classList.remove('hidden');
+}
+function closeShareSheet(){ $('shareSheet').classList.add('hidden'); }
+function sheetDownload(){ const a = document.createElement('a'); a.href = shareSheetUrl; a.download = 'sudachim.png'; a.click(); toast('Сохранено ✅'); }
+async function sheetShare(){
+  try {
+    const blob = await (await fetch(shareSheetUrl)).blob();
+    const file = new File([blob], 'sudachim.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Судачим', text: 'Народ решил — а ты на чьей стороне?' });
+      closeShareSheet(); return;
+    }
+  } catch (e) { if (e.name === 'AbortError') { closeShareSheet(); return; } }
+  sheetDownload();
+}
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
 function authorHtml(cm,nicks,stats){
   const s = stats[cm.user_id];
@@ -1519,12 +1513,12 @@ function authorHtml(cm,nicks,stats){
 }
 function cmtClass(cm){ return 'cmt' + (isPremiumUser(cm.user_id) ? ' cmt-premium' : ''); }
 function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('flag') + '</button>' + authorHtml(cm,nicks,stats) +
-   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div></div>';
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) +
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div></div>';
 }
 function cmtBlock(cm,reps,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('flag') + '</button>' + authorHtml(cm,nicks,stats) +
-   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + esc(cm.text) + '</div>' +
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) +
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
    '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats)).join('') + '</div></div>';
@@ -1620,26 +1614,26 @@ async function renderFeed(){
     const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-        '<div class="fmeta"><span>' + ic('moon') + ' треш · откроется с 23:00</span><span>' + votesLabel(total) + '</span></div>' +
-        '<div class="ftxt" style="filter:blur(7px);user-select:none;pointer-events:none">' + esc(c.text) + '</div>' +
-        '<button class="fpill lockPill" style="flex:1">' + ic('lock') + ' треш-час: с 23:00 до 5:00</button></div></div>';
+        '<div class="fmeta"><span class="fmL"></span><span class="fmC">🌙 треш · откроется с 23:00</span><span class="fmR">' + votesLabel(total) + '</span></div>' +
+        '<div class="ftxt" style="filter:blur(7px);user-select:none;pointer-events:none">' + nl2br(c.text) + '</div>' +
+        '<button class="fpill lockPill" style="flex:1">🔒 треш-час: с 23:00 до 5:00</button></div></div>';
     }
     const actions = votedIt ? (
       '<div class="fbars"><i class="fbar" style="width:' + pct(c.condemn) + '%;background:var(--red)"></i><i class="fbar" style="width:' + pct(c.life) + '%;background:var(--yel)"></i><i class="fbar" style="width:' + pct(c.justify) + '%;background:var(--grn)"></i></div>' +
       '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>' +
-      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('share') + 'Поделиться</button></div>' +
+      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '">' + cmHtml + '</div>'
     ) : (me ? (
       isMine(c) ? '<button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button>' :
-      '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="feedVote(' + c.id + ',\'condemn\')">' + ic('gavel') + 'Осуждаю</button>' +
-      '<button class="fpill" style="color:var(--yel)" onclick="feedVote(' + c.id + ',\'life\')">' + ic('bolt') + 'Жиза</button>' +
-      '<button class="fpill" style="color:var(--grn)" onclick="feedVote(' + c.id + ',\'justify\')">' + ic('shield') + 'Не осуждаю</button></div>'
+      '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="feedVote(' + c.id + ',\'condemn\')">😡 Осуждаю</button>' +
+      '<button class="fpill" style="color:var(--yel)" onclick="feedVote(' + c.id + ',\'life\')">🤔 Жиза</button>' +
+      '<button class="fpill" style="color:var(--grn)" onclick="feedVote(' + c.id + ',\'justify\')">👍 Не осуждаю</button></div>'
     ) : (
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-      '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span style="display:flex;align-items:center;gap:6px"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('flag') + '</button>' + votesLabel(total) + '</span></div>' +
-      '<div class="ftxt">' + esc(c.text) + '</div>' + evdHtml(c) + reactsHtml(c.id) + actions + '</div></div>';
+      '<div class="fmeta"><span class="fmL"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button></span><span class="fmC">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span class="fmR">' + votesLabel(total) + '</span></div>' +
+      '<div class="ftxt">' + nl2br(c.text) + '</div>' + evdHtml(c) + reactsHtml(c.id) + actions + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
@@ -1683,7 +1677,7 @@ function next(){
   if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
   $('cardWrap').classList.remove('hidden'); $('hint').classList.remove('hidden'); $('empty').classList.add('hidden');
   $('sub').textContent = 'народный суд · ' + catOf(cur);
-  caseText.innerHTML = cur.text.split(/\s+/).map(w => '<span class="w">' + esc(w) + '</span>').join(' ');
+  caseText.innerHTML = cur.text.split(/\n+/).map(p => p.split(/\s+/).filter(Boolean).map(w => '<span class="w">' + esc(w) + '</span>').join(' ')).join('<br>');
   $('caseMedia').innerHTML = evdHtml(cur);
   dx = dy = 0;
   if (voiceOn) speak(cur.text);
@@ -1707,14 +1701,14 @@ async function vote(v){
   const c = cur, total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
   const pct = x => Math.round(x * 100 / total);
   $('pills').innerHTML =
-    '<span class="pill red">' + ic('gavel') + ' Осуждаю · ' + pct(c.condemn) + '%</span>' +
-    '<span class="pill yel">' + ic('bolt') + ' Жиза · ' + pct(c.life) + '%</span>' +
-    '<span class="pill grn">' + ic('shield') + ' Не осуждаю · ' + pct(c.justify) + '%</span>';
+    '<span class="pill red">😡 Осуждаю · ' + pct(c.condemn) + '%</span>' +
+    '<span class="pill yel">🤔 Жиза · ' + pct(c.life) + '%</span>' +
+    '<span class="pill grn">👍 Не осуждаю · ' + pct(c.justify) + '%</span>';
   $('pills').classList.add('show');
   const my = pct(c[myVerdict]);
   $('result').innerHTML =
     '<div id="myLabel">' + (my >= 50 ? 'Ты с большинством — ' + my + '%' : 'Ты в меньшинстве — ' + my + '% 🔥') + '</div>' +
-    '<div class="rbtns"><button onclick="loadComments()">' + ic('comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>';
+    '<div class="rbtns"><button onclick="loadComments()">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('i-share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>';
   $('result').classList.remove('hidden');
   $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   renderFeed();
@@ -1919,9 +1913,9 @@ function renderCardBlob(c){
   const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
   const pct = v => Math.round(v * 100 / total);
   const pills = [
-    ['Осуждаю ' + pct(c.condemn) + '%', red],
-    ['Жиза ' + pct(c.life) + '%', yel],
-    ['Не осуждаю ' + pct(c.justify) + '%', grn]
+    ['😡 Осуждаю ' + pct(c.condemn) + '%', red],
+    ['🤔 Жиза ' + pct(c.life) + '%', yel],
+    ['👍 Не осуждаю ' + pct(c.justify) + '%', grn]
   ];
   const gap = 26, maxW = W - 200;
   let pf = 38, widths;
@@ -1946,25 +1940,6 @@ function renderCardBlob(c){
   x.fillText('А ты на чьей стороне?', W / 2, 1020);
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
-let shareSheetUrl = null;
-function downloadOrShare(dataUrl){
-  shareSheetUrl = dataUrl;
-  $('shareImg').src = dataUrl;
-  $('shareSheet').classList.remove('hidden');
-}
-function closeShareSheet(){ $('shareSheet').classList.add('hidden'); }
-function sheetDownload(){ const a = document.createElement('a'); a.href = shareSheetUrl; a.download = 'sudachim.png'; a.click(); toast('Сохранено ✅'); }
-async function sheetShare(){
-  try {
-    const blob = await (await fetch(shareSheetUrl)).blob();
-    const file = new File([blob], 'sudachim.png', { type: 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Судачим', text: 'Народ решил — а ты на чьей стороне?' });
-      closeShareSheet(); return;
-    }
-  } catch (e) { if (e.name === 'AbortError') { closeShareSheet(); return; } }
-  sheetDownload();
-}
 async function shareCase(c){
   if (!c) return;
   track('share');
@@ -1980,18 +1955,16 @@ async function shareCase(c){
       const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: '#EDEEF2' });
       prep.remove();
       node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
-      await downloadOrShare(dataUrl, 'sudachim.png');
+      downloadOrShare(dataUrl);
       return;
     } catch (e) {
       const p = document.getElementById('sharePrep'); if (p) p.remove();
       node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
     }
   }
-  /* запасной вариант — старый шаблон */
   await ensureFonts();
   const blob = await renderCardBlob(c);
-  const url = URL.createObjectURL(blob);
-  await downloadOrShare(url, 'sudachim.png');
+  downloadOrShare(URL.createObjectURL(blob));
 }
 function shareCard(){ shareCase(cur); }
 let dx = 0, dy = 0, dragging = false, sx = 0, sy = 0;
