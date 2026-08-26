@@ -1357,10 +1357,15 @@ async function reactToggle(caseId, kind){
 function evdHtml(c){
   if (!c || !c.media_url) return '';
   const isV = c.media_type === 'video';
-  const inner = isV
-    ? '<video src="' + c.media_url + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span>'
-    : '<img src="' + c.media_url + '" loading="lazy">';
-  return '<div class="evd' + (isV ? ' evdV' : '') + '" onclick="lbOpen(\'' + c.media_url + '\',\'' + (c.media_type||'image') + '\',' + c.id + ')">' + inner + '<span class="evdTag">📎 вещдок</span></div>';
+  if (isV) {
+    return '<div class="evd evdV" data-src="' + c.media_url + '" onclick="playInline(this)"><video src="' + c.media_url + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span><span class="evdTag">📎 вещдок</span></div>';
+  }
+  return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'image\',' + c.id + ')"><img src="' + c.media_url + '" loading="lazy"><span class="evdTag">📎 вещдок</span></div>';
+}
+function playInline(el){
+  const url = el.getAttribute('data-src');
+  el.removeAttribute('onclick');
+  el.innerHTML = '<video src="' + url + '" controls playsinline autoplay style="width:100%;display:block;max-height:440px;object-fit:contain;background:#000"></video><span class="evdTag">📎 вещдок</span>';
 }
 let lbCaseId = null;
 function fmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
