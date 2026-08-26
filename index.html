@@ -177,6 +177,7 @@ body.vplay .fart::before,body.vplay .ntag,body.vplay .ntag::after,body.vplay .bu
 .rct{flex:0 0 auto;display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}
 .rct span{font-size:14px;line-height:1}
 .votesRow{display:flex;justify-content:center;align-items:center;gap:6px;font-size:11px;color:var(--gray);margin:6px 0 2px;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+  .rctOpen{background:none;border:none;font-size:15px;padding:2px 4px}
 .fpill{flex:1;border:none;background:#fff;border-radius:999px;padding:10px 4px;font-weight:700;font-size:12px;box-shadow:0 6px 18px rgba(20,24,32,.10);white-space:nowrap;overflow:hidden;justify-content:center;display:flex;align-items:center;gap:4px;cursor:pointer}
 .fpill .icn{width:13px;height:13px}
 .fpills{display:flex;gap:6px}
@@ -428,6 +429,12 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <div id="lbBody"></div>
   <button style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
+<div id="reactSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.5);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='reactSheet')closeReactSheet()">
+  <div style="background:#fff;border-radius:24px 24px 0 0;padding:16px 14px 22px;width:100%;max-width:560px">
+    <div style="text-align:center;font-size:11px;font-weight:800;color:var(--gray);margin-bottom:10px;letter-spacing:.1em">ТВОЯ РЕАКЦИЯ</div>
+    <div id="reactRow" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+  </div>
+</div>
 <div id="shareSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.6);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='shareSheet')closeShareSheet()">
   <div style="background:#fff;border-radius:24px 24px 0 0;padding:14px 14px 22px;width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px">
     <img id="shareImg" style="max-height:52vh;object-fit:contain;border-radius:14px;background:#EDEEF2">
@@ -489,6 +496,7 @@ const ICOS = {
 };
 const ic = n => '<svg class="icn" viewBox="0 0 24 24">' + (ICOS[n] || '') + '</svg>';
 const REACTS = [
+  { k:'angry', e:'🤬' },
   { k:'bolt',  e:'🤔' },
   { k:'flame', e:'🔥' },
   { k:'lol',   e:'😂' },
@@ -498,7 +506,7 @@ const REACTS = [
   { k:'eye',   e:'👀' },
   { k:'gavel', e:'👍' }
 ];
-const RCOLORS = { bolt:'#C9971C', flame:'#E2593F', lol:'#E0A400', shock:'#7A5CFF', heart:'#E64980', cry:'#4C86E8', eye:'#2E9E5B', gavel:'#5A6472' };
+const RCOLORS = { angry:'#D33A2C', bolt:'#C9971C', flame:'#E2593F', lol:'#E0A400', shock:'#7A5CFF', heart:'#E64980', cry:'#4C86E8', eye:'#2E9E5B', gavel:'#5A6472' };
 const ACH = {
   'first':   { ic:'i-scale', name:'Первый вердикт', tier:'c', desc:'Вынеси первый вердикт' },
   'zhiza':   { ic:'i-bolt', name:'Жиза-детектор', tier:'c', desc:'10+ голосов «жиза»' },
@@ -1274,7 +1282,7 @@ function dailyCard(c){
   }
   return '<div class="fitem hot"><div class="fart '+art+'"></div><div class="fbody">' +
     '<div class="dTop">🔥 дело дня · <span id="dcount_'+c.id+'"></span></div>' +
-    '<div class="ftxt">'+nl2br(c.text)+'</div>' + evdHtml(c) + reactsHtml(c.id) + body + '</div></div>';
+    '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker('+c.id+')">'+nl2br(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -1341,20 +1349,26 @@ function reactsHtml(caseId){
     return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')"><span style="font-size:13px">' + r.e + '</span>' + (n ? ' ' + n : '') + '</button>';
   }).join('') + '</div>';
 }
-async function reactToggle(caseId, kind){
+let reactCaseId = null;
+function openReactPicker(id){
   if (!me) { openAuth(); return; }
-  const { data } = await sb.from('reactions').select('id,kind').eq('case_id', caseId).eq('user_id', me.id);
-  const cur = (data || [])[0];
-  allReacts = allReacts.filter(r => !(r.case_id === caseId && r.user_id === me.id));
-  if (cur && cur.kind === kind) {
-    await sb.from('reactions').delete().eq('id', cur.id);
-  } else {
-    if (cur) await sb.from('reactions').delete().eq('id', cur.id);
-    const { data: nd } = await sb.from('reactions').insert({ case_id: caseId, kind, user_id: me.id }).select();
-    allReacts.push((nd && nd[0]) || { case_id: caseId, kind, user_id: me.id });
-    track('react');
-  }
-  renderFeed();
+  reactCaseId = id;
+  const rc = allReacts.filter(r => r.case_id === id);
+  const counts = {}; rc.forEach(r => counts[r.kind] = (counts[r.kind]||0)+1);
+  const mine = rc.find(r => r.user_id === me.id);
+  $('reactRow').innerHTML = REACTS.map(r => {
+    const n = counts[r.k] || 0;
+    const on = mine && mine.kind === r.k;
+    const col = RCOLORS[r.k] || '#8A919E';
+    return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + ';font-size:12px;padding:8px 12px" onclick="pickReact(\'' + r.k + '\')"><span style="font-size:20px">' + r.e + '</span>' + (n ? ' ' + n : '') + '</button>';
+  }).join('');
+  $('reactSheet').classList.remove('hidden');
+}
+function closeReactSheet(){ $('reactSheet').classList.add('hidden'); reactCaseId = null; }
+async function pickReact(kind){
+  const id = reactCaseId; if (!id) return;
+  closeReactSheet();
+  await reactToggle(id, kind);
 }
 function evdHtml(c){
   if (!c || !c.media_url) return '';
@@ -1623,6 +1637,8 @@ async function renderFeed(){
     const premium = isPremiumUser(c.user_id);
     const art = ART[catL(c)] || 'artD';
     const cmsAll = allComments.filter(k => k.case_id === c.id);
+    const myR = me ? allReacts.find(r => r.case_id === c.id && r.user_id === me.id) : null;
+    const myE = myR ? ((REACTS.find(r => r.k === myR.kind) || {}).e || '😀') : '😀';
     const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
     const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
@@ -1647,7 +1663,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="ftxt">' + nl2br(c.text) + '</div>' + evdHtml(c) + reactsHtml(c.id) + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '</div>' + actions + '</div></div>';
+      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
