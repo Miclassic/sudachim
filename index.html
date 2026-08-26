@@ -1392,7 +1392,36 @@ async function reactToggle(caseId, kind){
     allReacts.push((nd && nd[0]) || { case_id: caseId, kind, user_id: me.id });
     track('react');
   }
-  renderFeed();
+  refreshCaseCard(caseId);
+}
+function refreshCaseCard(caseId){
+  const el = document.querySelector('[data-case-id="' + caseId + '"]');
+  if (!el) return;
+  const c = allById(caseId); if (!c) return;
+  const total = ((c.condemn||0) + (c.justify||0) + (c.life||0));
+  const cntR = {}; allReacts.filter(r => r.case_id === caseId).forEach(r => cntR[r.kind] = (cntR[r.kind]||0)+1);
+  const sumList = REACTS.map(r => ({ r, n: cntR[r.k]||0 })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+  const sumHtml = sumList.length ? '<div class="reactsSum">' + sumList.map(x => { const on = myRFor(caseId, x.r.k); const col = RCOLORS[x.r.k] || '#8A919E'; return '<span class="rsChip' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + '14;border-color:' + (on ? col + '66' : 'transparent') + '">' + x.r.e + ' ' + x.n + '</span>'; }).join('') + '</div>' : '';
+  const myR = me ? allReacts.find(r => r.case_id === caseId && r.user_id === me.id) : null;
+  const myE = myR ? ((REACTS.find(r => r.k === myR.kind) || {}).e || '😀') : '😀';
+  const body = el.querySelector('.fbody');
+  if (!body) return;
+  let sumEl = body.querySelector('.reactsSum');
+  if (sumHtml) {
+    if (sumEl) sumEl.outerHTML = sumHtml;
+    else {
+      const votesRow = body.querySelector('.votesRow');
+      if (votesRow) votesRow.insertAdjacentHTML('beforebegin', sumHtml);
+    }
+  } else if (sumEl) sumEl.remove();
+  const votesRow = body.querySelector('.votesRow');
+  if (votesRow) {
+    const openBtn = votesRow.querySelector('.rctOpen');
+    if (openBtn) openBtn.textContent = myE;
+  }
+}
+function myRFor(caseId, kind){
+  return !!(me && allReacts.find(r => r.case_id === caseId && r.user_id === me.id && r.kind === kind));
 }
 function evdHtml(c){
   if (!c || !c.media_url) return '';
