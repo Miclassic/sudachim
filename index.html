@@ -63,6 +63,8 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .ghost.g2{transform:scale(.88) translateY(32px);opacity:.25;z-index:0}
 .bubble{position:relative;z-index:1;background:var(--card);border-radius:44px;padding:24px 20px 20px;box-shadow:0 18px 50px rgba(20,24,32,.10);touch-action:none;user-select:none;cursor:grab}
 .bubble:not(.drag):not(.done){animation:idle 22s ease-in-out infinite}
+.bubble.done{touch-action:pan-y;cursor:default}
+.bubble.done .evd img,.bubble.done .evd video{max-height:140px}
 @keyframes idle{0%,10%{transform:none}13%{transform:translateX(-16px) rotate(-2deg)}16%{transform:none}22%{transform:translateX(16px) rotate(2deg)}25%{transform:none}31%{transform:translateY(-14px)}34%,100%{transform:none}}
 .bSub{color:var(--gray);font-size:13px;text-align:center}
 #caseText{font-size:16px;line-height:1.55;margin:14px 4px 12px;color:#1B1E24;touch-action:none}
@@ -158,7 +160,8 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 #plTime,#plDur{font-size:10px;font-weight:700;opacity:.9}
 .bubble .evd{margin:6px 0 10px}
 .bubble .evd img,.bubble .evd video{max-height:240px}
-.evdTag{position:absolute;top:10px;right:10px;background:linear-gradient(90deg,#8C6A1D,#E9C767);color:#fff;font-size:10px;font-weight:800;letter-spacing:.8px;padding:5px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.3);text-transform:uppercase;pointer-events:none}
+.evdTag{position:absolute;right:8px;bottom:8px;background:rgba(140,106,29,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;font-size:9px;font-weight:800;letter-spacing:.8px;padding:4px 9px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.28);text-transform:uppercase;pointer-events:none;opacity:.9}
+.evdV::after,.plWm{content:"";position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%3E%3Ctext%20x='14'%20y='100'%20font-size='17'%20font-weight='700'%20fill='%23ffffff'%20fill-opacity='.16'%20transform='rotate(-16%2090%2090)'%20font-family='Arial,sans-serif'%3E%D1%81%D1%83%D0%B4%D0%B0%D1%87%D0%B8%D0%BC%20%E2%9A%96%3C/text%3E%3C/svg%3E") repeat;background-size:180px 180px}
 #lb{position:fixed;inset:0;background:rgba(10,10,14,.93);z-index:95;display:flex;align-items:center;justify-content:center;padding:14px}
 #lb img,#lb video{max-width:100%;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .lbX{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:16px;font-weight:800}
@@ -1277,16 +1280,18 @@ async function reportItem(type, id){
 /* вещдок */
 function evdHtml(c){
   if (!c || !c.media_url) return '';
-  const inner = c.media_type === 'video'
+  const isV = c.media_type === 'video';
+  const inner = isV
     ? '<video src="' + c.media_url + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span>'
     : '<img src="' + c.media_url + '" loading="lazy">';
-  return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'' + (c.media_type||'image') + '\',' + c.id + ')">' + inner + '<span class="evdTag">📎 вещдок</span></div>';
+  return '<div class="evd' + (isV ? ' evdV' : '') + '" onclick="lbOpen(\'' + c.media_url + '\',\'' + (c.media_type||'image') + '\',' + c.id + ')">' + inner + '<span class="evdTag">📎 вещдок</span></div>';
 }
 let lbCaseId = null;
 function fmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 function playerHtml(){
   return '<div class="plWrap">' +
     '<video id="lbVid" playsinline></video>' +
+    '<i class="plWm"></i>' +
     '<div class="plBig" id="plBig">▶</div>' +
     '<div class="plLoad" id="plLoad"><div class="plBar"><i id="plBarI"></i></div><div id="plPct">качаем видео… 0%</div></div>' +
     '<div class="plCtrl" id="plCtrl">' +
@@ -1384,15 +1389,38 @@ async function onMediaPick(inp){
   pickedMedia = f;
   $('fMediaName').textContent = f.name.slice(0, 18) + ' · ' + (f.size/1048576).toFixed(1) + ' МБ';
 }
+function stampWatermark(cv){
+  const x = cv.getContext('2d');
+  x.save();
+  const fs = Math.max(16, Math.round(cv.width / 26));
+  x.font = '700 ' + fs + 'px system-ui, Arial';
+  x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  x.globalAlpha = .08;
+  x.fillStyle = '#ffffff';
+  x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 1; x.shadowOffsetY = 1;
+  const stepX = fs * 8, stepY = fs * 6;
+  for (let y = -stepY; y < cv.height + stepY; y += stepY) {
+    for (let xx = -stepX; xx < cv.width + stepX; xx += stepX) {
+      x.save(); x.translate(xx, y); x.rotate(-0.16);
+      x.fillText('судачим ⚖', 0, 0);
+      x.restore();
+    }
+  }
+  x.restore();
+}
 function compressImage(f){
   return new Promise(res => {
     const rd = new FileReader();
     rd.onload = () => { const im = new Image();
-      im.onload = () => { const sc = Math.min(1, 1280/Math.max(im.width, im.height));
-        if (sc === 1 && f.size < 400*1024) return res(f);
-        const cv = document.createElement('canvas'); cv.width = Math.round(im.width*sc); cv.height = Math.round(im.height*sc);
-        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
-        cv.toBlob(b => res(b), 'image/jpeg', .82);
+      im.onload = () => {
+        const sc = Math.min(1, 1280/Math.max(im.width, im.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(im.width*sc));
+        cv.height = Math.max(1, Math.round(im.height*sc));
+        const x = cv.getContext('2d');
+        x.drawImage(im, 0, 0, cv.width, cv.height);
+        stampWatermark(cv);
+        cv.toBlob(b => res(b), 'image/jpeg', .85);
       };
       im.onerror = () => res(f);
       im.src = rd.result;
@@ -1594,6 +1622,7 @@ async function vote(v){
     '<div id="myLabel">' + (my >= 50 ? 'Ты с большинством — ' + my + '%' : 'Ты в меньшинстве — ' + my + '% 🔥') + '</div>' +
     '<div class="rbtns"><button onclick="loadComments()">' + ic('comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>';
   $('result').classList.remove('hidden');
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   renderFeed();
 }
 function afterVote(){ loadFeed(); next(); }
@@ -1845,7 +1874,7 @@ function clampDrag(){
   dx = Math.max(-w * 0.6, Math.min(w * 0.6, dx));
   dy = Math.max(-h * 0.5, Math.min(h * 0.5, dy));
 }
-card.addEventListener('pointerdown', e => { if (voteLock) return; dragging = true; card.classList.add('drag'); sx = e.clientX; sy = e.clientY; });
+card.addEventListener('pointerdown', e => { if (voteLock || card.classList.contains('done')) return; dragging = true; card.classList.add('drag'); sx = e.clientX; sy = e.clientY; });
 card.addEventListener('pointermove', e => { if (!dragging) return; dx = e.clientX - sx; dy = e.clientY - sy; clampDrag(); apply(); });
 function endDrag(cancel){
   if (!dragging) return; dragging = false;
