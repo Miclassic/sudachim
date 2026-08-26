@@ -177,7 +177,9 @@ body.vplay .fart::before,body.vplay .ntag,body.vplay .ntag::after,body.vplay .bu
 .rct{flex:0 0 auto;display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}
 .rct span{font-size:14px;line-height:1}
 .votesRow{display:flex;justify-content:center;align-items:center;gap:6px;font-size:11px;color:var(--gray);margin:6px 0 2px;text-shadow:0 1px 0 rgba(255,255,255,.8)}
-  .rctOpen{background:none;border:none;font-size:15px;padding:2px 4px}
+.rctOpen{background:none;border:none;font-size:15px;padding:2px 4px}
+.reactsSum{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:8px 0 0}
+.rsChip{display:flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid transparent}
 .fpill{flex:1;border:none;background:#fff;border-radius:999px;padding:10px 4px;font-weight:700;font-size:12px;box-shadow:0 6px 18px rgba(20,24,32,.10);white-space:nowrap;overflow:hidden;justify-content:center;display:flex;align-items:center;gap:4px;cursor:pointer}
 .fpill .icn{width:13px;height:13px}
 .fpills{display:flex;gap:6px}
@@ -1639,6 +1641,9 @@ async function renderFeed(){
     const cmsAll = allComments.filter(k => k.case_id === c.id);
     const myR = me ? allReacts.find(r => r.case_id === c.id && r.user_id === me.id) : null;
     const myE = myR ? ((REACTS.find(r => r.k === myR.kind) || {}).e || '😀') : '😀';
+    const cntR = {}; allReacts.filter(r => r.case_id === c.id).forEach(r => cntR[r.kind] = (cntR[r.kind]||0)+1);
+    const sumList = REACTS.map(r => ({ r, n: cntR[r.k]||0 })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+    const sumHtml = sumList.length ? '<div class="reactsSum">' + sumList.map(x => { const on = myR && myR.kind === x.r.k; const col = RCOLORS[x.r.k] || '#8A919E'; return '<span class="rsChip' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + '14;border-color:' + (on ? col + '66' : 'transparent') + '">' + x.r.e + ' ' + x.n + '</span>'; }).join('') + '</div>' : '';
     const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
     const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
@@ -1663,7 +1668,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + '</div></div>';
+      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
