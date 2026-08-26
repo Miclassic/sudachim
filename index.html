@@ -144,10 +144,8 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .artV{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 65 88)'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFE3C4,#FFF7EC)}
 .artD{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%96%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(10 66 88)'%3E%E2%9D%93%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#F3E3B8,#FBF6EA)}
 .fbody{position:relative;padding:16px}
-.fmeta{font-size:11px;color:var(--gray);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-shadow:0 1px 0 rgba(255,255,255,.8)}
-.fmeta .fmL{justify-self:start;display:flex;align-items:center;gap:6px}
-.fmeta .fmC{justify-self:center;text-align:center;font-weight:600}
-.fmeta .fmR{justify-self:end}
+.fmetaCat{display:flex;justify-content:center;align-items:center;gap:6px;font-size:11px;color:var(--gray);font-weight:600;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.fmeta{font-size:11px;color:var(--gray);display:flex;justify-content:space-between;align-items:center;margin-top:2px;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .fmeta .icn{width:12px;height:12px;color:var(--gold)}
 .ftxt{font-size:14px;line-height:1.5;margin:8px 0 4px;color:#1B1E24;font-weight:500;text-shadow:0 1px 0 rgba(255,255,255,.85),0 0 12px rgba(255,255,255,.6)}
 .evd{position:relative;margin:10px 0 12px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(20,24,32,.16);background:#000}
@@ -1105,7 +1103,7 @@ function duelCard(d){
       '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('i-share') + 'Поделиться</button></div>';
   }
   return '<div class="fitem' + (hot ? ' hot' : '') + '">' + (hot ? art : '') + '<div class="fbody">' +
-    '<div class="fmeta"><span class="fmL"></span><span class="fmC">' + (hot ? '🔥 ' : '') + 'дуэль</span><span class="fmR">' + votesLabel(total) + '</span></div>' + body + '</div></div>';
+    '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + '⚔️ дуэль</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' + body + '</div></div>';
 }
 async function duelVote(id, side){
   const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
@@ -1614,7 +1612,7 @@ async function renderFeed(){
     const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-        '<div class="fmeta"><span class="fmL"></span><span class="fmC">🌙 треш · откроется с 23:00</span><span class="fmR">' + votesLabel(total) + '</span></div>' +
+        '<div class="fmetaCat">🌙 треш · откроется с 23:00</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' +
         '<div class="ftxt" style="filter:blur(7px);user-select:none;pointer-events:none">' + nl2br(c.text) + '</div>' +
         '<button class="fpill lockPill" style="flex:1">🔒 треш-час: с 23:00 до 5:00</button></div></div>';
     }
@@ -1632,7 +1630,8 @@ async function renderFeed(){
       '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
-      '<div class="fmeta"><span class="fmL"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button></span><span class="fmC">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span class="fmR">' + votesLabel(total) + '</span></div>' +
+      '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
+      '<div class="fmeta"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button><span>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + nl2br(c.text) + '</div>' + evdHtml(c) + reactsHtml(c.id) + actions + '</div></div>';
   }).join('');
 }
