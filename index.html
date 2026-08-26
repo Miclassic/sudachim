@@ -1372,6 +1372,28 @@ async function pickReact(kind){
   closeReactSheet();
   await reactToggle(id, kind);
 }
+async function reactToggle(caseId, kind){
+  if (!me) { openAuth(); return; }
+  const { data, error: e1 } = await sb.from('reactions').select('id,kind').eq('case_id', caseId).eq('user_id', me.id);
+  if (e1) { toast('Чтение реакций: ' + e1.message); return; }
+  const cur = (data || [])[0];
+  if (cur && cur.kind === kind) {
+    const { error: e2 } = await sb.from('reactions').delete().eq('id', cur.id);
+    if (e2) { toast('Снятие реакции: ' + e2.message); return; }
+    allReacts = allReacts.filter(r => !(r.case_id === caseId && r.user_id === me.id));
+  } else {
+    if (cur) {
+      const { error: e3 } = await sb.from('reactions').delete().eq('id', cur.id);
+      if (e3) { toast('Замена реакции: ' + e3.message); return; }
+    }
+    const { data: nd, error: e4 } = await sb.from('reactions').insert({ case_id: caseId, kind, user_id: me.id }).select();
+    if (e4) { toast('Реакция не встала: ' + e4.message); return; }
+    allReacts = allReacts.filter(r => !(r.case_id === caseId && r.user_id === me.id));
+    allReacts.push((nd && nd[0]) || { case_id: caseId, kind, user_id: me.id });
+    track('react');
+  }
+  renderFeed();
+}
 function evdHtml(c){
   if (!c || !c.media_url) return '';
   const isV = c.media_type === 'video';
