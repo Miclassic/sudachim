@@ -422,6 +422,15 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <div id="lbBody"></div>
   <button style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
+<div id="shareSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.6);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='shareSheet')closeShareSheet()">
+  <div style="background:#fff;border-radius:24px 24px 0 0;padding:14px 14px 22px;width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px">
+    <img id="shareImg" style="max-height:52vh;object-fit:contain;border-radius:14px;background:#EDEEF2">
+    <div style="display:flex;gap:8px">
+      <button onclick="sheetShare()" style="flex:1;background:#15181C;color:#fff;border:none;border-radius:999px;padding:13px;font-weight:700">📤 Поделиться</button>
+      <button onclick="sheetDownload()" style="flex:1;background:#EDEEF2;color:#15181C;border:none;border-radius:999px;padding:13px;font-weight:700">⬇ Скачать</button>
+    </div>
+  </div>
+</div>
 <div id="toast" class="hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -447,7 +456,36 @@ let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null, pickedMedia = null;
-const ic = n => '<svg class="icn"><use href="#i-' + n + '"/></svg>';
+const ICOS = {
+'i-scale':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M9 19.5h6M5.5 6.5h13"/><circle cx="12" cy="4" r="1.1" fill="currentColor" stroke="none"/></g><path fill="currentColor" d="M5.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L5.5 7zM18.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L18.5 7z"/>',
+'i-swords':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l13.5 13.5M20 4L6.5 17.5"/><path d="M15 18l3-3M9 18l-3-3"/><path d="M18.5 18.5l2 2M5.5 18.5l-2 2"/></g>',
+'i-flame':'<path fill="currentColor" d="M12 2.5s5.5 5 5.5 10a5.5 5.5 0 0 1-11 0c0-2.2 1-4.2 2.4-5.8.3 1.3 1 2.2 1.9 2.7-.5-2.4.2-5 1.2-6.9z"/>',
+'i-user':'<g fill="currentColor"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 19.4c.8-3.6 3.8-5.4 7.2-5.4s6.4 1.8 7.2 5.4z"/></g>',
+'i-bell':'<path fill="currentColor" d="M12 3a6 6 0 0 0-6 6v3.2L4.5 15v1h15v-1L18 12.2V9a6 6 0 0 0-6-6z"/><path fill="currentColor" d="M10 17.5a2 2 0 0 0 4 0z"/>',
+'i-gavel':'<g fill="currentColor"><path d="M13.2 3.4l7.4 7.4-2.5 2.5-7.4-7.4z"/><path d="M11 7.6l-7.6 7.6 2.9 2.9 7.6-7.6z" opacity=".85"/><path d="M4 20.2h9v1.8H4z"/></g>',
+'i-bolt':'<path fill="currentColor" d="M13 2L5.5 13H10l-1.6 9L16 11h-4.5z"/>',
+'i-shield':'<path fill="currentColor" d="M12 2.8l7.2 2.9v6c0 4.6-3 7.7-7.2 9.5C7.8 19.4 4.8 16.3 4.8 11.7v-6z"/>',
+'i-share':'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 6.5L12 3l4 3.5"/><path d="M6 10H5v11h14V10h-1"/></g>',
+'i-comment':'<path fill="currentColor" d="M4 4h16v12H9l-5 4z"/>',
+'i-down':'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13M7.5 12.5L12 17l4.5-4.5M5 20h14"/></g>',
+'i-camera':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M9 5l-1.4 2H4v12h16V7h-3.6L15 5z"/><circle cx="12" cy="12.5" r="3.2"/></g>',
+'i-trophy':'<path fill="currentColor" d="M6 3h12v2h3v3c0 2.2-1.8 4-4 4h-.3A6 6 0 0 1 13 15.7V18h3v3H8v-3h3v-2.3A6 6 0 0 1 7.3 12H7c-2.2 0-4-1.8-4-4V5h3zM5 7v1c0 1.1.9 2 2 2V7zm14 0h-2v3c1.1 0 2-.9 2-2z"/>',
+'i-star':'<path fill="currentColor" d="M12 2.8l2.6 5.6 6 .7-4.5 4.1 1.2 5.9L12 16.2l-5.3 2.9 1.2-5.9L3.4 9.1l6-.7z"/>',
+'i-lock':'<path fill="currentColor" d="M7 10V8a5 5 0 0 1 10 0v2h1v11H6V10zm2 0h6V8a3 3 0 0 0-6 0z"/>',
+'i-moon':'<path fill="currentColor" d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>',
+'i-eye':'<g fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></g>',
+'i-cal':'<g fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M4 10h16M8 3v4M16 3v4"/></g>',
+'i-target':'<g fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></g>',
+'i-doc':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></g>',
+'i-vote':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 12h14v8H5z"/><path d="M9 12l1.5-6h3L15 12M10.5 9h3M10 16h4"/></g>',
+'i-plus':'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 5v14M5 12h14"/>',
+'i-flag':'<path fill="currentColor" d="M5 2h2v20H5z"/><path fill="currentColor" d="M9 3h11l-3 4.5L20 12H9z"/>',
+'r-lol':'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7.8 9.6c.5-.9 1.7-.9 2.2 0M14 9.6c.5-.9 1.7-.9 2.2 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7.3 13.2c1.1 2.7 2.8 4 4.7 4s3.6-1.3 4.7-4z" fill="currentColor"/>',
+'r-shock':'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.8" r="1.2" fill="currentColor"/><circle cx="15" cy="9.8" r="1.2" fill="currentColor"/><circle cx="12" cy="15" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+'r-heart':'<path fill="currentColor" d="M12 20s-7.2-4.6-9.2-9.2C1.6 8 3.4 4.8 6.6 4.8c2 0 3.5 1.2 5.4 3.5 1.9-2.3 3.4-3.5 5.4-3.5 3.2 0 5 3.2 3.8 6-2 4.6-9.2 9.2-9.2 9.2z"/>',
+'r-cry':'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.5 16.6q3.5-3.2 7 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.2 12.6c.7 1.3 1.1 2.2 1.1 2.9a1.6 1.6 0 0 1-3.2 0c0-.7.4-1.6 1.1-2.9z" fill="currentColor"/>'
+};
+const ic = n => '<svg class="icn" viewBox="0 0 24 24">' + (ICOS[n] || '') + '</svg>';
 const REACTS = [
   { k:'bolt',  ic:'i-bolt' },
   { k:'flame', ic:'i-flame' },
@@ -1908,17 +1946,24 @@ function renderCardBlob(c){
   x.fillText('А ты на чьей стороне?', W / 2, 1020);
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
-async function downloadOrShare(dataUrl, name){
+let shareSheetUrl = null;
+function downloadOrShare(dataUrl){
+  shareSheetUrl = dataUrl;
+  $('shareImg').src = dataUrl;
+  $('shareSheet').classList.remove('hidden');
+}
+function closeShareSheet(){ $('shareSheet').classList.add('hidden'); }
+function sheetDownload(){ const a = document.createElement('a'); a.href = shareSheetUrl; a.download = 'sudachim.png'; a.click(); toast('Сохранено ✅'); }
+async function sheetShare(){
   try {
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], name, { type: 'image/png' });
+    const blob = await (await fetch(shareSheetUrl)).blob();
+    const file = new File([blob], 'sudachim.png', { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], title: 'Судачим', text: 'Народ решил — а ты на чьей стороне?' });
-      return;
+      closeShareSheet(); return;
     }
-  } catch (e) { if (e.name === 'AbortError') return; }
-  const a = document.createElement('a'); a.href = dataUrl; a.download = name; a.click();
-  toast('Картинка сохранена — кидай в чат! 📤');
+  } catch (e) { if (e.name === 'AbortError') { closeShareSheet(); return; } }
+  sheetDownload();
 }
 async function shareCase(c){
   if (!c) return;
