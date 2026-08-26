@@ -133,12 +133,24 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .artR{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%92%94%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%92%8D%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#E6D6FF,#F8F2FF)}
 .artE{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-10 25 44)'%3E%F0%9F%A4%9D%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#C9F0EC,#EFFDFA)}
 .artT{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.5' transform='rotate(-12 25 44)'%3E%F0%9F%94%A5%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.45' transform='rotate(12 65 88)'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#DCD3EC,#F2EEF9)}
+.artB{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%A4%B3%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFD6F2,#FFF3FB)}
+.artG{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%F0%9F%8E%AE%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.35' transform='rotate(12 66 88)'%3E%F0%9F%95%B9%EF%B8%8F%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#E4F7C9,#F9FFF2)}
 .artV{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(12 65 88)'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#FFE3C4,#FFF7EC)}
 .artD{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.4' transform='rotate(-12 25 44)'%3E%E2%9A%96%EF%B8%8F%3C/text%3E%3Ctext x='54' y='88' font-size='24' opacity='.35' transform='rotate(10 66 88)'%3E%E2%9D%93%3C/text%3E%3C/svg%3E"),linear-gradient(135deg,#F3E3B8,#FBF6EA)}
 .fbody{position:relative;padding:16px}
 .fmeta{font-size:11px;color:var(--gray);display:flex;justify-content:space-between;align-items:center;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .fmeta .icn{width:12px;height:12px;color:var(--gold)}
-.ftxt{font-size:14px;line-height:1.5;margin:8px 0 12px;color:#1B1E24;font-weight:500;text-shadow:0 1px 0 rgba(255,255,255,.85),0 0 12px rgba(255,255,255,.6)}
+.ftxt{font-size:14px;line-height:1.5;margin:8px 0 4px;color:#1B1E24;font-weight:500;text-shadow:0 1px 0 rgba(255,255,255,.85),0 0 12px rgba(255,255,255,.6)}
+/* вещдок — строгий кадр */
+.evd{position:relative;margin:10px 0 12px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(20,24,32,.16);background:#000}
+.evd img,.evd video{width:100%;display:block;max-height:340px;object-fit:cover;cursor:zoom-in}
+.bubble .evd{margin:6px 0 10px}
+.bubble .evd img,.bubble .evd video{max-height:240px}
+.evdTag{position:absolute;top:10px;right:10px;background:linear-gradient(90deg,#8C6A1D,#E9C767);color:#fff;font-size:10px;font-weight:800;letter-spacing:.8px;padding:5px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.3);text-transform:uppercase;pointer-events:none}
+#lb{position:fixed;inset:0;background:rgba(10,10,14,.93);z-index:95;display:flex;align-items:center;justify-content:center;padding:14px}
+#lb img,#lb video{max-width:100%;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lbX{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:16px;font-weight:800}
+.lbRep{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px}
 .fpill{flex:1;border:none;background:#fff;border-radius:999px;padding:10px 4px;font-weight:700;font-size:12px;box-shadow:0 6px 18px rgba(20,24,32,.10);white-space:nowrap;overflow:hidden;justify-content:center;display:flex;align-items:center;gap:4px;cursor:pointer}
 .fpill .icn{width:13px;height:13px}
 .fpills{display:flex;gap:6px}
@@ -306,6 +318,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
         <div class="bubble" id="card">
           <div class="bSub" id="sub">народный суд · другое</div>
           <div id="caseText"></div>
+          <div id="caseMedia"></div>
           <div class="pills" id="pills"></div>
           <div class="bCap">А ты на чьей стороне?</div>
           <div class="stamp stL" id="stL">ОСУЖДАЮ</div>
@@ -350,12 +363,17 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <div class="box">
     <h3>Расскажи свою ситуацию</h3>
     <textarea id="fText" maxlength="2000" placeholder="например: свекровь приходит без звонка и переставляет вещи. я стала запирать дверь. кто не прав?"></textarea>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button type="button" class="miniBtn" onclick="$('fMedia').click()">📎 приложить вещдок</button>
+      <span id="fMediaName" style="font-size:11px;color:var(--gray)"></span>
+    </div>
+    <input type="file" id="fMedia" accept="image/*,video/*" style="display:none" onchange="onMediaPick(this)">
     <select id="fCat">
-      <option>семья</option><option>деньги</option><option>соседи</option><option>работа</option><option>отношения</option><option>этикет</option><option>треш</option><option>другое</option>
+      <option>семья</option><option>деньги</option><option>соседи</option><option>работа</option><option>отношения</option><option>этикет</option><option>медиа</option><option>гейминг</option><option>треш</option><option>другое</option>
     </select>
     <button class="go" onclick="submitCase()">Отправить на модерацию</button>
     <button style="background:none;border:none;color:var(--gray)" onclick="closeForm()">Отмена</button>
-    <div style="font-size:11px;color:var(--gray)">Без имён, телефонов, адресов и ссылок. «треш» виден только с 23:00 до 5:00.</div>
+    <div style="font-size:11px;color:var(--gray)">Без имён, телефонов, адресов и ссылок. «треш» виден только с 23:00 до 5:00. Фото до 8 МБ, видео до 15 МБ.</div>
   </div>
 </div>
 <div id="auth" class="hidden">
@@ -377,6 +395,11 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <div id="notifs" class="hidden">
   <div class="nHead"><button class="pBack" onclick="closeNotifs()">←</button><span>уведомления</span></div>
   <div id="nList" style="padding-top:6px"></div>
+</div>
+<div id="lb" class="hidden" onclick="if(event.target.id==='lb')lbHide()">
+  <button class="lbX" onclick="lbHide()">✕</button>
+  <div id="lbBody"></div>
+  <button class="lbRep" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
 <div id="toast" class="hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -401,7 +424,7 @@ let allCases = [], allComments = [], allDuels = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
-let replyTo = null;
+let replyTo = null, pickedMedia = null;
 const ic = n => '<svg class="icn"><use href="#i-' + n + '"/></svg>';
 const ACH = {
   'first':   { ic:'i-scale', name:'Первый вердикт', tier:'c', desc:'Вынеси первый вердикт' },
@@ -471,8 +494,8 @@ async function refreshTop(){
   topCache.map = {};
   topCache.list.forEach((r, i) => topCache.map[r.id] = i + 1);
 }
-const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT' };
-const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'другое':'⚖️' };
+const ART = { 'семья':'artF', 'деньги':'artM', 'соседи':'artN', 'работа':'artW', 'отношения':'artR', 'этикет':'artE', 'треш':'artT', 'медиа':'artB', 'гейминг':'artG' };
+const EMO = { 'семья':'❤️', 'деньги':'💵', 'соседи':'🏢', 'работа':'💼', 'отношения':'💔', 'этикет':'🤝', 'треш':'🔥', 'медиа':'🤳', 'гейминг':'🎮', 'другое':'⚖️' };
 const ADMIN_EMAILS = ['artixz18@gmail.com'];
 const QUOTES = {
   'НАРОДНЫЙ СУДЬЯ':'Судишь по совести — к тебе прислушиваются.',
@@ -1183,7 +1206,7 @@ function dailyCard(c){
   }
   return '<div class="fitem hot"><div class="fart '+art+'"></div><div class="fbody">' +
     '<div class="dTop">' + ic('flame') + 'дело дня · <span id="dcount_'+c.id+'"></span></div>' +
-    '<div class="ftxt">'+esc(c.text)+'</div>'+body+'</div></div>';
+    '<div class="ftxt">'+esc(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -1238,6 +1261,49 @@ async function reportItem(type, id){
   if (!me) { openAuth(); return; }
   const { error } = await sb.from('reports').insert({ target_type: type, target_id: id, user_id: me.id, reason: 'жалоба' });
   toast(error ? 'Жалоба уже отправлена' : '🚩 Жалоба принята. После 3 жалоб запись скрывается');
+}
+/* вещдок */
+function evdHtml(c){
+  if (!c || !c.media_url) return '';
+  const inner = c.media_type === 'video'
+    ? '<video src="' + c.media_url + '" preload="metadata" muted playsinline></video>'
+    : '<img src="' + c.media_url + '" loading="lazy">';
+  return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'' + (c.media_type||'image') + '\',' + c.id + ')">' + inner + '<span class="evdTag">📎 вещдок</span></div>';
+}
+let lbCaseId = null;
+function lbOpen(url, type, caseId){
+  lbCaseId = caseId || null;
+  $('lbBody').innerHTML = type === 'video' ? '<video src="' + url + '" controls autoplay playsinline></video>' : '<img src="' + url + '">';
+  $('lb').classList.remove('hidden');
+}
+function lbHide(){ $('lb').classList.add('hidden'); $('lbBody').innerHTML = ''; lbCaseId = null; }
+function lbReport(){ if (lbCaseId) reportItem('case', lbCaseId); }
+function onMediaPick(inp){
+  const f = inp.files[0];
+  if (!f) { pickedMedia = null; $('fMediaName').textContent = ''; return; }
+  const isV = f.type.startsWith('video/'), isI = f.type.startsWith('image/');
+  if (!isV && !isI) { toast('Можно только фото или видео'); inp.value = ''; return; }
+  if (isI && f.size > 8*1024*1024) { toast('Фото до 8 МБ'); inp.value = ''; return; }
+  if (isV && f.size > 15*1024*1024) { toast('Видео до 15 МБ'); inp.value = ''; return; }
+  pickedMedia = f;
+  $('fMediaName').textContent = f.name.slice(0, 18) + ' · ' + (f.size/1048576).toFixed(1) + ' МБ';
+}
+function compressImage(f){
+  return new Promise(res => {
+    const rd = new FileReader();
+    rd.onload = () => { const im = new Image();
+      im.onload = () => { const sc = Math.min(1, 1280/Math.max(im.width, im.height));
+        if (sc === 1 && f.size < 400*1024) return res(f);
+        const cv = document.createElement('canvas'); cv.width = Math.round(im.width*sc); cv.height = Math.round(im.height*sc);
+        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+        cv.toBlob(b => res(b), 'image/jpeg', .82);
+      };
+      im.onerror = () => res(f);
+      im.src = rd.result;
+    };
+    rd.onerror = () => res(f);
+    rd.readAsDataURL(f);
+  });
 }
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
 function authorHtml(cm,nicks,stats){
@@ -1306,7 +1372,7 @@ async function loadFeed(){
     myPrefs = new Set(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]));
   }
   await refreshTop();
-  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0)).join(',') + '|' + allComments.length;
+  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length;
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
 }
 function renderChips(){
@@ -1355,7 +1421,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
       '<div class="fmeta"><span>' + (hot ? ic('flame') + ' ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</span><span style="display:flex;align-items:center;gap:6px"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('flag') + '</button>' + votesLabel(total) + '</span></div>' +
-      '<div class="ftxt">' + esc(c.text) + '</div>' + actions + '</div></div>';
+      '<div class="ftxt">' + esc(c.text) + '</div>' + evdHtml(c) + actions + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
@@ -1396,10 +1462,11 @@ function next(){
   $('pills').classList.remove('show'); $('pills').innerHTML = '';
   card.classList.remove('done'); card.classList.remove('drag');
   card.style.transform = 'none';
-  if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); $('empty').classList.remove('hidden'); return; }
+  if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
   $('cardWrap').classList.remove('hidden'); $('hint').classList.remove('hidden'); $('empty').classList.add('hidden');
   $('sub').textContent = 'народный суд · ' + catOf(cur);
   caseText.innerHTML = cur.text.split(/\s+/).map(w => '<span class="w">' + esc(w) + '</span>').join(' ');
+  $('caseMedia').innerHTML = evdHtml(cur);
   dx = dy = 0;
   if (voiceOn) speak(cur.text);
 }
@@ -1459,8 +1526,20 @@ async function submitCase(){
   const t = $('fText').value.trim(), cat = $('fCat').value;
   if (t.length < 20) { toast('Опиши подробнее (мин. 20 символов)'); return; }
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-  const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id });
-  $('fText').value = ''; closeForm();
+  let media_url = null, media_type = null;
+  if (pickedMedia) {
+    toast('📎 Грузим вещдок…');
+    const isV = pickedMedia.type.startsWith('video/');
+    const blob = isV ? pickedMedia : await compressImage(pickedMedia);
+    const path = me.id + '/' + Date.now() + (isV ? '.mp4' : '.jpg');
+    const up = await sb.storage.from('evidence').upload(path, blob, { contentType: isV ? pickedMedia.type : 'image/jpeg', upsert: false });
+    if (up.error) { toast('Ошибка загрузки: ' + up.error.message); return; }
+    media_url = sb.storage.from('evidence').getPublicUrl(path).data.publicUrl;
+    media_type = isV ? 'video' : 'image';
+  }
+  const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id, media_url, media_type });
+  $('fText').value = ''; pickedMedia = null; $('fMedia').value = ''; $('fMediaName').textContent = '';
+  closeForm();
   if (!error) track('story');
   toast(error ? 'Ошибка: ' + error.message : 'Принято! Появится после проверки ✅');
 }

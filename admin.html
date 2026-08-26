@@ -20,6 +20,7 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
 .mcat{font-size:11px;color:#8A919E;margin-bottom:6px}
 .mctx{font-size:12px;color:#8A919E;background:#EDEEF2;border-radius:10px;padding:8px 10px;margin-bottom:8px}
 .mtxt{font-size:14px;line-height:1.45;margin-bottom:10px}
+.mmedia{width:100%;border-radius:12px;margin:-4px 0 10px;max-height:280px;object-fit:cover;background:#000;display:block}
 .mbtns{display:flex;gap:8px;flex-wrap:wrap}
 .mbtns button{flex:1;border:none;border-radius:999px;padding:11px;font-weight:700;font-size:12px}
 .ok{background:#2E9E5B;color:#fff}.no{background:#EDEEF2;color:#D33A2C}
@@ -61,6 +62,11 @@ function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sideRu(s){ return s === 'condemn' ? '😡 осуждает' : s === 'justify' ? '👍 не осуждает' : '🤔 жиза'; }
 function whenRu(t){ try { return new Date(t).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); } catch(e){ return ''; } }
+function mediaHtml(o){
+  if (!o || !o.media_url) return '';
+  if (o.media_type === 'video') return '<video class="mmedia" src="' + o.media_url + '" controls preload="metadata"></video>';
+  return '<img class="mmedia" src="' + o.media_url + '" loading="lazy">';
+}
 async function boot(){
   const { data } = await sb.auth.getSession();
   if (data.session) panel(); else $('loginBox').classList.remove('hidden');
@@ -103,7 +109,7 @@ function setTab(t){
 }
 function repCard(type, o, cat){
   return '<div class="card"><div class="mcat">🚩 ' + (type === 'case' ? 'история' : 'комментарий') + ' · ' + cat + ' · скрыта жалобами</div>' +
-    '<div class="mtxt">' + esc(o.text) + '</div>' +
+    '<div class="mtxt">' + esc(o.text) + '</div>' + mediaHtml(o) +
     '<div class="mbtns"><button class="ok" onclick="unhide(\'' + type + '\',' + o.id + ')">↩ вернуть</button>' +
     '<button class="no" onclick="kill(\'' + type + '\',' + o.id + ')">❌ удалить</button></div></div>';
 }
@@ -112,7 +118,7 @@ function renderList(){
   if (tab === 'cases') {
     box.innerHTML = pendCases.length ? pendCases.map(o =>
       '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · ' + (o.category || 'другое') + (o.user_id ? ' · от пользователя' : ' · без автора → станет твоим') + '</div>' +
-      '<div class="mtxt">' + esc(o.text) + '</div>' +
+      '<div class="mtxt">' + esc(o.text) + '</div>' + mediaHtml(o) +
       '<div class="mbtns"><button class="ok" onclick="decide(' + o.id + ',true)">✅ одобрить</button>' +
       '<button class="no" onclick="decide(' + o.id + ',false)">❌ отклонить</button>' +
       '<button class="daily" onclick="setDaily(' + o.id + ')">🔥 дело дня</button></div></div>'
