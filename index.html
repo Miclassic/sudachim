@@ -146,6 +146,7 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 .fbody{position:relative;padding:16px}
 .fmetaCat{display:flex;justify-content:center;align-items:center;gap:6px;font-size:11px;color:var(--gray);font-weight:600;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .fmeta{font-size:11px;color:var(--gray);display:flex;justify-content:space-between;align-items:center;margin-top:2px;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.fmRight{display:flex;align-items:center;gap:6px}
 .fmeta .icn{width:12px;height:12px;color:var(--gold)}
 .ftxt{font-size:14px;line-height:1.5;margin:8px 0 4px;color:#1B1E24;font-weight:500;text-shadow:0 1px 0 rgba(255,255,255,.85),0 0 12px rgba(255,255,255,.6)}
 .evd{position:relative;margin:10px 0 12px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(20,24,32,.16);background:#000}
@@ -1631,7 +1632,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="fmeta"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button><span>' + votesLabel(total) + '</span></div>' +
+      '<div class="fmeta"><span class="fmRight" style="margin-left:auto"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '</span></div>' +
       '<div class="ftxt">' + nl2br(c.text) + '</div>' + evdHtml(c) + reactsHtml(c.id) + actions + '</div></div>';
   }).join('');
 }
