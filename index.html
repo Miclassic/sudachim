@@ -144,6 +144,8 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
 /* вещдок — строгий кадр */
 .evd{position:relative;margin:10px 0 12px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(20,24,32,.16);background:#000}
 .evd img,.evd video{width:100%;display:block;max-height:340px;object-fit:cover;cursor:zoom-in}
+.evdPlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.92);color:#15181C;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none}
+#lbSpin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none}
 .bubble .evd{margin:6px 0 10px}
 .bubble .evd img,.bubble .evd video{max-height:240px}
 .evdTag{position:absolute;top:10px;right:10px;background:linear-gradient(90deg,#8C6A1D,#E9C767);color:#fff;font-size:10px;font-weight:800;letter-spacing:.8px;padding:5px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.3);text-transform:uppercase;pointer-events:none}
@@ -1266,25 +1268,47 @@ async function reportItem(type, id){
 function evdHtml(c){
   if (!c || !c.media_url) return '';
   const inner = c.media_type === 'video'
-    ? '<video src="' + c.media_url + '" preload="metadata" muted playsinline></video>'
+    ? '<video src="' + c.media_url + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span>'
     : '<img src="' + c.media_url + '" loading="lazy">';
   return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'' + (c.media_type||'image') + '\',' + c.id + ')">' + inner + '<span class="evdTag">📎 вещдок</span></div>';
 }
 let lbCaseId = null;
 function lbOpen(url, type, caseId){
   lbCaseId = caseId || null;
-  $('lbBody').innerHTML = type === 'video' ? '<video src="' + url + '" controls autoplay playsinline></video>' : '<img src="' + url + '">';
+  if (type === 'video') {
+    $('lbBody').innerHTML = '<div style="position:relative;display:flex;align-items:center;justify-content:center"><video id="lbVid" src="' + url + '" controls playsinline preload="auto" style="max-width:100%;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)"></video><div id="lbSpin">⏳ грузим видео…</div></div>';
+    const v = $('lbVid'), s = $('lbSpin');
+    v.addEventListener('canplay', () => { s.style.display = 'none'; });
+    v.addEventListener('waiting', () => { s.style.display = 'flex'; });
+    v.addEventListener('playing', () => { s.style.display = 'none'; });
+    v.addEventListener('error', () => { s.textContent = '😕 не удалось загрузить видео'; });
+  } else {
+    $('lbBody').innerHTML = '<img src="' + url + '">';
+  }
   $('lb').classList.remove('hidden');
 }
 function lbHide(){ $('lb').classList.add('hidden'); $('lbBody').innerHTML = ''; lbCaseId = null; }
 function lbReport(){ if (lbCaseId) reportItem('case', lbCaseId); }
-function onMediaPick(inp){
+function videoDuration(f){
+  return new Promise(res => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => { const d = v.duration || 0; v.src = ''; res(d); };
+    v.onerror = () => res(0);
+    v.src = URL.createObjectURL(f);
+  });
+}
+async function onMediaPick(inp){
   const f = inp.files[0];
   if (!f) { pickedMedia = null; $('fMediaName').textContent = ''; return; }
   const isV = f.type.startsWith('video/'), isI = f.type.startsWith('image/');
   if (!isV && !isI) { toast('Можно только фото или видео'); inp.value = ''; return; }
   if (isI && f.size > 8*1024*1024) { toast('Фото до 8 МБ'); inp.value = ''; return; }
-  if (isV && f.size > 15*1024*1024) { toast('Видео до 15 МБ'); inp.value = ''; return; }
+  if (isV) {
+    if (f.size > 15*1024*1024) { toast('Видео до 15 МБ'); inp.value = ''; return; }
+    const dur = await videoDuration(f);
+    if (dur > 60) { toast('Видео до 60 секунд — иначе будет лагать'); inp.value = ''; return; }
+  }
   pickedMedia = f;
   $('fMediaName').textContent = f.name.slice(0, 18) + ' · ' + (f.size/1048576).toFixed(1) + ' МБ';
 }
