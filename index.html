@@ -423,6 +423,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <button style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
 <div id="toast" class="hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
@@ -1907,20 +1908,50 @@ function renderCardBlob(c){
   x.fillText('А ты на чьей стороне?', W / 2, 1020);
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
-async function shareCase(c){
-  if (!c) return;
-  track('share');
-  await ensureFonts();
-  const blob = await renderCardBlob(c);
+async function downloadOrShare(dataUrl, name){
   try {
-    const file = new File([blob], 'sudachim.png', { type: 'image/png' });
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], name, { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], title: 'Судачим', text: 'Народ решил — а ты на чьей стороне?' });
       return;
     }
   } catch (e) { if (e.name === 'AbortError') return; }
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sudachim.png'; a.click();
-  toast('Картинка сохранена в загрузки — кидай в чат! 📤');
+  const a = document.createElement('a'); a.href = dataUrl; a.download = name; a.click();
+  toast('Картинка сохранена — кидай в чат! 📤');
+}
+async function shareCase(c){
+  if (!c) return;
+  track('share');
+  const node = document.querySelector('[data-case-id="' + c.id + '"]');
+  if (node && window.htmlToImage) {
+    try {
+      toast('Готовим карточку…');
+      const prep = document.createElement('style');
+      prep.id = 'sharePrep';
+      prep.textContent = '.share-hide{display:none!important}.share-foot{display:flex;justify-content:center;padding:12px 0 2px;color:#8A919E;font-size:10px;font-weight:600;letter-spacing:.14em}';
+      document.head.appendChild(prep);
+      node.querySelectorAll('.fbtns,.repBtn').forEach(el => el.classList.add('share-hide'));
+      const foot = document.createElement('div');
+      foot.className = 'share-foot';
+      foot.textContent = 'судачим · народный суд · miclassic.github.io/sudachim';
+      node.appendChild(foot);
+      const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: '#EDEEF2' });
+      foot.remove(); prep.remove();
+      node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
+      await downloadOrShare(dataUrl, 'sudachim.png');
+      return;
+    } catch (e) {
+      const f = document.querySelector('.share-foot'); if (f) f.remove();
+      const p = document.getElementById('sharePrep'); if (p) p.remove();
+      node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
+    }
+  }
+  /* запасной вариант — старый шаблон */
+  await ensureFonts();
+  const blob = await renderCardBlob(c);
+  const url = URL.createObjectURL(blob);
+  await downloadOrShare(url, 'sudachim.png');
 }
 function shareCard(){ shareCase(cur); }
 let dx = 0, dy = 0, dragging = false, sx = 0, sy = 0;
