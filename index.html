@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Судачим — народный суд</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://tfqsyovyshheqkslsjhx.supabase.co 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.cdnfonts.com; font-src 'self' https://fonts.cdnfonts.com; img-src 'self' data: https://tfqsyovyshheqkslsjhx.supabase.co blob:; media-src 'self' https://tfqsyovyshheqkslsjhx.supabase.co blob:; connect-src 'self' https://tfqsyovyshheqkslsjhx.supabase.co wss://speech.platform.bing.com https://api.streamelements.com; frame-ancestors 'none';">
 <meta name="description" content="Судачим — народный суд бытовых историй. Свайпай, выноси вердикт, смотри, совпадаешь ли с народом.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Судачим">
@@ -388,8 +387,8 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     <div class="secDesc">Выбери, что хуже, — или предложи свою пару. Сторона с большинством побеждает. Самые жаркие дуэли получают огонь.</div>
     <button class="miniBtn" style="margin-bottom:12px" onclick="toggleDuelForm()"><svg class="icn"><use href="#i-plus"/></svg> предложить дуэль</button>
     <div id="duelForm" class="hidden" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-      <input id="dA" class="aIn" placeholder="вариант А" maxlength="200">
-      <input id="dB" class="aIn" placeholder="вариант Б" maxlength="200">
+      <input id="dA" class="aIn" placeholder="вариант А">
+      <input id="dB" class="aIn" placeholder="вариант Б">
       <button class="go" onclick="submitDuel()">Отправить на модерацию</button>
     </div>
     <div id="duelsList"></div>
@@ -429,8 +428,8 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     <div class="authTitle">СУДАЧИМ</div>
     <div class="authSub">войди, чтобы голосовать, писать и слать истории</div>
     <input id="aNick" class="aIn" placeholder="Никнейм — как тебя видеть" maxlength="16">
-    <input id="aEmail" class="aIn" type="email" placeholder="Email" maxlength="254">
-    <input id="aPass" class="aIn" type="password" placeholder="Пароль (мин. 6 символов)" maxlength="128" autocomplete="new-password">
+    <input id="aEmail" class="aIn" type="email" placeholder="Email">
+    <input id="aPass" class="aIn" type="password" placeholder="Пароль (мин. 6 символов)">
     <button class="go" id="aGo" onclick="doAuth()">Создать аккаунт</button>
     <button class="swap" id="aSwap" onclick="toggleAuthMode()">Уже есть аккаунт? Войти</button>
     <div class="aDiv"><span>или</span></div>
@@ -475,118 +474,6 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ============================================
-// ИСПРАВЛЕНИЯ БЕЗОПАСНОСТИ
-// ============================================
-
-// 1. УЛУЧШЕННАЯ ФУНКЦИЯ ЭКРАНИРОВАНИЯ
-// Добавлено экранирование кавычек и обратного слэша для защиты от XSS в атрибутах
-function esc(s){
-  if (!s) return '';
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;')
-    .replace(/\\/g,'&#92;');
-}
-
-// 2. ФУНКЦИЯ ВАЛИДАЦИИ URL
-// Проверяет, что URL безопасен для вставки в атрибуты (src, href)
-function safeUrl(url) {
-  if (!url) return '';
-  try {
-    const parsed = new URL(url, location.origin);
-    // Разрешаем только безопасные протоколы
-    if (!['http:', 'https:', 'data:', 'blob:'].includes(parsed.protocol)) {
-      console.warn('Blocked unsafe URL protocol:', parsed.protocol);
-      return '';
-    }
-    return parsed.href;
-  } catch (e) {
-    console.warn('Invalid URL:', url);
-    return '';
-  }
-}
-
-// 3. ЗАЩИТА ОТ RACE CONDITIONS
-// Добавляем флаги для предотвращения повторных вызовов
-let voteInProgress = false;
-let commentInProgress = false;
-let duelVoteInProgress = false;
-
-// 4. СИНХРОНИЗАЦИЯ ВРЕМЕНИ С СЕРВЕРОМ
-// Защищает от манипуляций с локальными часами
-let serverTimeOffset = 0;
-async function syncServerTime() {
-  try {
-    const { data, error } = await sb.rpc('get_server_time');
-    if (!error && data) {
-      const serverTime = new Date(data).getTime();
-      const localTime = Date.now();
-      serverTimeOffset = serverTime - localTime;
-    }
-  } catch (e) {
-    console.warn('Failed to sync server time');
-  }
-}
-
-// Вызываем синхронизацию при загрузке
-syncServerTime();
-
-// 5. ФУНКЦИЯ ПОЛУЧЕНИЯ ТЕКУЩЕГО ВРЕМЕНИ С УЧЕТОМ СЕРВЕРНОГО
-function getServerTime() {
-  return new Date(Date.now() + serverTimeOffset);
-}
-
-// 6. УЛУЧШЕННАЯ ВАЛИДАЦИЯ ФАЙЛОВ
-function validateFile(file) {
-  if (!file) return { valid: false, error: 'Файл не выбран' };
-  
-  // Проверка размера
-  const maxSize = file.type.startsWith('video/') ? 15 * 1024 * 1024 : 8 * 1024 * 1024;
-  if (file.size > maxSize) {
-    return { 
-      valid: false, 
-      error: file.type.startsWith('video/') ? 'Видео до 15 МБ' : 'Фото до 8 МБ' 
-    };
-  }
-  
-  // Проверка MIME типа
-  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-  const validVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
-  
-  if (file.type.startsWith('image/') && !validImageTypes.includes(file.type)) {
-    return { valid: false, error: 'Неподдерживаемый формат изображения' };
-  }
-  
-  if (file.type.startsWith('video/') && !validVideoTypes.includes(file.type)) {
-    return { valid: false, error: 'Неподдерживаемый формат видео' };
-  }
-  
-  return { valid: true };
-}
-
-// 7. RATE LIMITING НА КЛИЕНТЕ
-// Простая защита от спама
-const rateLimits = {};
-function checkRateLimit(action, limitMs = 1000) {
-  const now = Date.now();
-  const lastTime = rateLimits[action] || 0;
-  
-  if (now - lastTime < limitMs) {
-    return { allowed: false, waitMs: limitMs - (now - lastTime) };
-  }
-  
-  rateLimits[action] = now;
-  return { allowed: true };
-}
-
-// ============================================
-// ОРИГИНАЛЬНЫЙ КОД (с исправлениями)
-// ============================================
-
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
 let device = localStorage.getItem('sud_device');
 if (!device) { device = 'd' + Math.random().toString(36).slice(2) + Date.now(); localStorage.setItem('sud_device', device); }
@@ -734,9 +621,9 @@ const catOf = c => (c.category || 'другое');
 const catL = c => catOf(c).toLowerCase();
 const isMine = c => !!(me && c.user_id && c.user_id === me.id);
 const isAdmin = () => !!(me && me.email && ADMIN_EMAILS.includes(String(me.email).toLowerCase()));
-const trashOpen = () => { const h = getServerTime().getHours(); return h >= 23 || h < 5; };
+const trashOpen = () => { const h = new Date().getHours(); return h >= 23 || h < 5; };
 const visibleCase = c => catL(c) !== 'треш' || trashOpen();
-const since24 = () => new Date(getServerTime().getTime() - 864e5).toISOString();
+const since24 = () => new Date(Date.now() - 864e5).toISOString();
 function vLabel(k){
   if (!trashOpen()) return k==='condemn' ? '😡 Осуждаю' : k==='life' ? '🤔 Жиза' : '👍 Не осуждаю';
   return k==='condemn' ? '⚔️ Казнить' : k==='life' ? '🤷 Мне пох' : '🕊 Помиловать';
@@ -746,7 +633,7 @@ function timerState(c){
   if (new Date(c.created_at).getTime() < TIMER_TS) return null;
   const total = (c.condemn||0) + (c.justify||0) + (c.life||0);
   const end = new Date(c.created_at).getTime() + 90*60000;
-  const now = getServerTime().getTime();
+  const now = Date.now();
   if (now >= end) return total >= 10 ? 'locked' : null;
   return total >= 10 ? 'live' : null;
 }
@@ -757,6 +644,7 @@ function timerHtml(c){
   if (st === 'locked') return '<div class="lockStamp">ПРИГОВОР ВСТУПИЛ В СИЛУ</div>';
   return '';
 }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function nl2br(t){ return esc(t).replace(/\n/g,'<br>'); }
 function votesLabel(total){
   if (total >= 100) return plural(total);
@@ -765,7 +653,7 @@ function votesLabel(total){
 }
 function scoreCase(c, total){
   const act = voteCnt24[c.id] || 0;
-  const ageH = (getServerTime().getTime() - new Date(c.created_at).getTime()) / 3600000;
+  const ageH = (Date.now() - new Date(c.created_at).getTime()) / 3600000;
   const recency = Math.exp(-ageH / 48);
   const pctC = total ? (c.condemn||0) / total : .5;
   const controversy = 1 - Math.abs(pctC - .5) * 2;
@@ -799,7 +687,7 @@ function badgeHtml(uid, s){
 }
 function calcStreak(rows){
   const days = [...new Set(rows.map(r => new Date(r.created_at).toDateString()))];
-  let streak = 0; const d = getServerTime();
+  let streak = 0; const d = new Date();
   if (!days.includes(d.toDateString())) d.setDate(d.getDate() - 1);
   while (days.includes(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
   return streak;
@@ -834,7 +722,7 @@ function avaColor(n){
 function avaInitials(n){ return (n || '?').trim().slice(0, 1).toUpperCase(); }
 function renderTbUser(){
   $('tbUser').innerHTML = me
-    ? '<button class="avaBtn" style="background:' + avaColor(myNick) + '" onclick="showTab(\'profile\')">' + (myAva ? '<img class="avaImg" src="' + safeUrl(myAva) + '">' : avaInitials(myNick)) + '</button>'
+    ? '<button class="avaBtn" style="background:' + avaColor(myNick) + '" onclick="showTab(\'profile\')">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</button>'
     : '<button class="miniBtn" onclick="openAuth()">войти</button>';
   $('bellBtn').classList.toggle('hidden', !me);
   if (me) fetchUnread();
@@ -893,14 +781,6 @@ sb.auth.onAuthStateChange(() => refreshMe());
 function pickAva(){ $('avaFile').click(); }
 async function uploadAva(){
   const f = $('avaFile').files[0]; if (!f || !me) return;
-  
-  // ВАЛИДАЦИЯ ФАЙЛА
-  const validation = validateFile(f);
-  if (!validation.valid) {
-    toast(validation.error);
-    return;
-  }
-  
   const up = await sb.storage.from('avatars').upload(me.id + '/ava', f, { upsert: true, contentType: f.type });
   if (up.error) { toast('Фото: ' + up.error.message); return; }
   const url = sb.storage.from('avatars').getPublicUrl(me.id + '/ava').data.publicUrl + '?v=' + Date.now();
@@ -920,13 +800,6 @@ async function nickTaken(nick, exceptId){
   return (r.data || []).some(p => p.id !== exceptId && p.nick.toLowerCase() === nick.toLowerCase());
 }
 async function doAuth(){
-  // RATE LIMITING
-  const rateCheck = checkRateLimit('auth', 3000);
-  if (!rateCheck.allowed) {
-    toast('Подождите ' + Math.ceil(rateCheck.waitMs / 1000) + ' сек');
-    return;
-  }
-  
   const email = $('aEmail').value.trim(), pass = $('aPass').value;
   if (!email || pass.length < 6) { toast('Email и пароль от 6 символов'); return; }
   if (authMode === 'reg') {
@@ -1007,7 +880,7 @@ async function showProfile(){
       const p = profs[r.id] || {};
       const nm = p.nick || 'аноним';
       const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
-      const av = p.avatar_url ? '<img src="' + safeUrl(p.avatar_url) + '">' : avaInitials(nm);
+      const av = p.avatar_url ? '<img src="' + p.avatar_url + '">' : avaInitials(nm);
       return '<div class="lbRow' + (r.id === me.id ? ' me' : '') + '">' +
         '<span class="pos' + (pos <= 3 ? ' top3' : '') + '">' + medal + '</span>' +
         '<span class="av" style="' + (p.avatar_url ? '' : 'background:' + avaColor(nm)) + '">' + av + '</span>' +
@@ -1016,7 +889,7 @@ async function showProfile(){
     }).join('')
     : '<div class="empty">Пока нет активных судей</div>';
   $('pBody').innerHTML =
-    '<div class="avaBig" style="background:' + (myAva ? '#fff' : avaColor(myNick)) + '">' + (myAva ? '<img class="avaImg" src="' + safeUrl(myAva) + '">' : avaInitials(myNick)) + '</div>' +
+    '<div class="avaBig" style="background:' + (myAva ? '#fff' : avaColor(myNick)) + '">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</div>' +
     '<div class="pNick">' + esc(myNick) + badgeHtml(me.id, myStats) + '</div>' +
     '<div class="pSub">на судачим с ' + since + (myRank ? ' · #' + myRank + ' в рейтинге' : '') + '</div>' +
     myCasesHtml(c.data || []) +
@@ -1249,13 +1122,6 @@ function dlWrapped(){
   const a = document.createElement('a'); a.href = lastWrapped; a.download = 'sudachim-wrapped.png'; a.click();
 }
 async function renameMe(){
-  // RATE LIMITING
-  const rateCheck = checkRateLimit('rename', 5000);
-  if (!rateCheck.allowed) {
-    toast('Подождите ' + Math.ceil(rateCheck.waitMs / 1000) + ' сек');
-    return;
-  }
-  
   const n = prompt('Новый никнейм:', myNick); if (!n) return;
   const nick = n.trim().slice(0, 16); if (nick.length < 2) { toast('Короткий ник'); return; }
   if (await nickTaken(nick, me.id)) { toast('Занят'); return; }
@@ -1266,14 +1132,6 @@ async function logoutMe(){ await sb.auth.signOut(); showTab('court'); await refr
 function toggleDuelForm(){ const f = $('duelForm'); f.classList.toggle('hidden'); f.style.display = f.classList.contains('hidden') ? 'none' : 'flex'; }
 async function submitDuel(){
   if (!me) { openAuth(); return; }
-  
-  // RATE LIMITING
-  const rateCheck = checkRateLimit('submitDuel', 10000);
-  if (!rateCheck.allowed) {
-    toast('Подождите ' + Math.ceil(rateCheck.waitMs / 1000) + ' сек перед отправкой');
-    return;
-  }
-  
   const a = $('dA').value.trim(), b = $('dB').value.trim();
   if (a.length < 3 || b.length < 3) { toast('Заполни обе стороны'); return; }
   const err = checkSafety(a + ' ' + b); if (err) { toast('⚠️ ' + err); return; }
@@ -1314,24 +1172,11 @@ function duelCard(d){
     '<div class="fmeta"><span class="fmL"></span><span class="fmC">' + (hot ? '🔥 ' : '') + 'дуэль</span><span class="fmR">' + votesLabel(total) + '</span></div>' + body + '</div></div>';
 }
 async function duelVote(id, side){
-  if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (duelVoteInProgress) {
-    toast('Подождите...');
-    return;
-  }
-  duelVoteInProgress = true;
-  
-  try {
-    const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
-    if (error) { toast(error.message); return; }
-    duelVoted[id] = side; saveDuelVoted();
-    track('duel');
-    renderDuels();
-  } finally {
-    duelVoteInProgress = false;
-  }
+  const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
+  if (error) { toast(error.message); return; }
+  duelVoted[id] = side; saveDuelVoted();
+  track('duel');
+  renderDuels();
 }
 async function shareDuel(id){
   const d = allDuels.find(x => x.id === id); if (!d) return;
@@ -1441,7 +1286,7 @@ function renderCardBlobDuel(d){
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 let dailyTimer = null;
-const dailyReveal = () => getServerTime().getHours() >= 21;
+const dailyReveal = () => new Date().getHours() >= 21;
 async function pickDaily(){
   const [c, rv] = await Promise.all([
     sb.from('cases').select('*').eq('status','approved'),
@@ -1463,8 +1308,8 @@ async function renderDaily(){
   const tick = () => {
     const el = $('dcount_' + today.id); if (!el) return;
     if (dailyReveal()) { el.textContent = 'результаты открыты'; return; }
-    const t = getServerTime(); t.setHours(21, 0, 0, 0);
-    let ms = t - getServerTime(); if (ms < 0) ms = 0;
+    const t = new Date(); t.setHours(21, 0, 0, 0);
+    let ms = t - new Date(); if (ms < 0) ms = 0;
     const h = Math.floor(ms/3600000), m = Math.floor(ms%3600000/60000), s = Math.floor(ms%60000/1000);
     el.textContent = 'результаты через ' + h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
   };
@@ -1495,26 +1340,14 @@ function dailyCard(c){
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (voteInProgress) {
-    toast('Подождите...');
-    return;
-  }
-  voteInProgress = true;
-  
-  try {
-    const c = allById(id) || (await sb.from('cases').select('*').eq('id', id).single()).data;
-    if (isMine(c)) { toast('Это твоя история 📝'); return; }
-    if (timerState(c) === 'locked') { toast('🔏 Приговор вступил в силу — голосование закрыто'); return; }
-    const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
-    if (error) { toast(error.message); return; }
-    voted[id] = v; saveVoted();
-    track('swipe');
-    renderDaily();
-  } finally {
-    voteInProgress = false;
-  }
+  const c = allById(id) || (await sb.from('cases').select('*').eq('id', id).single()).data;
+  if (isMine(c)) { toast('Это твоя история 📝'); return; }
+  if (timerState(c) === 'locked') { toast('🔏 Приговор вступил в силу — голосование закрыто'); return; }
+  const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
+  if (error) { toast(error.message); return; }
+  voted[id] = v; saveVoted();
+  track('swipe');
+  renderDaily();
 }
 let brandTaps = 0, brandTimer = null;
 function brandTap(){
@@ -1556,14 +1389,6 @@ async function profilesFor(ids){
 }
 async function reportItem(type, id){
   if (!me) { openAuth(); return; }
-  
-  // RATE LIMITING
-  const rateCheck = checkRateLimit('report', 5000);
-  if (!rateCheck.allowed) {
-    toast('Подождите ' + Math.ceil(rateCheck.waitMs / 1000) + ' сек');
-    return;
-  }
-  
   const { error } = await sb.from('reports').insert({ target_type: type, target_id: id, user_id: me.id, reason: 'жалоба' });
   toast(error ? 'Жалоба уже отправлена' : '🚩 Жалоба принята. После 3 жалоб запись скрывается');
 }
@@ -1652,22 +1477,17 @@ async function pickReact(kind){
 }
 function evdHtml(c){
   if (!c || !c.media_url) return '';
-  
-  // ВАЛИДАЦИЯ URL
-  const safeMediaUrl = safeUrl(c.media_url);
-  if (!safeMediaUrl) return '';
-  
   const isV = c.media_type === 'video';
   if (isV) {
-    return '<div class="evd evdV" data-src="' + esc(safeMediaUrl) + '" onclick="playInline(this)"><video src="' + esc(safeMediaUrl) + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span><span class="evdTag">📎 вещдок</span></div>';
+    return '<div class="evd evdV" data-src="' + c.media_url + '" onclick="playInline(this)"><video src="' + c.media_url + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span><span class="evdTag">📎 вещдок</span></div>';
   }
-  return '<div class="evd" onclick="lbOpen(\'' + esc(safeMediaUrl) + '\',\'image\',' + c.id + ')"><img src="' + esc(safeMediaUrl) + '" loading="lazy"><span class="evdTag">📎 вещдок</span></div>';
+  return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'image\',' + c.id + ')"><img src="' + c.media_url + '" loading="lazy"><span class="evdTag">📎 вещдок</span></div>';
 }
 function playInline(el){
   const url = el.getAttribute('data-src');
   el.removeAttribute('onclick');
   document.body.classList.add('vplay');
-  el.innerHTML = '<video src="' + esc(url) + '" controls playsinline autoplay style="width:100%;display:block;max-height:440px;object-fit:contain;background:#000"></video><span class="evdTag">📎 вещдок</span>';
+  el.innerHTML = '<video src="' + url + '" controls playsinline autoplay style="width:100%;display:block;max-height:440px;object-fit:contain;background:#000"></video><span class="evdTag">📎 вещдок</span>';
   const v = el.querySelector('video');
   const off = () => document.body.classList.remove('vplay');
   v.addEventListener('pause', off);
@@ -1689,16 +1509,12 @@ function playerHtml(){
     '</div></div>';
 }
 async function initPlayer(url){
-  // ВАЛИДАЦИЯ URL
-  const safePlayerUrl = safeUrl(url);
-  if (!safePlayerUrl) return;
-  
   const v = $('lbVid'), load = $('plLoad'), pct = $('plPct'), bar = $('plBarI');
   const big = $('plBig'), ctrl = $('plCtrl');
   const play = $('plPlay'), seek = $('plSeek'), tEl = $('plTime'), dEl = $('plDur'), mute = $('plMute'), full = $('plFull');
   bar.style.width = '100%'; bar.style.opacity = '.35';
   pct.textContent = 'грузим…';
-  v.src = safePlayerUrl; v.preload = 'auto';
+  v.src = url; v.preload = 'auto';
   const show = () => { load.style.display = 'flex'; pct.textContent = 'буфер…'; };
   const hide = () => { load.style.display = 'none'; };
   v.addEventListener('waiting', show);
@@ -1725,17 +1541,12 @@ async function initPlayer(url){
 }
 function lbOpen(url, type, caseId){
   lbCaseId = caseId || null;
-  
-  // ВАЛИДАЦИЯ URL
-  const safeLbUrl = safeUrl(url);
-  if (!safeLbUrl) return;
-  
   if (type === 'video') {
     $('lbBody').innerHTML = playerHtml();
     $('lb').classList.remove('hidden');
-    initPlayer(safeLbUrl);
+    initPlayer(url);
   } else {
-    $('lbBody').innerHTML = '<img src="' + esc(safeLbUrl) + '">';
+    $('lbBody').innerHTML = '<img src="' + url + '">';
     $('lb').classList.remove('hidden');
   }
 }
@@ -1758,17 +1569,11 @@ function videoDuration(f){
 async function onMediaPick(inp){
   const f = inp.files[0];
   if (!f) { pickedMedia = null; $('fMediaName').textContent = ''; return; }
-  
-  // ВАЛИДАЦИЯ ФАЙЛА
-  const validation = validateFile(f);
-  if (!validation.valid) {
-    toast(validation.error);
-    inp.value = '';
-    return;
-  }
-  
   const isV = f.type.startsWith('video/'), isI = f.type.startsWith('image/');
+  if (!isV && !isI) { toast('Можно только фото или видео'); inp.value = ''; return; }
+  if (isI && f.size > 8*1024*1024) { toast('Фото до 8 МБ'); inp.value = ''; return; }
   if (isV) {
+    if (f.size > 15*1024*1024) { toast('Видео до 15 МБ'); inp.value = ''; return; }
     const dur = await videoDuration(f);
     if (dur > 60) { toast('Видео до 60 секунд — иначе будет лагать'); inp.value = ''; return; }
   }
@@ -1927,7 +1732,7 @@ async function loadFeed(){
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
   if (trashOpen()) {
-    const since1h = new Date(getServerTime().getTime() - 3600000).toISOString();
+    const since1h = new Date(Date.now() - 3600000).toISOString();
     const nv = await sb.from('votes').select('user_id').gte('created_at', since1h);
     const uniq = [...new Set((nv.data || []).map(r => r.user_id))];
     const el = $('nightCount');
@@ -2068,28 +1873,16 @@ async function renderFeed(){
 }
 async function feedVote(id, v){
   if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (voteInProgress) {
-    toast('Подождите...');
-    return;
-  }
-  voteInProgress = true;
-  
-  try {
-    const c = allById(id); if (!c) return;
-    if (isMine(c)) { toast('Это твоя история — решает народ 📝'); return; }
-    if (timerState(c) === 'locked') { toast('🔏 Приговор вступил в силу — голосование закрыто'); return; }
-    const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
-    if (error) { toast('Не удалось: ' + error.message); return; }
-    c[v] = (c[v] || 0) + 1;
-    voted[id] = v; saveVoted();
-    queue = queue.filter(q => q.id !== id);
-    track('swipe');
-    renderFeed();
-  } finally {
-    voteInProgress = false;
-  }
+  const c = allById(id); if (!c) return;
+  if (isMine(c)) { toast('Это твоя история — решает народ 📝'); return; }
+  if (timerState(c) === 'locked') { toast('🔏 Приговор вступил в силу — голосование закрыто'); return; }
+  const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
+  if (error) { toast('Не удалось: ' + error.message); return; }
+  c[v] = (c[v] || 0) + 1;
+  voted[id] = v; saveVoted();
+  queue = queue.filter(q => q.id !== id);
+  track('swipe');
+  renderFeed();
 }
 async function feedToggleComments(id, force){
   const box = $('fc_' + id); if (!box) return;
@@ -2102,29 +1895,17 @@ async function feedToggleComments(id, force){
 }
 async function feedSendComment(id){
   if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (commentInProgress) {
-    toast('Подождите...');
-    return;
+  const inp = $('ci_' + id), t = inp.value.trim(); if (!t) return;
+  const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
+  const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
+  inp.value = '';
+  if (!error) {
+    track('comment');
+    notifyCaseAuthor(id, t, replyTo ? replyTo.id : null);
+    clearReply();
+    await feedToggleComments(id, true);
   }
-  commentInProgress = true;
-  
-  try {
-    const inp = $('ci_' + id), t = inp.value.trim(); if (!t) return;
-    const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-    const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
-    inp.value = '';
-    if (!error) {
-      track('comment');
-      notifyCaseAuthor(id, t, replyTo ? replyTo.id : null);
-      clearReply();
-      await feedToggleComments(id, true);
-    }
-    toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
-  } finally {
-    commentInProgress = false;
-  }
+  toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
 function next(){
   voteLock = false;
@@ -2144,73 +1925,49 @@ function next(){
 }
 async function vote(v){
   if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (voteInProgress) {
-    toast('Подождите...');
-    return;
+  if (isMine(cur)) { toast('Это твоя история — решает народ 📝'); return; }
+  if (!cur || voteLock) return;
+  if (timerState(cur) === 'locked') { toast('🔏 Приговор вступил в силу — голосование закрыто'); return; }
+  voteLock = true;
+  myVerdict = v;
+  card.classList.remove('drag');
+  card.classList.add('done');
+  card.style.transform = 'none';
+  const { error } = await sb.rpc('vote', { p_case: cur.id, p_verdict: v, p_device: device });
+  if (error) { toast(error.message); voteLock = false; card.classList.remove('done'); return; }
+  cur[v] = (cur[v] || 0) + 1;
+  voted[cur.id] = v; saveVoted();
+  queue = queue.filter(q => q.id !== cur.id);
+  const ac = allById(cur.id); if (ac) ac[v] = (ac[v] || 0) + 1;
+  track('swipe');
+  const nt100 = ((cur.condemn||0) + (cur.justify||0) + (cur.life||0));
+  if (nt100 === 100 && cur.user_id && cur.user_id !== me.id) {
+    sb.from('notifications').insert({ user_id: cur.user_id, actor_id: me.id, type: 'verdict', case_id: cur.id, text: '100 голосов — народный вердикт готов' }).then(() => {});
   }
-  voteInProgress = true;
-  
-  try {
-    if (isMine(cur)) { toast('Это твоя история — решает народ 📝'); return; }
-    if (!cur || voteLock) return;
-    if (timerState(cur) === 'locked') { toast('🔏 Приговор вступил в силу — голосование закрыто'); return; }
-    voteLock = true;
-    myVerdict = v;
-    card.classList.remove('drag');
-    card.classList.add('done');
-    card.style.transform = 'none';
-    const { error } = await sb.rpc('vote', { p_case: cur.id, p_verdict: v, p_device: device });
-    if (error) { toast(error.message); voteLock = false; card.classList.remove('done'); return; }
-    cur[v] = (cur[v] || 0) + 1;
-    voted[cur.id] = v; saveVoted();
-    queue = queue.filter(q => q.id !== cur.id);
-    const ac = allById(cur.id); if (ac) ac[v] = (ac[v] || 0) + 1;
-    track('swipe');
-    const nt100 = ((cur.condemn||0) + (cur.justify||0) + (cur.life||0));
-    if (nt100 === 100 && cur.user_id && cur.user_id !== me.id) {
-      sb.from('notifications').insert({ user_id: cur.user_id, actor_id: me.id, type: 'verdict', case_id: cur.id, text: '100 голосов — народный вердикт готов' }).then(() => {});
-    }
-    const c = cur, total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
-    const pct = x => Math.round(x * 100 / total);
-    $('pills').innerHTML =
-      '<span class="pill red">' + vLabel('condemn') + ' · ' + pct(c.condemn) + '%</span>' +
-      '<span class="pill yel">' + vLabel('life') + ' · ' + pct(c.life) + '%</span>' +
-      '<span class="pill grn">' + vLabel('justify') + ' · ' + pct(c.justify) + '%</span>';
-    $('pills').classList.add('show');
-    const my = pct(c[myVerdict]);
-    $('result').innerHTML =
-      '<div id="myLabel">' + (my >= 50 ? 'Ты с большинством — ' + my + '%' : 'Ты в меньшинстве — ' + my + '% 🔥') + '</div>' +
-      '<div class="rbtns"><button onclick="loadComments()">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('i-share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>' +
-      '<div class="crow" style="margin-top:10px"><input id="advIn" maxlength="150" placeholder="🧑‍⚖️ защитить сторону (до 150 символов)"><button onclick="sendAdvocate()">→</button></div>';
-    $('result').classList.remove('hidden');
-    $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    renderFeed();
-  } finally {
-    voteInProgress = false;
-  }
+  const c = cur, total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
+  const pct = x => Math.round(x * 100 / total);
+  $('pills').innerHTML =
+    '<span class="pill red">' + vLabel('condemn') + ' · ' + pct(c.condemn) + '%</span>' +
+    '<span class="pill yel">' + vLabel('life') + ' · ' + pct(c.life) + '%</span>' +
+    '<span class="pill grn">' + vLabel('justify') + ' · ' + pct(c.justify) + '%</span>';
+  $('pills').classList.add('show');
+  const my = pct(c[myVerdict]);
+  $('result').innerHTML =
+    '<div id="myLabel">' + (my >= 50 ? 'Ты с большинством — ' + my + '%' : 'Ты в меньшинстве — ' + my + '% 🔥') + '</div>' +
+    '<div class="rbtns"><button onclick="loadComments()">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('i-share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>' +
+    '<div class="crow" style="margin-top:10px"><input id="advIn" maxlength="150" placeholder="🧑‍⚖️ защитить сторону (до 150 символов)"><button onclick="sendAdvocate()">→</button></div>';
+  $('result').classList.remove('hidden');
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  renderFeed();
 }
 async function sendAdvocate(){
   if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (commentInProgress) {
-    toast('Подождите...');
-    return;
-  }
-  commentInProgress = true;
-  
-  try {
-    const inp = $('advIn'), t = inp.value.trim(); if (!t) return;
-    const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-    const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: null });
-    inp.value = '';
-    toast(error ? 'Ошибка: ' + error.message : '🧑‍⚖️ Аргумент подан — собирай 👏');
-    renderFeed();
-  } finally {
-    commentInProgress = false;
-  }
+  const inp = $('advIn'), t = inp.value.trim(); if (!t) return;
+  const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
+  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: null });
+  inp.value = '';
+  toast(error ? 'Ошибка: ' + error.message : '🧑‍⚖️ Аргумент подан — собирай 👏');
+  renderFeed();
 }
 function afterVote(){ loadFeed(); next(); }
 async function loadComments(force){
@@ -2224,43 +1981,22 @@ async function loadComments(force){
 }
 async function sendComment(){
   if (!me) { openAuth(); return; }
-  
-  // ЗАЩИТА ОТ RACE CONDITIONS
-  if (commentInProgress) {
-    toast('Подождите...');
-    return;
+  const inp = $('cIn'), t = inp.value.trim();
+  if (!t) return;
+  const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
+  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
+  inp.value = '';
+  if (!error) {
+    track('comment');
+    notifyCaseAuthor(cur.id, t, replyTo ? replyTo.id : null);
+    clearReply();
+    await loadComments(true);
   }
-  commentInProgress = true;
-  
-  try {
-    const inp = $('cIn'), t = inp.value.trim();
-    if (!t) return;
-    const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-    const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
-    inp.value = '';
-    if (!error) {
-      track('comment');
-      notifyCaseAuthor(cur.id, t, replyTo ? replyTo.id : null);
-      clearReply();
-      await loadComments(true);
-    }
-    toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
-  } finally {
-    commentInProgress = false;
-  }
+  toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
 function openForm(){ if (!me) { openAuth(); return; } $('modal').classList.remove('hidden'); }
 function closeForm(){ $('modal').classList.add('hidden'); }
 async function submitCase(){
-  if (!me) { openAuth(); return; }
-  
-  // RATE LIMITING
-  const rateCheck = checkRateLimit('submitCase', 10000);
-  if (!rateCheck.allowed) {
-    toast('Подождите ' + Math.ceil(rateCheck.waitMs / 1000) + ' сек перед отправкой');
-    return;
-  }
-  
   const t = $('fText').value.trim(), cat = $('fCat').value;
   if (t.length < 20) { toast('Опиши подробнее (мин. 20 символов)'); return; }
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
@@ -2326,6 +2062,282 @@ function edgeSpeak(text, onWord, onEnd, onFallback){
     let url;
     try {
       const gec = await edgeGec();
-      url = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4&Sec-
-</parameter>
-</function>
+      url = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4&Sec-MS-GEC=' + gec + '&ConnectionId=' + id().replace(/-/g, '');
+    } catch (e) { onFallback(); return; }
+    try { ws = new WebSocket(url); } catch (e) { onFallback(); return; }
+    ws.binaryType = 'arraybuffer';
+    const watchdog = setTimeout(() => { failed = true; try { ws.close(); } catch(_){} }, 6000);
+    ws.onopen = () => {
+      try {
+        ws.send('X-Timestamp:' + new Date().toString() + '\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"true"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3","voiceLocale":"ru-RU"}}}}');
+        const e2 = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        ws.send('X-RequestId:' + id() + '\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n<speak version=\'1.0\' xmlns=\'http://www.w3.org/2001/10/synthesis\' xml:lang=\'ru-RU\'><voice name=\'ru-RU-SvetlanaNeural\'><prosody pitch=\'+0Hz\' rate=\'+0%\' volume=\'+0%\'>' + e2 + '</prosody></voice></speak>');
+      } catch (e) { failed = true; try { ws.close(); } catch(_){} }
+    };
+    ws.onmessage = (e) => {
+      if (typeof e.data === 'string') {
+        if (e.data.indexOf('Path:audio.metadata') >= 0) {
+          try { const j = JSON.parse(e.data.split('\r\n\r\n')[1]); (j.Metadata || []).forEach(m => { if (m.Type === 'WordBoundary') words.push({ t: (m.Data.Offset || 0) / 1e7 }); }); } catch(_){}
+        }
+      } else {
+        clearTimeout(watchdog);
+        const part = splitAudio(new Uint8Array(e.data)); if (part && part.length) chunks.push(part);
+      }
+    };
+    ws.onerror = () => { failed = true; clearTimeout(watchdog); };
+    ws.onclose = () => {
+      clearTimeout(watchdog);
+      if (failed || !chunks.length) { onFallback(); return; }
+      const a = new Audio(URL.createObjectURL(new Blob(chunks, { type: 'audio/mpeg' })));
+      curAudio = a;
+      a.onplay = () => { words.forEach(w => timers.push(setTimeout(onWord, w.t * 1000))); };
+      a.onended = () => { timers.forEach(clearTimeout); curAudio = null; onEnd(); };
+      a.onerror = () => { timers.forEach(clearTimeout); curAudio = null; onFallback(); };
+      a.play().catch(() => onFallback());
+    };
+  })();
+}
+function seSpeak(text, onWord, onEnd, onFail){
+  fetch('https://api.streamelements.com/kappa/v2/speech?voice=Tatyana&text=' + encodeURIComponent(text))
+    .then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })
+    .then(buf => {
+      const a = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/mpeg' })));
+      curAudio = a;
+      const n = text.split(/\s+/).length;
+      let timers = [];
+      a.onloadedmetadata = () => {
+        const dur = (isFinite(a.duration) && a.duration > 0 ? a.duration : n * 0.4) * 1000;
+        for (let i = 0; i < n; i++) timers.push(setTimeout(onWord, (dur * i) / n));
+      };
+      a.onended = () => { timers.forEach(clearTimeout); curAudio = null; onEnd(); };
+      a.onerror = () => { timers.forEach(clearTimeout); curAudio = null; onFail(); };
+      a.play().catch(() => onFail());
+    })
+    .catch(() => onFail());
+}
+async function ensureFonts(){
+  try {
+    await Promise.race([
+      Promise.all([document.fonts.load('600 56px "OPPO Sans"'), document.fonts.load('700 40px "OPPO Sans"'), document.fonts.load('800 92px "OPPO Sans"')]),
+      new Promise(r => setTimeout(r, 1500))
+    ]);
+  } catch(e){}
+}
+function rr(x, X, Y, W, H, R){ x.beginPath(); if (x.roundRect) x.roundRect(X, Y, W, H, R); else x.rect(X, Y, W, H); }
+function wrapCenter(ctx, text, maxW){
+  const words = text.split(/\s+/); const lines = []; let line = '';
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function drawWatermark(x, W, top, bottom){
+  x.save();
+  x.globalAlpha = .05;
+  x.fillStyle = '#8C6A1D';
+  x.font = '700 30px "OPPO Sans", system-ui';
+  x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  let row = 0;
+  for (let y = top; y < bottom; y += 84){
+    const off = (row % 2) ? -70 : 0;
+    for (let xx = off; xx < W; xx += 230){
+      x.save(); x.translate(xx, y); x.rotate(-0.16); x.fillText('sudachim', 0, 0); x.restore();
+    }
+    row++;
+  }
+  x.restore();
+}
+function renderCardBlob(c){
+  const W = 1080, H = 1350;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const ink = '#15181C', gray = '#8A919E', red = '#D33A2C', yel = '#E0A400', grn = '#2E9E5B';
+  x.fillStyle = '#EDEEF2'; x.fillRect(0, 0, W, H);
+  x.save(); x.shadowColor = 'rgba(20,24,32,.14)'; x.shadowBlur = 46; x.shadowOffsetY = 18;
+  x.fillStyle = '#fff'; rr(x, 60, 90, W - 120, 1020, 90); x.fill(); x.restore();
+  drawWatermark(x, W, 130, 1080);
+  x.save(); x.globalAlpha = .12; x.font = '170px system-ui'; x.textAlign = 'right';
+  x.fillText(EMO[catL(c)] || '⚖️', W - 100, 270); x.restore();
+  let g = x.createLinearGradient(200, 0, W - 200, 0);
+  g.addColorStop(0, ink); g.addColorStop(.5, '#C9971C'); g.addColorStop(1, ink);
+  x.fillStyle = g; x.textAlign = 'center';
+  x.font = '600 60px "OPPO Sans", system-ui'; x.fillText('С У Д А Ч И М', W / 2, 250);
+  x.fillStyle = gray; x.font = '500 36px "OPPO Sans", system-ui';
+  x.fillText('народный суд · ' + catOf(c), W / 2, 318);
+  x.fillStyle = '#1B1E24'; x.font = '500 44px "OPPO Sans", system-ui';
+  let lines = wrapCenter(x, c.text, W - 260);
+  if (lines.length > 6) { lines = lines.slice(0, 6); lines[5] += '…'; }
+  let y = 430;
+  for (const l of lines) { x.fillText(l, W / 2, y); y += 62; }
+  const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
+  const pct = v => Math.round(v * 100 / total);
+  const pills = [
+    ['😡 Осуждаю ' + pct(c.condemn) + '%', red],
+    ['🤔 Жиза ' + pct(c.life) + '%', yel],
+    ['👍 Не осуждаю ' + pct(c.justify) + '%', grn]
+  ];
+  const gap = 26, maxW = W - 200;
+  let pf = 38, widths;
+  do {
+    x.font = '700 ' + pf + 'px "OPPO Sans", system-ui';
+    widths = pills.map(p => x.measureText(p[0]).width + 70);
+    if (widths.reduce((a, b) => a + b, 0) + gap * 2 <= maxW) break;
+    pf -= 2;
+  } while (pf > 22);
+  let px = W / 2 - (widths[0] + widths[1] + widths[2] + gap * 2) / 2;
+  const py = 830, ph = 92;
+  pills.forEach((p, i) => {
+    x.save(); x.shadowColor = p[1] + '55'; x.shadowBlur = 30; x.shadowOffsetY = 10;
+    x.fillStyle = '#fff'; rr(x, px, py, widths[i], ph, ph / 2); x.fill(); x.restore();
+    x.fillStyle = p[1]; x.textAlign = 'center';
+    x.fillText(p[0], px + widths[i] / 2, py + 58);
+    px += widths[i] + gap;
+  });
+  const cg = x.createLinearGradient(240, 0, W - 240, 0);
+  cg.addColorStop(0, '#C9971C'); cg.addColorStop(.5, '#FF8A3D'); cg.addColorStop(1, '#C9971C');
+  x.fillStyle = cg; x.font = '700 46px "OPPO Sans", system-ui';
+  x.fillText('А ты на чьей стороне?', W / 2, 1020);
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+async function shareCase(c){
+  if (!c) return;
+  track('share');
+  const node = document.querySelector('[data-case-id="' + c.id + '"]');
+  if (node && window.htmlToImage) {
+    try {
+      toast('Готовим карточку…');
+      const prep = document.createElement('style');
+      prep.id = 'sharePrep';
+      prep.textContent = '.share-hide{display:none!important}';
+      document.head.appendChild(prep);
+      node.querySelectorAll('.fbtns,.repBtn').forEach(el => el.classList.add('share-hide'));
+      const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: '#EDEEF2' });
+      prep.remove();
+      node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
+      downloadOrShare(dataUrl);
+      return;
+    } catch (e) {
+      const p = document.getElementById('sharePrep'); if (p) p.remove();
+      node.querySelectorAll('.share-hide').forEach(el => el.classList.remove('share-hide'));
+    }
+  }
+  await ensureFonts();
+  const blob = await renderCardBlob(c);
+  downloadOrShare(URL.createObjectURL(blob));
+}
+function shareCard(){ shareCase(cur); }
+let dx = 0, dy = 0, dragging = false, sx = 0, sy = 0;
+function clampDrag(){
+  const w = card.offsetWidth || 320, h = card.offsetHeight || 320;
+  dx = Math.max(-w * 0.6, Math.min(w * 0.6, dx));
+  dy = Math.max(-h * 0.5, Math.min(h * 0.5, dy));
+}
+card.addEventListener('pointerdown', e => { if (voteLock || card.classList.contains('done')) return; dragging = true; card.classList.add('drag'); sx = e.clientX; sy = e.clientY; });
+card.addEventListener('pointermove', e => { if (!dragging) return; dx = e.clientX - sx; dy = e.clientY - sy; clampDrag(); apply(); });
+function endDrag(cancel){
+  if (!dragging) return; dragging = false;
+  const vx = dx, vy = dy; dx = 0; dy = 0;
+  card.classList.remove('drag');
+  if (!cancel && (vx < -90 || vx > 90 || vy < -90)) vote(vx < -90 ? 'condemn' : vx > 90 ? 'justify' : 'life');
+  apply();
+}
+window.addEventListener('pointerup', () => endDrag(false));
+window.addEventListener('pointercancel', () => endDrag(true));
+function apply(){
+  if (voteLock) return;
+  card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (dx * 0.05) + 'deg)';
+  $('stL').style.opacity = Math.max(0, Math.min(1, -dx / 90));
+  $('stR').style.opacity = Math.max(0, Math.min(1, dx / 90));
+  $('stU').style.opacity = Math.max(0, Math.min(1, -dy / 90));
+}
+function openCaseFromNotif(id){
+  closeNotifs();
+  showTab('court');
+  const c = allById(id);
+  if (!c) { toast('Запись не найдена или ещё на модерации'); return; }
+  if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) toast('🌙 Эта запись полностью откроется в треш-час (23:00–5:00)');
+  setTimeout(() => {
+    const el = document.querySelector('[data-case-id="' + id + '"]');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.outline = '2px solid var(--gold)';
+    setTimeout(() => el.style.outline = '', 1600);
+    feedToggleComments(id, true);
+  }, 350);
+}
+function dlCanvas(cv, name){ const a = document.createElement('a'); a.download = name; a.href = cv.toDataURL('image/png'); a.click(); }
+async function maybeOg(){
+  if (!new URLSearchParams(location.search).has('og')) return;
+  await ensureFonts();
+  const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const bg = x.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#15181C'); bg.addColorStop(1, '#3A2E4A');
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(233,199,103,.25)';
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 6; j++) { x.beginPath(); x.arc(80 + j * 30 + i * 8, 80 + i * 26, 2.5, 0, 7); x.fill(); }
+  drawScales(x, 170, 300, 90);
+  let g = x.createLinearGradient(320, 0, W - 100, 0);
+  g.addColorStop(0, '#E9C767'); g.addColorStop(1, '#C9971C');
+  x.fillStyle = g; x.textAlign = 'left'; x.font = '800 96px "OPPO Sans", system-ui';
+  x.fillText('СУДАЧИМ', 320, 300);
+  x.fillStyle = '#EDEEF2'; x.font = '500 40px "OPPO Sans", system-ui';
+  x.fillText('народный суд бытовых историй', 320, 370);
+  x.fillStyle = '#C9971C'; x.font = '700 34px "OPPO Sans", system-ui';
+  x.fillText('свайпай · решай · делись', 320, 470);
+  x.fillStyle = 'rgba(237,238,242,.6)'; x.font = '500 28px "OPPO Sans", system-ui';
+  x.fillText('miclassic.github.io/sudachim', 320, 540);
+  dlCanvas(cv, 'og.png');
+  [512, 192].forEach(s => {
+    const c2 = document.createElement('canvas'); c2.width = s; c2.height = s;
+    const y = c2.getContext('2d');
+    y.fillStyle = '#15181C'; rr(y, 0, 0, s, s, s * 0.22); y.fill();
+    drawScales(y, s / 2, s * 0.52, s * 0.34);
+    dlCanvas(c2, 'icon-' + s + '.png');
+  });
+  toast('OG-картинка и иконки скачаны — закинь их в корень репозитория');
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) loadFeed(); });
+setInterval(() => {
+  if (!document.hidden) { loadFeed(); return; }
+  if (me && 'Notification' in window && Notification.permission === 'granted') {
+    sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', me.id).eq('read', false).then(({ count }) => {
+      const n = count || 0;
+      if (n > lastUnread) { try { new Notification('Судачим 💬', { body: 'Новое по твоим историям — непрочитанных: ' + n }); } catch (e) {} }
+      lastUnread = n;
+    });
+  }
+}, 30000);
+var lastUnread = 0;
+function askNotifPermission(){
+  if (!('Notification' in window)) { toast('Устройство не поддерживает уведомления'); return; }
+  Notification.requestPermission().then(p => toast(p === 'granted' ? 'Уведомления включены 🔔' : 'Ладно, не будем навязываться'));
+}
+let nightPrev = trashOpen();
+function applyNight(){
+  const n = trashOpen();
+  document.body.classList.toggle('night', n);
+  if (nightPrev && !n) toast('🌅 Рассвет! Ночной суд закрыт — голоса снова дневные');
+  if (!nightPrev && n) toast('🌙 Ночной суд открыт — до 5:00');
+  nightPrev = n;
+}
+applyNight(); setInterval(applyNight, 60000);
+setInterval(() => {
+  document.querySelectorAll('[data-end]').forEach(el => {
+    const ms = Number(el.getAttribute('data-end')) - Date.now();
+    if (ms <= 0) { el.textContent = '0:00'; return; }
+    const m = Math.floor(ms/60000), s = Math.floor(ms%60000/1000);
+    el.textContent = m + ':' + String(s).padStart(2,'0');
+  });
+}, 1000);
+if (!localStorage.getItem('sud_onboard')) {
+  setTimeout(() => { $('onboard').classList.remove('hidden'); localStorage.setItem('sud_onboard', '1'); setTimeout(() => $('onboard').classList.add('hidden'), 6000); }, 800);
+}
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+load();
+maybeOg();
+</script>
+</body>
+</html>
