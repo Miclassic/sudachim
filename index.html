@@ -133,6 +133,7 @@ body.night .bCap{background-image:linear-gradient(90deg,#7A5CFF,#E2593F,#E9C767,
 .chipBtn{flex:0 0 auto;background:#fff;border:none;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--gray);box-shadow:0 4px 14px rgba(20,24,32,.06)}
 .chipBtn.on{color:var(--ink);box-shadow:0 6px 18px rgba(201,151,28,.25)}
 #feed,#duelsList,#dailyList{display:flex;flex-direction:column;gap:14px}
+#feed.rerender .fitem{animation:none}
 @media (min-width:700px){
   body{background:radial-gradient(rgba(140,106,29,.06) 2px,transparent 2.5px),var(--bg);background-size:26px 26px}
   #caseText{font-size:18px}.ftxt{font-size:15px}.bSub{font-size:14px}
@@ -320,6 +321,22 @@ body.night .onboardBox{background:#171A20;color:var(--ink)}
 #nightFx.on{opacity:1}
 #nightFx.on .moon{transform:scale(1) rotate(0);opacity:1}
 #nightFx.on .fxT{opacity:1}
+body.night .fitem{background:#171A20;color:var(--ink)}
+body.night .fart{opacity:.22}
+body.night .fitem.trashHot .fart{opacity:.6}
+body.night .ftxt{color:#E8EAEE;text-shadow:none}
+body.night .fmetaCat,body.night .fmeta,body.night .votesRow{text-shadow:none}
+body.night .fpill,body.night .chipBtn,body.night .miniBtn,body.night .bell,body.night .bn.on,body.night .mcPill{background:#171A20;color:var(--ink)}
+body.night .lockPill{color:var(--gray)}
+body.night .cmt,body.night .pCard,body.night .secCard,body.night .achItem,body.night .lbRow,body.night .myCases,body.night .nItem,body.night #modal .box,body.night .sheetBox,body.night .ghost{background:#171A20;color:var(--ink)}
+body.night .aIn,body.night #modal textarea,body.night #modal select,body.night .crow input{background:var(--bg);color:var(--ink)}
+body.night .fbtns button,body.night .cActions button{color:var(--gray)}
+body.night .advBlock{background:rgba(201,151,28,.10)}
+body.night .advItem{color:var(--ink)}
+body.night .mcItem{background:#0F1115}
+body.night .mcTxt{color:#E8EAEE}
+body.night .achItem .aT.c{background:#22262E;color:var(--gray)}
+body.night .replies{border-left-color:rgba(237,238,242,.08)}
 </style>
 </head>
 <body>
@@ -1402,7 +1419,7 @@ async function profilesFor(ids){
   const un = [...new Set(ids.filter(Boolean))];
   if (!un.length) return {};
   const r = await sb.from('profiles').select('id,nick,avatar_url').in('id', un);
-  const m = {}; (r.data || []).forEach(p => m[p] = p);
+  const m = {}; (r.data || []).forEach(p => m[p.id] = p);
   return m;
 }
 async function reportItem(type, id){
@@ -1699,7 +1716,7 @@ function buildComments(all,nicks,stats){
 }
 function commentInput(inputId, fn, tagId){
   return me ? '<div class="crow"><input id="' + inputId + '" maxlength="500" placeholder="Твой аргумент…"><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
-   : '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button>';
+   : '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button></div>';
 }
 function setReply(id, nick){
   replyTo = { id };
@@ -1846,6 +1863,8 @@ async function renderFeed(){
   const nicks = await nicksFor(allComments.map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
   const night = trashOpen();
+  const feedEl = $('feed');
+  if (feedEl.dataset.once) feedEl.classList.add('rerender'); else feedEl.dataset.once = '1';
   $('feed').innerHTML = list.map(({ c, total }, i) => {
     const pct = v => total ? Math.round(v * 100 / total) : 0;
     const votedIt = (c.id in voted);
@@ -1868,10 +1887,10 @@ async function renderFeed(){
     const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + esc(k.text).slice(0,120) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
     if (isTrash && !night && !isAdmin()) {
       const excerpt = c.text.replace(/\s+/g,' ').slice(0, 70) + '…';
-      return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
+      return '<div class="fitem" data-case-id="' + c.id + '"><div class="fart ' + art + '"></div><div class="fbody">' +
         '<div class="fmetaCat">🌙 треш · откроется с 23:00</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' +
         '<div class="ftxt" style="color:var(--gray)">' + esc(excerpt) + '</div>' +
-        '<button class="fpill lockPill" style="flex:1">🔒 треш-час: с 23:00 до 5:00</button></div></div>';
+        '<div class="fpills"><button class="fpill lockPill" style="flex:1">🔒 треш-час: с 23:00 до 5:00</button></div></div></div>';
     }
     const actions = (votedIt || locked) ? (
       (locked ? '<div class="lockStamp">ПРИГОВОР ВСТУПИЛ В СИЛУ</div>' : '') +
@@ -1880,15 +1899,15 @@ async function renderFeed(){
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' + advHtml +
       '<div class="fcom hidden" id="fc_' + c.id + '">' + cmHtml + '</div>'
     ) : (me ? (
-      isMine(c) ? '<button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button>' +
+      isMine(c) ? '<div class="fpills"><button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button></div>' +
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button>' + (total >= 100 ? '<button onclick="shareVerdict(' + c.id + ')">📜 вердикт</button>' : '') + '</div>' :
       '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="feedVote(' + c.id + ',\'condemn\')">' + vLabel('condemn') + '</button>' +
       '<button class="fpill" style="color:var(--yel)" onclick="feedVote(' + c.id + ',\'life\')">' + vLabel('life') + '</button>' +
       '<button class="fpill" style="color:var(--grn)" onclick="feedVote(' + c.id + ',\'justify\')">' + vLabel('justify') + '</button></div>'
     ) : (
-      '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
+      '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button></div>'
     ));
-    return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div>' + trashMark + timerHtml(c) + '<div class="fbody">' +
+    return '<div class="' + itemClass + '" data-case-id="' + c.id + '"><div class="fart ' + art + '"></div>' + trashMark + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (night ? '🌙 ' : '') + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
       '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + '</div></div>';
   }).join('');
