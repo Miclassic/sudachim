@@ -1710,7 +1710,8 @@ async function renderFeed(){
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '">' + cmHtml + '</div>'
     ) : (me ? (
-      isMine(c) ? '<button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button>' :
+      isMine(c) ? '<button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button>' +
+      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' :
       '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="feedVote(' + c.id + ',\'condemn\')">😡 Осуждаю</button>' +
       '<button class="fpill" style="color:var(--yel)" onclick="feedVote(' + c.id + ',\'life\')">🤔 Жиза</button>' +
       '<button class="fpill" style="color:var(--grn)" onclick="feedVote(' + c.id + ',\'justify\')">👍 Не осуждаю</button></div>'
@@ -1748,8 +1749,13 @@ async function feedSendComment(id){
   const inp = $('ci_' + id), t = inp.value.trim(); if (!t) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
   const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
-  inp.value = ''; clearReply();
-  if (!error) { track('comment'); await feedToggleComments(id, true); }
+  inp.value = '';
+  if (!error) {
+    track('comment');
+    notifyCaseAuthor(id, t, replyTo ? replyTo.id : null);
+    clearReply();
+    await feedToggleComments(id, true);
+  }
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
 }
 function next(){
@@ -1815,9 +1821,29 @@ async function sendComment(){
   if (!t) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
   const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
-  inp.value = ''; clearReply();
-  if (!error) { track('comment'); await loadComments(true); }
+  inp.value = '';
+  if (!error) {
+    track('comment');
+    notifyCaseAuthor(cur.id, t, replyTo ? replyTo.id : null);
+    clearReply();
+    await loadComments(true);
+  }
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
+}
+async function notifyCaseAuthor(caseId, text, parentId){
+  const c = allById(caseId);
+  if (c && c.user_id && c.user_id !== me.id) {
+    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
+  }
+  if (parentId) {
+    let pAuthor = null;
+    const loc = allComments.find(k => k.id === parentId);
+    if (loc) pAuthor = loc.user_id;
+    else { const { data } = await sb.from('comments').select('user_id').eq('id', parentId).maybeSingle(); pAuthor = data ? data.user_id : null; }
+    if (pAuthor && pAuthor !== me.id && (!c || pAuthor !== c.user_id)) {
+      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
+    }
+  }
 }
 function openForm(){ if (!me) { openAuth(); return; } $('modal').classList.remove('hidden'); }
 function closeForm(){ $('modal').classList.add('hidden'); }
