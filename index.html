@@ -26,6 +26,14 @@
 :root{--bg:#EDEEF2;--card:#FFFFFF;--ink:#15181C;--gray:#8A919E;--red:#D33A2C;--yel:#E0A400;--grn:#2E9E5B;--gold:#C9971C}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'OPPO Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--ink);min-height:100vh}
+body.night{--bg:#0F1115;--card:#171A20;--ink:#EDEEF2;--gray:#9AA3AE;background:var(--bg)}
+body.night .topbar{background:rgba(15,17,21,.72)}
+body.night .fitem,body.night .bubble,body.night .cmt,body.night .miniBtn,body.night .bell,body.night .bn.on,body.night .chipBtn,body.night .pill,body.night .fpill,body.night .lockPill,body.night .crow input,body.night .pCard,body.night .secCard,body.night .achItem,body.night .lbRow,body.night .myCases,body.night .mcPill,body.night .aIn,body.night .gBtn,body.night #modal .box,body.night .ghost{background:#171A20;color:var(--ink)}
+body.night .ftxt{color:#E8EAEE;text-shadow:none}
+body.night .fmeta,body.night .fmetaCat,body.night .votesRow,body.night .secDesc,body.night .bSub{text-shadow:none}
+body.night .fbtns button{color:var(--gray)}
+body.night .stamp{background:rgba(23,26,32,.85)}
+body.night .fart{opacity:.3}
 button{transition:transform .15s ease}
 button:active{transform:scale(.95)}
 .icn{width:1.05em;height:1.05em;display:inline-block;vertical-align:-.15em;flex:none}
@@ -171,13 +179,12 @@ body.vplay .fart::before,body.vplay .ntag,body.vplay .ntag::after,body.vplay .bu
 #plTime,#plDur{font-size:10px;font-weight:700;opacity:.9}
 #lb{position:fixed;inset:0;background:rgba(10,10,14,.93);z-index:95;display:flex;align-items:center;justify-content:center;padding:14px}
 #lb img{max-width:100%;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-/* реакции */
 .reacts{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:4px;margin:10px 0 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .reacts::-webkit-scrollbar{display:none}
 .rct{flex:0 0 auto;display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}
 .rct span{font-size:14px;line-height:1}
 .votesRow{display:flex;justify-content:center;align-items:center;gap:6px;font-size:11px;color:var(--gray);margin:6px 0 2px;text-shadow:0 1px 0 rgba(255,255,255,.8)}
-.rctOpen{background:none;border:none;font-size:15px;padding:2px 4px}
+.rctOpen{background:none;border:none;font-size:13px;padding:2px 4px;opacity:.55}
 .reactsSum{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:8px 0 0}
 .rsChip{display:flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid transparent;cursor:pointer}
 .fpill{flex:1;border:none;background:#fff;border-radius:999px;padding:10px 4px;font-weight:700;font-size:12px;box-shadow:0 6px 18px rgba(20,24,32,.10);white-space:nowrap;overflow:hidden;justify-content:center;display:flex;align-items:center;gap:4px;cursor:pointer}
@@ -446,6 +453,14 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
     </div>
   </div>
 </div>
+<div id="onboard" class="hidden" style="position:fixed;inset:0;z-index:97;background:rgba(10,10,14,.55);display:flex;align-items:center;justify-content:center;padding:20px" onclick="this.classList.add('hidden')">
+  <div style="background:#fff;border-radius:24px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="font-size:34px;margin-bottom:8px">⚖️</div>
+    <div style="font-weight:800;font-size:16px;margin-bottom:8px">Народный суд открыт</div>
+    <div style="font-size:13px;color:#8A919E;line-height:1.5">Свайпай карточку: 👈 осуждаю · 👆 жиза · 👉 не осуждаю.<br>Голосовать можно без входа!</div>
+    <div style="margin-top:12px;font-size:11px;color:#C9971C;font-weight:700">тапни, чтобы начать</div>
+  </div>
+</div>
 <div id="toast" class="hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -466,7 +481,7 @@ function duelKey(){ return 'sud_duelv:' + (me ? me.id : 'anon'); }
 function loadDuelVoted(){ duelVoted = JSON.parse(localStorage.getItem(duelKey()) || '{}'); }
 function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVoted)); }
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
-let allCases = [], allComments = [], allDuels = [], allReacts = [], feedCat = 'все';
+let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
 let voteCnt24 = {}, myPrefs = new Set();
 let me = null, myNick = '', myAva = '', authMode = 'reg';
@@ -557,10 +572,13 @@ function isInTop(uid){
   return typeof pos === 'number' && pos <= topCache.size;
 }
 function isPremiumUser(uid){
-  if (!isInTop(uid)) return false;
   const row = topCache.list.find(r => r.id === uid);
   if (!row) return false;
-  return achsFor(uid, row.stats).some(a => STRONG_ACHS.has(a));
+  const s = row.stats || {};
+  if ((s.total || 0) < 30) return false;
+  const pos = topCache.map[uid];
+  if (pos && pos <= 3) return true;
+  return achsFor(uid, s).some(a => STRONG_ACHS.has(a));
 }
 async function refreshTop(){
   const ts = topSize();
@@ -683,6 +701,7 @@ async function fetchUnread(){
   const { count } = await sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', me.id).eq('read', false);
   const b = $('bellBdg');
   if (count > 0) { b.textContent = count > 9 ? '9+' : count; b.classList.remove('hidden'); } else b.classList.add('hidden');
+  lastUnread = count || 0;
 }
 async function openNotifs(){
   $('notifs').classList.remove('hidden');
@@ -690,7 +709,7 @@ async function openNotifs(){
   const nicks = await nicksFor((data || []).map(n => n.actor_id));
   $('nList').innerHTML = (data || []).map(n => {
     const who = nicks[n.actor_id] || 'кто-то';
-    const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : 'прокомментировал(а) твою историю';
+    const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : n.type === 'verdict' ? '📜 твоя история набрала 100 голосов — вердикт готов' : 'прокомментировал(а) твою историю';
     return '<div class="nItem' + (n.read ? '' : ' unread') + '" onclick="openCaseFromNotif(' + (n.case_id || 0) + ')"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + '»</div>' : '') + '</div>';
   }).join('') || '<div class="empty">Пока тихо 🔕</div>';
   await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false);
@@ -854,6 +873,7 @@ async function showProfile(){
     '<div class="secCard"><h4>' + ic('i-trophy') + 'рейтинг судей · топ-' + ts + '</h4>' + lbHtml +
       '<div class="topnote">Размер топа растёт с активностью народа: сейчас топ-' + ts + '. Ачивки активны только у судей из топа.</div></div>' +
     '<div class="secCard"><h4>' + ic('i-star') + 'ачивки</h4><div class="achGrid">' + achsHtml + '</div><div class="topnote">' + achsNote + '</div></div>' +
+    ('Notification' in window && Notification.permission === 'default' ? '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="askNotifPermission()">🔔 Включить уведомления</button>' : '') +
     '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="pickAva()">' + ic('i-camera') + 'Сменить фото</button>' +
     '<input type="file" id="avaFile" accept="image/*" style="display:none" onchange="uploadAva()">' +
     '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="renameMe()">Сменить никнейм</button>' +
@@ -951,15 +971,15 @@ function renderWrappedCanvas(s, t){
       if (r[3] === red) { fg.addColorStop(0, '#e2593f'); fg.addColorStop(1, '#c22f1f'); }
       else { fg.addColorStop(0, '#f4ca57'); fg.addColorStop(1, '#d99a1b'); }
       x.fillStyle = fg; rr(x, 260, y + 16, Math.max(16, 680 * r[2] / 100), 16, 8); x.fill();
-    } else { x.fillStyle = '#d99a1b'; x.beginPath(); x.arc(268, y + 24, 8, 0, 7); x.fill(); }
+    } else { x.fillStyle = '#d9a92b'; x.beginPath(); x.arc(268, y + 24, 8, 0, 7); x.fill(); }
     y += 130;
   });
   drawSeal(x, 205, 1140, 95);
   x.save(); x.shadowColor = 'rgba(70,50,10,.12)'; x.shadowBlur = 18; x.shadowOffsetY = 8;
   x.fillStyle = '#fff'; rr(x, 430, 1070, 540, 150, 28); x.fill(); x.restore();
   x.fillStyle = '#e0a52c'; x.font = '800 60px Georgia, serif';
-  x.textAlign = 'left'; x.fillText('“', 452, 1132);
-  x.textAlign = 'right'; x.fillText('”', 950, 1202);
+  x.textAlign = 'left'; x.fillText('"', 452, 1132);
+  x.textAlign = 'right'; x.fillText('"', 950, 1202);
   x.fillStyle = '#3a3a42'; x.font = '500 30px "OPPO Sans", system-ui'; x.textAlign = 'left';
   const q = QUOTES[t.t] || QUOTES['НАРОДНЫЙ СУДЬЯ'];
   wrapCenter(x, q, 420).slice(0, 2).forEach((l, i) => x.fillText(l, 505, 1132 + i * 44));
@@ -1119,7 +1139,7 @@ function duelCard(d){
       '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('i-share') + 'Поделиться</button></div>';
   }
   return '<div class="fitem' + (hot ? ' hot' : '') + '">' + (hot ? art : '') + '<div class="fbody">' +
-    '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + '⚔️ дуэль</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' + body + '</div></div>';
+    '<div class="fmeta"><span class="fmL"></span><span class="fmC">' + (hot ? '🔥 ' : '') + 'дуэль</span><span class="fmR">' + votesLabel(total) + '</span></div>' + body + '</div></div>';
 }
 async function duelVote(id, side){
   const { error } = await sb.rpc('duel_vote', { p_duel: id, p_side: side, p_device: device });
@@ -1284,7 +1304,7 @@ function dailyCard(c){
   }
   return '<div class="fitem hot"><div class="fart '+art+'"></div><div class="fbody">' +
     '<div class="dTop">🔥 дело дня · <span id="dcount_'+c.id+'"></span></div>' +
-    '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker('+c.id+')">'+nl2br(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
+    '<div class="ftxt">'+nl2br(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -1351,27 +1371,6 @@ function reactsHtml(caseId){
     return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + '" onclick="reactToggle(' + caseId + ',\'' + r.k + '\')"><span style="font-size:13px">' + r.e + '</span>' + (n ? ' ' + n : '') + '</button>';
   }).join('') + '</div>';
 }
-let reactCaseId = null;
-function openReactPicker(id){
-  if (!me) { openAuth(); return; }
-  reactCaseId = id;
-  const rc = allReacts.filter(r => r.case_id === id);
-  const counts = {}; rc.forEach(r => counts[r.kind] = (counts[r.kind]||0)+1);
-  const mine = rc.find(r => r.user_id === me.id);
-  $('reactRow').innerHTML = REACTS.map(r => {
-    const n = counts[r.k] || 0;
-    const on = mine && mine.kind === r.k;
-    const col = RCOLORS[r.k] || '#8A919E';
-    return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + ';font-size:12px;padding:8px 12px" onclick="pickReact(\'' + r.k + '\')"><span style="font-size:20px">' + r.e + '</span>' + (n ? ' ' + n : '') + '</button>';
-  }).join('');
-  $('reactSheet').classList.remove('hidden');
-}
-function closeReactSheet(){ $('reactSheet').classList.add('hidden'); reactCaseId = null; }
-async function pickReact(kind){
-  const id = reactCaseId; if (!id) return;
-  closeReactSheet();
-  await reactToggle(id, kind);
-}
 async function reactToggle(caseId, kind){
   if (!me) { openAuth(); return; }
   const { data, error: e1 } = await sb.from('reactions').select('id,kind').eq('case_id', caseId).eq('user_id', me.id);
@@ -1422,6 +1421,27 @@ function refreshCaseCard(caseId){
 }
 function myRFor(caseId, kind){
   return !!(me && allReacts.find(r => r.case_id === caseId && r.user_id === me.id && r.kind === kind));
+}
+let reactCaseId = null;
+function openReactPicker(id){
+  if (!me) { openAuth(); return; }
+  reactCaseId = id;
+  const rc = allReacts.filter(r => r.case_id === id);
+  const counts = {}; rc.forEach(r => counts[r.kind] = (counts[r.kind]||0)+1);
+  const mine = rc.find(r => r.user_id === me.id);
+  $('reactRow').innerHTML = REACTS.map(r => {
+    const n = counts[r.k] || 0;
+    const on = mine && mine.kind === r.k;
+    const col = RCOLORS[r.k] || '#8A919E';
+    return '<button class="rct' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + (on ? '26' : '12') + ';border-color:' + (on ? col + '66' : 'transparent') + ';font-size:12px;padding:8px 12px" onclick="pickReact(\'' + r.k + '\')"><span style="font-size:20px">' + r.e + '</span>' + (n ? ' ' + n : '') + '</button>';
+  }).join('');
+  $('reactSheet').classList.remove('hidden');
+}
+function closeReactSheet(){ $('reactSheet').classList.add('hidden'); reactCaseId = null; }
+async function pickReact(kind){
+  const id = reactCaseId; if (!id) return;
+  closeReactSheet();
+  await reactToggle(id, kind);
 }
 function evdHtml(c){
   if (!c || !c.media_url) return '';
@@ -1593,21 +1613,39 @@ function authorHtml(cm,nicks,stats){
   return '<div class="cHead" style="padding-right:26px">' + (nicks[cm.user_id] ? '<span class="nick">' + esc(nicks[cm.user_id]) + '</span>' : '<span class="nick">аноним</span>') + (s ? badgeHtml(cm.user_id, s) : '') + '</div>';
 }
 function cmtClass(cm){ return 'cmt' + (isPremiumUser(cm.user_id) ? ' cmt-premium' : ''); }
+function likesOf(cmId){ return allLikes.filter(l => l.comment_id === cmId).length; }
+async function likeComment(cmId){
+  if (!me) { openAuth(); return; }
+  const cur = allLikes.find(l => l.comment_id === cmId && l.user_id === me.id);
+  if (cur) {
+    await sb.from('comment_likes').delete().eq('comment_id', cmId).eq('user_id', me.id);
+    allLikes = allLikes.filter(l => !(l.comment_id === cmId && l.user_id === me.id));
+  } else {
+    const { error } = await sb.from('comment_likes').insert({ comment_id: cmId, user_id: me.id });
+    if (error) { toast('Лайк: ' + error.message); return; }
+    allLikes.push({ comment_id: cmId, user_id: me.id });
+  }
+  renderFeed();
+}
 function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
   return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) +
-   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div></div>';
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
+   '<div class="cActions"><button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button></div></div>';
 }
-function cmtBlock(cm,reps,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) +
+function cmtBlock(cm,reps,nicks,stats,topId){ const [lab,col]=sideInfo(cm);
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
+   '<button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
    '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats)).join('') + '</div></div>';
 }
 function buildComments(all,nicks,stats){
   const tops = all.filter(c => !c.parent_id);
   const byP = {}; all.filter(c => c.parent_id).forEach(c => { (byP[c.parent_id] = byP[c.parent_id] || []).push(c); });
-  return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats)).join('');
+  let topId = null, topN = 2;
+  tops.forEach(t => { const n = likesOf(t.id); if (n > topN) { topN = n; topId = t.id; } });
+  return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats, topId)).join('');
 }
 function commentInput(inputId, fn, tagId){
   return me ? '<div class="crow"><input id="' + inputId + '" maxlength="500" placeholder="Твой аргумент…"><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
@@ -1655,6 +1693,9 @@ async function loadFeed(){
   const ids = allCases.map(x => x.id);
   const rq = ids.length ? await sb.from('reactions').select('case_id,kind,user_id').in('case_id', ids) : { data: [] };
   allReacts = rq.data || [];
+  const cmIds = allComments.map(k => k.id);
+  const lq = cmIds.length ? await sb.from('comment_likes').select('comment_id,user_id').in('id', cmIds) : { data: [] };
+  allLikes = lq.data || [];
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
@@ -1665,7 +1706,7 @@ async function loadFeed(){
     myPrefs = new Set(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]));
   }
   await refreshTop();
-  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length;
+  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length + '|' + allLikes.length;
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
 }
 function renderChips(){
@@ -1674,6 +1715,69 @@ function renderChips(){
   $('chips').innerHTML = cats.map(c => '<button class="chipBtn' + (c === feedCat ? ' on' : '') + '" onclick="setFeedCat(\'' + c + '\')">' + esc(c) + '</button>').join('');
 }
 function setFeedCat(c){ feedCat = c; renderChips(); renderFeed(); }
+function renderVerdictCanvas(c){
+  const W = 1080, H = 1350;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#EDEEF2'; x.fillRect(0, 0, W, H);
+  const bg = x.createLinearGradient(0, 40, 0, H - 40);
+  bg.addColorStop(0, '#fffefb'); bg.addColorStop(.8, '#f8f3e9'); bg.addColorStop(1, '#f3ead6');
+  x.save(); x.shadowColor = 'rgba(60,45,10,.18)'; x.shadowBlur = 46; x.shadowOffsetY = 18;
+  x.fillStyle = bg; rr(x, 50, 40, W - 100, 1270, 60); x.fill(); x.restore();
+  x.save(); rr(x, 50, 40, W - 100, 1270, 60); x.clip();
+  drawWatermark(x, W, 80, 1280);
+  x.restore();
+  let g = x.createLinearGradient(200, 0, W - 200, 0);
+  g.addColorStop(0, '#8C6A1D'); g.addColorStop(.5, '#E9C767'); g.addColorStop(1, '#8C6A1D');
+  x.fillStyle = g; x.textAlign = 'center'; x.font = '600 56px "OPPO Sans", system-ui';
+  x.fillText('С У Д А Ч И М', W / 2, 190);
+  x.fillStyle = '#8A919E'; x.font = '500 34px "OPPO Sans", system-ui';
+  x.fillText('народный вердикт · ' + catOf(c), W / 2, 250);
+  x.fillStyle = '#1B1E24'; x.font = '500 42px "OPPO Sans", system-ui';
+  let lines = wrapCenter(x, c.text, W - 260);
+  if (lines.length > 5) { lines = lines.slice(0, 5); lines[4] += '…'; }
+  let y = 380;
+  for (const l of lines) { x.fillText(l, W / 2, y); y += 60; }
+  const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
+  const pct = v => Math.round(v * 100 / total);
+  const barsY = 760;
+  x.fillStyle = '#D33A2C'; rr(x, 140, barsY, (W - 280) * pct(c.condemn) / 100, 26, 13); x.fill();
+  x.fillStyle = '#E0A400'; rr(x, 140 + (W - 280) * pct(c.condemn) / 100 + 6, barsY, (W - 280) * pct(c.life) / 100, 26, 13); x.fill();
+  x.fillStyle = '#2E9E5B'; rr(x, 140 + (W - 280) * (pct(c.condemn) + pct(c.life)) / 100 + 12, barsY, Math.max(0, (W - 280) * pct(c.justify) / 100 - 12), 26, 13); x.fill();
+  x.font = '800 40px "OPPO Sans", system-ui';
+  x.textAlign = 'left'; x.fillStyle = '#D33A2C'; x.fillText('осуждают ' + pct(c.condemn) + '%', 140, barsY + 90);
+  x.textAlign = 'right'; x.fillStyle = '#2E9E5B'; x.fillText('не осуждают ' + pct(c.justify) + '%', W - 140, barsY + 90);
+  const maj = Math.max(c.condemn||0, c.justify||0, c.life||0);
+  const verdict = (c.life||0) === maj && maj > 0 ? 'народ сказал: ЖИЗА' : (c.justify||0) === maj ? 'народ решил: НЕ ОСУЖДАЮ' : 'народ решил: ОСУЖДАЮ';
+  const vg = x.createLinearGradient(200, 0, W - 200, 0);
+  vg.addColorStop(0, '#C9971C'); vg.addColorStop(.5, '#FF8A3D'); vg.addColorStop(1, '#C9971C');
+  x.fillStyle = vg; x.textAlign = 'center'; x.font = '800 52px "OPPO Sans", system-ui';
+  x.fillText(verdict, W / 2, 1000);
+  x.fillStyle = '#8A919E'; x.font = '500 30px "OPPO Sans", system-ui';
+  x.fillText(plural(total) + ' · ' + new Date().toLocaleDateString('ru-RU'), W / 2, 1060);
+  drawSeal(x, W / 2, 1180, 90);
+  return cv.toDataURL('image/png');
+}
+function shareVerdict(id){
+  const c = allById(id); if (!c) return;
+  track('share');
+  downloadOrShare(renderVerdictCanvas(c));
+}
+async function notifyCaseAuthor(caseId, text, parentId){
+  const c = allById(caseId);
+  if (c && c.user_id && c.user_id !== me.id) {
+    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
+  }
+  if (parentId) {
+    let pAuthor = null;
+    const loc = allComments.find(k => k.id === parentId);
+    if (loc) pAuthor = loc.user_id;
+    else { const { data } = await sb.from('comments').select('user_id').eq('id', parentId).maybeSingle(); pAuthor = data ? data.user_id : null; }
+    if (pAuthor && pAuthor !== me.id && (!c || pAuthor !== c.user_id)) {
+      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
+    }
+  }
+}
 async function renderFeed(){
   const list = allCases
     .filter(c => feedCat === 'все' || catL(c) === feedCat)
@@ -1690,14 +1794,14 @@ async function renderFeed(){
     const premium = isPremiumUser(c.user_id);
     const art = ART[catL(c)] || 'artD';
     const cmsAll = allComments.filter(k => k.case_id === c.id);
+    const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
+    const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
+    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
     const myR = me ? allReacts.find(r => r.case_id === c.id && r.user_id === me.id) : null;
     const myE = myR ? ((REACTS.find(r => r.k === myR.kind) || {}).e || '😀') : '😀';
     const cntR = {}; allReacts.filter(r => r.case_id === c.id).forEach(r => cntR[r.kind] = (cntR[r.kind]||0)+1);
     const sumList = REACTS.map(r => ({ r, n: cntR[r.k]||0 })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
     const sumHtml = sumList.length ? '<div class="reactsSum">' + sumList.map(x => { const on = myR && myR.kind === x.r.k; const col = RCOLORS[x.r.k] || '#8A919E'; return '<button class="rsChip' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + '14;border-color:' + (on ? col + '66' : 'transparent') + '" onclick="reactToggle(' + c.id + ',\'' + x.r.k + '\')">' + x.r.e + ' ' + x.n + '</button>'; }).join('') + '</div>' : '';
-    const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
-    const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
-    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
         '<div class="fmetaCat">🌙 треш · откроется с 23:00</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' +
@@ -1711,7 +1815,7 @@ async function renderFeed(){
       '<div class="fcom hidden" id="fc_' + c.id + '">' + cmHtml + '</div>'
     ) : (me ? (
       isMine(c) ? '<button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button>' +
-      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' :
+      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button>' + (total >= 100 ? '<button onclick="shareVerdict(' + c.id + ')">📜 вердикт</button>' : '') + '</div>' :
       '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="feedVote(' + c.id + ',\'condemn\')">😡 Осуждаю</button>' +
       '<button class="fpill" style="color:var(--yel)" onclick="feedVote(' + c.id + ',\'life\')">🤔 Жиза</button>' +
       '<button class="fpill" style="color:var(--grn)" onclick="feedVote(' + c.id + ',\'justify\')">👍 Не осуждаю</button></div>'
@@ -1790,6 +1894,10 @@ async function vote(v){
   queue = queue.filter(q => q.id !== cur.id);
   const ac = allById(cur.id); if (ac) ac[v] = (ac[v] || 0) + 1;
   track('swipe');
+  const nt100 = ((cur.condemn||0) + (cur.justify||0) + (cur.life||0));
+  if (nt100 === 100 && cur.user_id && cur.user_id !== me.id) {
+    sb.from('notifications').insert({ user_id: cur.user_id, actor_id: me.id, type: 'verdict', case_id: cur.id, text: '100 голосов — народный вердикт готов' }).then(() => {});
+  }
   const c = cur, total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
   const pct = x => Math.round(x * 100 / total);
   $('pills').innerHTML =
@@ -1829,21 +1937,6 @@ async function sendComment(){
     await loadComments(true);
   }
   toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
-}
-async function notifyCaseAuthor(caseId, text, parentId){
-  const c = allById(caseId);
-  if (c && c.user_id && c.user_id !== me.id) {
-    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
-  }
-  if (parentId) {
-    let pAuthor = null;
-    const loc = allComments.find(k => k.id === parentId);
-    if (loc) pAuthor = loc.user_id;
-    else { const { data } = await sb.from('comments').select('user_id').eq('id', parentId).maybeSingle(); pAuthor = data ? data.user_id : null; }
-    if (pAuthor && pAuthor !== me.id && (!c || pAuthor !== c.user_id)) {
-      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
-    }
-  }
 }
 function openForm(){ if (!me) { openAuth(); return; } $('modal').classList.remove('hidden'); }
 function closeForm(){ $('modal').classList.add('hidden'); }
@@ -2151,7 +2244,26 @@ async function maybeOg(){
   toast('OG-картинка и иконки скачаны — закинь их в корень репозитория');
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) loadFeed(); });
-setInterval(() => { if (!document.hidden) loadFeed(); }, 30000);
+setInterval(() => {
+  if (!document.hidden) { loadFeed(); return; }
+  if (me && 'Notification' in window && Notification.permission === 'granted') {
+    sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', me.id).eq('read', false).then(({ count }) => {
+      const n = count || 0;
+      if (n > lastUnread) { try { new Notification('Судачим 💬', { body: 'Новое по твоим историям — непрочитанных: ' + n }); } catch (e) {} }
+      lastUnread = n;
+    });
+  }
+}, 30000);
+var lastUnread = 0;
+function askNotifPermission(){
+  if (!('Notification' in window)) { toast('Устройство не поддерживает уведомления'); return; }
+  Notification.requestPermission().then(p => toast(p === 'granted' ? 'Уведомления включены 🔔' : 'Ладно, не будем навязываться'));
+}
+function applyNight(){ document.body.classList.toggle('night', trashOpen()); }
+applyNight(); setInterval(applyNight, 60000);
+if (!localStorage.getItem('sud_onboard')) {
+  setTimeout(() => { $('onboard').classList.remove('hidden'); localStorage.setItem('sud_onboard', '1'); setTimeout(() => $('onboard').classList.add('hidden'), 6000); }, 800);
+}
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 load();
 maybeOg();
