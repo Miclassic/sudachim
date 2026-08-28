@@ -453,6 +453,7 @@ body.night .bubble{background:#171A20!important;background-image:radial-gradient
     <button class="bn on" data-t="court" onclick="showTab('court')"><svg class="icn"><use href="#i-scale"/></svg>суд</button>
     <button class="bn sizzle" data-t="duels" onclick="showTab('duels')"><svg class="icn"><use href="#i-swords"/></svg>дуэли</button>
     <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><svg class="icn"><use href="#i-flame"/></svg>дело дня</button>
+    <button class="bn" data-t="mine" onclick="showTab('mine')"><svg class="icn"><use href="#i-doc"/></svg>мои</button>
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
   <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
@@ -502,6 +503,11 @@ body.night .bubble{background:#171A20!important;background-image:radial-gradient
     <div class="secHead"><svg class="icn"><use href="#i-flame"/></svg>дело дня</div>
     <div class="secDesc">Одна история в день. Голосуй до 21:00 — вечером открывается народный вердикт.</div>
     <div id="dailyList"></div>
+  </section>
+  <section id="tab-mine" class="hidden">
+    <div class="secHead"><svg class="icn"><use href="#i-doc"/></svg>твои истории</div>
+    <div class="secDesc">То, что ты отправил. Народ голосует, ты читаешь комментарии.</div>
+    <div id="myCasesTab" style="display:flex;flex-direction:column;gap:10px"></div>
   </section>
   <section id="tab-profile" class="hidden">
     <div class="secHead"><svg class="icn"><use href="#i-user"/></svg>профиль</div>
@@ -768,9 +774,10 @@ function scoreCase(c, total){
   return act*2 + recency*3 + controversy*2 + personal + Math.log(total+1)*.5;
 }
 function showTab(t){
-  ['court','duels','daily','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
+  ['court','duels','daily','mine','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
   document.querySelectorAll('.bn').forEach(b => b.classList.toggle('on', b.dataset.t === t));
   if (t === 'profile') showProfile();
+  if (t === 'mine') renderMine();
   if (t === 'duels') renderDuels();
   if (t === 'daily') renderDaily();
   window.scrollTo(0, 0);
@@ -1927,11 +1934,12 @@ async function notifyCaseAuthor(caseId, text, parentId){
 async function renderFeed(){
   renderTicker();
   const list = allCases
+    .filter(c => !isMine(c))
     .filter(c => feedCat === 'все' || catL(c) === feedCat)
     .map(c => ({ c, total: (c.condemn||0) + (c.justify||0) + (c.life||0) }))
     .sort((a, b) => scoreCase(b.c, b.total) - scoreCase(a.c, a.total) || b.c.id - a.c.id);
   $('feedHead').classList.toggle('hidden', !list.length);
-  $('myCasesMain').innerHTML = me ? myCasesHtml(allCases.filter(c => isMine(c))) : '';
+  $('myCasesMain').innerHTML = '';
   const nicks = await nicksFor(allComments.map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
   const fe = $('feed'); if (fe.dataset.once) fe.classList.add('rerender'); else fe.dataset.once = '1';
@@ -2264,6 +2272,8 @@ function apply(){
 }
 function openCaseFromNotif(id){
   closeNotifs();
+  const cc = allById(id);
+  if (cc && isMine(cc)) { showTab('mine'); setTimeout(() => feedToggleComments(id, true), 600); return; }
   showTab('court');
   const c = allById(id);
   if (!c) { toast('Запись не найдена или ещё на модерации'); return; }
@@ -2421,6 +2431,21 @@ window.addEventListener('error', e => { try { const t = $('toast'); t.textConten
 window.addEventListener('unhandledrejection', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + ((e.reason && e.reason.message) || e.reason || 'rejection'); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 20000); } catch(_){} });
 setTimeout(loadFeed, 4000);
 setTimeout(loadFeed, 9000);
+async function renderMine(){
+  const box = $('myCasesTab'); if (!box) return;
+  if (!me) { box.innerHTML = '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы видеть свои истории</button>'; return; }
+  const { data } = await sb.from('cases').select('*').eq('user_id', me.id).eq('status', 'approved').order('created_at', { ascending: false });
+  const list = data || [];
+  if (!list.length) { box.innerHTML = '<div class="empty">Ты ещё не отправлял историй.<br>Жми «рассуди меня» — народ ждёт.</div>'; return; }
+  box.innerHTML = list.map(c => {
+    const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
+    const pct = v => Math.round(v * 100 / total);
+    return '<div class="mcItem" style="background:var(--card);box-shadow:0 8px 22px rgba(20,24,32,.06)"><div class="mcTxt" style="white-space:normal">' + esc(c.text) + '</div>' +
+      '<div class="mcPills"><span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span><span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span><span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div>' +
+      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
+      '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
+  }).join('');
+}
 load();
 maybeOg();
 </script>
