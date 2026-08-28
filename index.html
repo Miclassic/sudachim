@@ -140,7 +140,7 @@ main{padding:118px 16px 30px;max-width:620px;width:100%;margin:0 auto}
   #feed{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
 }
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.fitem{position:relative;overflow:hidden;background:#fff;border-radius:24px;box-shadow:0 12px 34px rgba(20,24,32,.08);animation:rise .45s ease both}
+.fitem{position:relative;overflow:hidden;background:#fff;border-radius:24px;box-shadow:0 12px 34px rgba(20,24,32,.08);animation:rise .3s ease both}
 .fitem.hot{box-shadow:0 16px 44px rgba(201,151,28,.20)}
 .fart{position:absolute;top:0;left:0;right:0;height:58%;opacity:.55;overflow:hidden;-webkit-mask-image:linear-gradient(#000 38%,transparent 74%);mask-image:linear-gradient(#000 38%,transparent 74%);background-image:var(--grad)}
 .fart::before{content:"";position:absolute;top:-96px;left:-96px;right:-96px;bottom:-96px;background-image:var(--pat);background-size:96px 96px;will-change:transform}
@@ -383,6 +383,7 @@ body.night .tickTrack .tkL{color:#EDEEF2}
 body.night .tkHot{color:#FF6B5E}body.night .tkLead{color:#FF8A3D}body.night .tkOn{color:#3DD68C}body.night .tkMoon{color:#B18CFF}
 .chipBtn{transition:transform .15s ease,color .3s ease,box-shadow .3s ease}
 .chipBtn:active{transform:scale(.9)}
+#feed.rerender .fitem{animation:none}
 </style>
 </head>
 <body>
@@ -1929,7 +1930,7 @@ async function renderFeed(){
     const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + esc(k.text).slice(0,120) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       const excerpt = c.text.replace(/\s+/g,' ').slice(0, 70) + '…';
-      return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
+      return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
         '<div class="fmetaCat">🌙 треш · откроется с 23:00</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' +
         '<div class="ftxt" style="color:var(--gray)">' + esc(excerpt) + '</div>' +
         '<button class="fpill lockPill" style="flex:1">🔒 треш-час: с 23:00 до 5:00</button></div></div>';
@@ -1949,7 +1950,7 @@ async function renderFeed(){
     ) : (
       '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button></div>' 
     ));
-    return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
+    return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
       '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + '</div></div>';
   }).join('');
