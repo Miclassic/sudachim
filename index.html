@@ -2716,6 +2716,8 @@ function fixDuelMeta(){
   });
 }
 fixDuelMeta(); setInterval(fixDuelMeta, 1200);
+const dl = document.getElementById('duelsList');
+if (dl) new MutationObserver(() => fixDuelMeta()).observe(dl, { childList: true, subtree: true });
 load();
 (function(){
   const q = new URLSearchParams(location.search);
