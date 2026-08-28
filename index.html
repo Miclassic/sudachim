@@ -430,6 +430,9 @@ body.night .bn.on{color:#FFB4AA}
 .bnRow{display:flex;align-items:center;gap:5px}
 .bnSub{font-size:8px;font-weight:800;color:var(--gray);letter-spacing:.4px;font-variant-numeric:tabular-nums}
 body.night .bnSub{color:#FF8A3D}
+.betaB{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,rgba(201,151,28,.12),rgba(201,151,28,.05));border:1.5px dashed rgba(201,151,28,.5);color:var(--ink);border-radius:14px;padding:8px 12px;font-size:11px;font-weight:600;line-height:1.4;margin:0 0 12px}
+.betaB button{margin-left:auto;flex:none;background:none;border:none;color:var(--gray);font-size:12px;padding:2px 6px}
+body.night .betaB{background:linear-gradient(90deg,rgba(255,138,61,.12),rgba(255,138,61,.04));border-color:rgba(255,138,61,.45)}
 </style>
 </head>
 <body>
@@ -480,6 +483,7 @@ body.night .bnSub{color:#FF8A3D}
   <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
 </div>
 <main>
+  <div id="betaBanner" class="betaB hidden"><span>🧪 тестовый режим: кое-что может ломаться — зато ты первым видишь новые фичи и судишь их раньше всех</span><button onclick="dismissBeta()">✕</button></div>
   <section id="tab-court">
     <div class="secHead"><svg class="icn"><use href="#i-scale"/></svg>суд</div>
     <div class="secDesc">Свайпай истории и выноси вердикт. Народ решит, кто прав, — и покажет, совпадаешь ли ты с ним.</div>
@@ -2505,6 +2509,8 @@ function srvNow(){ return Date.now() + (SRV_OFF || 0); }
 function mskHour(){ try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hour: '2-digit', hourCycle: 'h23' }).format(new Date(srvNow()))); } catch(e){ return (new Date(srvNow()).getUTCHours() + 3) % 24; } }
 function mskDay(iso){ try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); } catch(e){ return String(iso).slice(0, 10); } }
 function msTo21(){ try { const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(srvNow())).forEach(x => p[x.type] = x.value); const sec = 21 * 3600 - ((+p.hour) * 3600 + (+p.minute) * 60 + (+p.second)); return sec < 0 ? 0 : sec * 1000; } catch(e){ return 0; } }
+function dismissBeta(){ localStorage.setItem('sud_beta_off', '1'); $('betaBanner').classList.add('hidden'); }
+if (!localStorage.getItem('sud_beta_off')) $('betaBanner').classList.remove('hidden');
 load();
 maybeOg();
 </script>
