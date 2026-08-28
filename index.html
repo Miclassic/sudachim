@@ -398,6 +398,12 @@ body.night .fart{animation:fartInN .9s ease .1s both}
 @keyframes fartInN{from{opacity:0}}
 .fitem{animation:none!important}
 body.night .fart::before{display:none!important}
+body.night .fitem{box-shadow:0 12px 34px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.06)}
+body.night .fart{opacity:.34}
+body.night .fart::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.045) 0 1px,transparent 1px 7px),radial-gradient(90% 70% at 50% 0%,rgba(255,255,255,.07),transparent 70%)}
+body.night .fitem.trashHot .fart{opacity:.42}
+body.night .bubble{background-image:radial-gradient(120% 70% at 50% 0%,rgba(122,92,255,.12),transparent 70%)}
+body.night .cmt{box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.05)}
 </style>
 </head>
 <body>
