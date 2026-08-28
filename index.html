@@ -514,6 +514,13 @@ body.night .bn.on{color:#FFB4AA;animation:none;box-shadow:none}
 body.night .bn.on{background:transparent}
 .bn.on::after{height:2px;left:12%;right:12%;background:radial-gradient(50% 100% at 50% 50%,#FFE9A8 0%,#C9971C 40%,rgba(201,151,28,0) 100%);box-shadow:0 0 6px rgba(201,151,28,.5)}
 body.night .bn.on::after{background:radial-gradient(50% 100% at 50% 50%,#FF8A7A 0%,#FF4438 40%,rgba(255,68,56,0) 100%);box-shadow:0 0 8px rgba(255,68,56,.55)}
+.hotRow{display:flex;gap:6px;justify-content:center;margin:2px 0 6px;flex-wrap:wrap}
+.hotChip{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+.hotChip .icn{width:10px;height:10px}
+.hotFire{background:rgba(255,138,61,.14);color:#C9791C;box-shadow:0 0 10px rgba(255,138,61,.25)}
+body.night .hotFire{color:#FF8A3D}
+.hotContr{background:rgba(201,151,28,.12);color:#8C6A1D;box-shadow:0 0 10px rgba(201,151,28,.2)}
+body.night .hotContr{color:#E9C767}
 </style>
 </head>
 <body>
@@ -711,7 +718,7 @@ function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVot
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
 let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
-let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0;
+let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0, hourCnt = {};
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null, pickedMedia = null;
 const ICOS = {
@@ -1953,6 +1960,8 @@ async function loadFeed(){
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
+  const h1 = new Date(srvNow() - 3600000).toISOString();
+  hourCnt = {}; (rv.data || []).forEach(r => { if (r.created_at >= h1) hourCnt[r.case_id] = (hourCnt[r.case_id] || 0) + 1; });
   sb.from('votes').select('user_id').gte('created_at', new Date(srvNow() - 3600000).toISOString() ).then(({ data }) => {
     onlineNow = [...new Set((data || []).map(r => r.user_id))].length;
     if (trashOpen()) { const el = $('nightCount'); if (el) el.textContent = onlineNow ? '· сейчас в ночном суде: ' + onlineNow + ' 🌙' : ''; }
@@ -2049,6 +2058,10 @@ async function renderFeed(){
   $('myCasesMain').innerHTML = '';
   const nicks = await nicksFor(allComments.map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
+  let topHourId = null, topHourN = 2;
+  Object.entries(hourCnt).forEach(([id, n]) => { if (n > topHourN) { topHourN = n; topHourId = +id; } });
+  let contrId = null, contrBest = 0.11;
+  list.forEach(({ c }) => { const a = c.condemn || 0, b = c.justify || 0, t = a + b; if (t >= 6) { const d = Math.abs(a - b) / t; if (d < contrBest) { contrBest = d; contrId = c.id; } } });
   const fe = $('feed'); if (fe.dataset.once) fe.classList.add('rerender'); else fe.dataset.once = '1';
   $('feed').innerHTML = list.map(({ c, total }, i) => {
     const pct = v => total ? Math.round(v * 100 / total) : 0;
@@ -2072,6 +2085,10 @@ async function renderFeed(){
     let prevHtml = '';
     if (lastC && (!topAdv || lastC.id !== topAdv.id)) prevHtml += '<div class="cardPrev" onclick="jumpToComment(' + c.id + ',' + lastC.id + ')">' + esc(nicks[lastC.user_id] || 'аноним') + ': ' + esc(lastC.text).replace(/\s+/g, ' ').slice(0, 80) + '</div>';
     if (topAdv) prevHtml += '<div class="cardPrev adv" onclick="jumpToComment(' + c.id + ',' + topAdv.id + ')">' + ic('i-shield') + ' ' + esc(nicks[topAdv.user_id] || 'аноним') + ': ' + esc(topAdv.text).replace(/\s+/g, ' ').slice(0, 80) + ' · 👏' + likesOf(topAdv.id) + '</div>';
+    let hotHtml = '';
+    if (c.id === topHourId) hotHtml += '<span class="hotChip hotFire">' + ic('i-flame') + 'голоса часа</span>';
+    if (c.id === contrId) { const a = c.condemn || 0, b = c.justify || 0, t = a + b || 1; hotHtml += '<span class="hotChip hotContr">' + ic('i-scale') + 'спорное · ' + Math.round(a * 100 / t) + '/' + Math.round(b * 100 / t) + '</span>'; }
+    if (hotHtml) hotHtml = '<div class="hotRow">' + hotHtml + '</div>';
     const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + esc(k.text).slice(0,120) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       const excerpt = c.text.replace(/\s+/g,' ').slice(0, 70) + '…';
@@ -2097,7 +2114,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + prevHtml + '</div></div>';
+      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + hotHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + prevHtml + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
