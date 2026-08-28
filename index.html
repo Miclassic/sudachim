@@ -2499,9 +2499,9 @@ function dailyTabTick(){
   el.textContent = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
 dailyTabTick(); setInterval(dailyTabTick, 1000);
-let SRV_OFF = 0;
+var SRV_OFF = 0;
 sb.rpc('server_now').then(({ data }) => { if (data) SRV_OFF = Date.parse(data) - Date.now(); }).catch(() => {});
-const srvNow = () => Date.now() + SRV_OFF;
+function srvNow(){ return Date.now() + (SRV_OFF || 0); }
 function mskHour(){ try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hour: '2-digit', hourCycle: 'h23' }).format(new Date(srvNow()))); } catch(e){ return (new Date(srvNow()).getUTCHours() + 3) % 24; } }
 function mskDay(iso){ try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); } catch(e){ return String(iso).slice(0, 10); } }
 function msTo21(){ try { const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(srvNow())).forEach(x => p[x.type] = x.value); const sec = 21 * 3600 - ((+p.hour) * 3600 + (+p.minute) * 60 + (+p.second)); return sec < 0 ? 0 : sec * 1000; } catch(e){ return 0; } }
