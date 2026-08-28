@@ -467,6 +467,8 @@ body.night .laserLine{background:radial-gradient(50% 100% at 50% 50%,#FF8A7A 0%,
 .cardPrev.adv{opacity:.95;color:var(--ink);border-left:2px solid var(--gold);padding-left:6px}
 body.night .cardPrev.adv{color:#EDEEF2;border-left-color:#FF8A3D}
 .cardPrev .icn{width:11px;height:11px;color:var(--gold)}
+.cardPrev{font-size:11px;color:var(--gray);opacity:.75;margin:8px 2px 2px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardPrev.adv{opacity:1;color:var(--ink);border-left:2px solid var(--gold);padding-left:6px}
 </style>
 </head>
 <body>
@@ -2050,7 +2052,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + prevHtml + actions + '</div></div>';
+      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + (prevHtml ? actions.replace('<div class="fbtns">', prevHtml + '<div class="fbtns">') : actions) + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
