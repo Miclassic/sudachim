@@ -502,6 +502,18 @@ body.night .cardPrev{border-color:rgba(255,255,255,.10);background:rgba(0,0,0,.3
 body.night #toast{background:rgba(10,11,14,.92);border-color:rgba(255,138,61,.45);box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 28px rgba(255,68,56,.22);color:#F2F4F8}
 #toast:not(.hidden){animation:toastIn .35s ease}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.betaTag{display:inline-block;vertical-align:2px;margin-left:6px;font-size:8px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,#8A919E,#5F6774);border-radius:999px;padding:2px 7px;box-shadow:0 2px 8px rgba(20,24,32,.25)}
+body.night .betaTag{background:linear-gradient(90deg,#FF8A3D,#D33A2C);box-shadow:0 2px 10px rgba(211,58,44,.45)}
+.betaTag{font-size:6.5px;padding:1px 5px;letter-spacing:.5px;margin-left:4px}
+.bn{background:transparent;box-shadow:none;position:relative}
+.bn.on{background:transparent;box-shadow:none;color:var(--ink);animation:none}
+.bn.on::after{content:"";position:absolute;left:16%;right:16%;bottom:3px;height:3px;border-radius:999px;background:var(--gold);box-shadow:0 2px 10px rgba(201,151,28,.7),0 5px 18px rgba(201,151,28,.45)}
+body.night .bn.on{color:#FFB4AA}
+body.night .bn.on::after{background:#FF4438;box-shadow:0 2px 10px rgba(255,68,56,.8),0 5px 20px rgba(255,68,56,.5)}
+body.night .bn.on{color:#FFB4AA;animation:none;box-shadow:none}
+body.night .bn.on{background:transparent}
+.bn.on::after{height:2px;left:12%;right:12%;background:radial-gradient(50% 100% at 50% 50%,#FFE9A8 0%,#C9971C 40%,rgba(201,151,28,0) 100%);box-shadow:0 0 6px rgba(201,151,28,.5)}
+body.night .bn.on::after{background:radial-gradient(50% 100% at 50% 50%,#FF8A7A 0%,#FF4438 40%,rgba(255,68,56,0) 100%);box-shadow:0 0 8px rgba(255,68,56,.55)}
 </style>
 </head>
 <body>
@@ -552,7 +564,7 @@ body.night #toast{background:rgba(10,11,14,.92);border-color:rgba(255,138,61,.45
   <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
 </div>
 <main>
-  <div id="betaBanner" class="betaB hidden"><span>🧪 тестовый режим: кое-что может ломаться — зато ты первым видишь новые фичи и судишь их раньше всех</span><button onclick="dismissBeta()">✕</button></div>
+
   <section id="tab-court">
     <div class="secHead"><svg class="icn"><use href="#i-scale"/></svg>суд</div>
     <div class="secDesc">народный суд над бытовыми ситуациями: анонимно кидаешь историю — народ свайпает и выносит вердикт. никто не узнает, все посмеются, а кто-то словит жизу.</div>
@@ -2584,8 +2596,6 @@ function srvNow(){ return Date.now() + (SRV_OFF || 0); }
 function mskHour(){ try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hour: '2-digit', hourCycle: 'h23' }).format(new Date(srvNow()))); } catch(e){ return (new Date(srvNow()).getUTCHours() + 3) % 24; } }
 function mskDay(iso){ try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); } catch(e){ return String(iso).slice(0, 10); } }
 function msTo21(){ try { const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(srvNow())).forEach(x => p[x.type] = x.value); const sec = 21 * 3600 - ((+p.hour) * 3600 + (+p.minute) * 60 + (+p.second)); return sec < 0 ? 0 : sec * 1000; } catch(e){ return 0; } }
-function dismissBeta(){ localStorage.setItem('sud_beta_off', '1'); $('betaBanner').classList.add('hidden'); }
-if (!localStorage.getItem('sud_beta_off')) $('betaBanner').classList.remove('hidden');
 function renderEmpty(){
   const n = trashOpen();
   $('empty').innerHTML =
@@ -2618,6 +2628,15 @@ function jumpToComment(caseId, cmtId){
     }
   }, 350);
 }
+(function(){
+  const nodes = document.querySelectorAll('div,span,b,h1,h2');
+  for (const n of nodes) {
+    if (n.children.length === 0 && n.textContent.trim() === 'судачим') {
+      n.insertAdjacentHTML('beforeend', ' <span class="betaTag">бета</span>');
+      break;
+    }
+  }
+})();
 load();
 maybeOg();
 </script>
