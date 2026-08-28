@@ -521,6 +521,18 @@ body.night .bn.on::after{background:radial-gradient(50% 100% at 50% 50%,#FF8A7A 
 body.night .hotFire{color:#FF8A3D}
 .hotContr{background:rgba(201,151,28,.12);color:#8C6A1D;box-shadow:0 0 10px rgba(201,151,28,.2)}
 body.night .hotContr{color:#E9C767}
+.duelAdd{display:block;margin:0 auto 14px;background:transparent!important;box-shadow:none!important;animation:none!important;border:1.5px dashed rgba(154,163,174,.45)!important;color:var(--gray)!important}
+body.night .duelAdd{border-color:rgba(255,138,61,.4)!important;color:#9AA3AE!important}
+#tab-duels .secHead{position:relative}
+.duelAdd{position:absolute;right:0;top:50%;transform:translateY(-50%);margin:0;padding:7px 12px;font-size:11px}
+#tab-duels .secHead{display:flex;align-items:center;gap:6px;position:static}
+.duelAdd{position:static;transform:none;margin-left:auto!important;padding:5px 10px!important;font-size:10px!important;border-radius:999px!important}
+.duelAdd{display:inline-flex;align-items:center;gap:5px}
+.daPlus{font-size:12px;font-weight:800;line-height:1;color:#C9971C}
+body.night .daPlus{color:#FF8A3D}
+#tab-duels .secHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.shWrap{display:flex;align-items:center;gap:6px}
+.duelAdd{flex:none}
 </style>
 </head>
 <body>
@@ -2653,6 +2665,18 @@ function jumpToComment(caseId, cmtId){
       break;
     }
   }
+})();
+(function(){
+  const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('предложить дуэль'));
+  const h = document.querySelector('#tab-duels .secHead');
+  if (!b || !h) return;
+  b.classList.add('duelAdd'); b.innerHTML = '<span class="daPlus">+</span>предложить дуэль';
+  if (!h.querySelector('.shWrap')) {
+    const w = document.createElement('span'); w.className = 'shWrap';
+    [...h.childNodes].forEach(n => w.appendChild(n));
+    h.appendChild(w);
+  }
+  h.appendChild(b);
 })();
 load();
 maybeOg();
