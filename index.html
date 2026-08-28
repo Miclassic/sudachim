@@ -330,6 +330,15 @@ body.night .pill.grn{box-shadow:0 10px 26px rgba(61,214,140,.4)}
 body.night .bCap{background-image:linear-gradient(90deg,#7A5CFF,#FF4438,#E9C767,#7A5CFF)}
 body.night #trashBanner{background:linear-gradient(90deg,#2A1230,#4A1D1D);font-size:14px;box-shadow:0 10px 34px rgba(255,68,56,.25), inset 0 0 0 1px rgba(255,68,56,.35)}
 body.night #trashBanner .icn{width:20px;height:20px;color:#FF8A3D;animation:fireP 1.6s ease-in-out infinite}
+.ticker{max-width:620px;margin:0 auto;overflow:hidden;padding:0 12px 8px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tickTrack{display:flex;width:max-content;animation:tick 40s linear infinite;will-change:transform;color:var(--gray);font-size:11px;font-weight:600}
+.ticker:hover .tickTrack{animation-play-state:paused}
+.tickHalf{display:inline-flex;align-items:center;gap:26px;padding-right:26px;white-space:nowrap}
+.tickTrack .sep{color:var(--gold);opacity:.8}
+@keyframes tick{to{transform:translateX(-50%)}}
+body.night .tickTrack .sep{color:#FF8A3D}
+body.night .tickTrack{color:#B4AEB8}
+main{padding-top:142px}
 </style>
 </head>
 <body>
@@ -376,6 +385,7 @@ body.night #trashBanner .icn{width:20px;height:20px;color:#FF8A3D;animation:fire
     <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><svg class="icn"><use href="#i-flame"/></svg>дело дня</button>
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
+  <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
 </div>
 <main>
   <section id="tab-court">
@@ -1846,6 +1856,7 @@ async function notifyCaseAuthor(caseId, text, parentId){
   }
 }
 async function renderFeed(){
+  renderTicker();
   const list = allCases
     .filter(c => feedCat === 'все' || catL(c) === feedCat)
     .map(c => ({ c, total: (c.condemn||0) + (c.justify||0) + (c.life||0) }))
@@ -2251,10 +2262,30 @@ function applyNight(){
   document.body.classList.toggle('night', n);
   if (nightPrev && !n) toast('🌅 Рассвет! Ночной суд закрыт — голоса снова дневные');
   if (!nightPrev && n) { toast('🌙 Ночной суд открыт — до 5:00'); nightFx(); }
-  nightPrev = n;
+  nightPrev = n; renderTicker();
 }
 function nightFx(){ const fx = $('nightFx'); if (!fx) return; fx.style.opacity = '1'; const m = fx.firstElementChild; if (m) m.style.transform = 'scale(1)'; setTimeout(() => { fx.style.opacity = '0'; if (m) m.style.transform = 'scale(.5)'; }, 1600); }
 if (trashOpen()) setTimeout(nightFx, 700);
+async function renderTicker(){
+  const el = $('tickTrack'); if (!el) return;
+  const items = [];
+  if (trashOpen()) items.push('🌙 треш-час открыт — до 5:00, правда честнее');
+  const total24 = Object.values(voteCnt24).reduce((a, b) => a + b, 0);
+  if (total24) items.push('⚖️ голосов за сутки: ' + total24);
+  const hot = allById([...hotCases][0]);
+  if (hot) items.push('🔥 сейчас судят: ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
+  if (topCache.list[0]) {
+    const p = await profilesFor([topCache.list[0].id]);
+    const u = p[topCache.list[0].id];
+    items.push('🏆 лидер народа: ' + esc(u ? u.nick : 'аноним') + ' · ' + topCache.list[0].score + ' оч.');
+  }
+  items.push('📝 расскажи свою историю — народ рассудит');
+  items.push('🤫 всё анонимно · 16+');
+  const half = items.map(t => '<span>' + t + '</span>').join('<span class="sep">✦</span>') + '<span class="sep">✦</span>';
+  el.innerHTML = '<div class="tickHalf">' + half + '</div><div class="tickHalf">' + half + '</div>';
+  el.style.animationDuration = Math.min(90, Math.max(30, Math.round(items.join('').length * 0.2))) + 's';
+}
+renderTicker();
 applyNight(); setInterval(applyNight, 60000);
 setInterval(() => {
   document.querySelectorAll('[data-end]').forEach(el => {
