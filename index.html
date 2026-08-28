@@ -358,9 +358,23 @@ body.night .miniBtn.cta{background:linear-gradient(90deg,#7A1D1D,#E2593F);animat
 .ticker::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 130% at 50% 50%,rgba(201,151,28,.12),transparent 70%)}
 body.night .ticker::after{background:radial-gradient(60% 130% at 50% 50%,rgba(255,68,56,.14),transparent 70%)}
 .tickLayer{overflow:hidden}
-.tickBase{-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent 48%,transparent 52%,#000 60%);mask-image:linear-gradient(90deg,#000 40%,transparent 48%,transparent 52%,#000 60%)}
-.tickZoom{position:absolute;inset:0;transform:scale(1.05,1.22);-webkit-mask-image:linear-gradient(90deg,transparent 40%,#000 50%,transparent 60%);mask-image:linear-gradient(90deg,transparent 40%,#000 50%,transparent 60%)}
+.tickBase{-webkit-mask-image:linear-gradient(90deg,#000 44%,transparent 45%,transparent 55%,#000 56%);mask-image:linear-gradient(90deg,#000 44%,transparent 45%,transparent 55%,#000 56%)}
+.tickZoom{position:absolute;inset:0;transform:scale(1.05,1.22);-webkit-mask-image:linear-gradient(90deg,transparent 44%,#000 45%,#000 55%,transparent 56%);mask-image:linear-gradient(90deg,transparent 44%,#000 45%,#000 55%,transparent 56%)}
 body.night .tickZoom{filter:drop-shadow(0 0 6px rgba(255,138,61,.35))}
+.tickZoom{position:absolute;inset:0;transform:scale(1.05,1.22);clip-path:inset(-40% 38% -40% 38%);background:linear-gradient(90deg,transparent 36%,rgba(237,238,242,.95) 39% 61%,transparent 64%)}
+body.night .tickZoom{background:linear-gradient(90deg,transparent 36%,rgba(15,17,21,.95) 39% 61%,transparent 64%)}
+.tickBase{-webkit-mask-image:none!important;mask-image:none!important}
+.tickZoom{clip-path:inset(-40% 30% -40% 30%);transform:scale(1.06,1.25);background:linear-gradient(90deg,transparent 28%,rgba(237,238,242,.95) 32% 68%,transparent 72%);box-shadow:inset 0 5px 9px -6px rgba(20,24,32,.45), inset 0 -5px 9px -6px rgba(20,24,32,.45)}
+body.night .tickZoom{background:linear-gradient(90deg,transparent 28%,rgba(15,17,21,.95) 32% 68%,transparent 72%);box-shadow:inset 0 5px 9px -6px rgba(0,0,0,.7), inset 0 -5px 9px -6px rgba(0,0,0,.7)}
+.tickZoom::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 8px),radial-gradient(90% 120% at 50% 0%,rgba(255,255,255,.10),transparent 55%),radial-gradient(rgba(120,90,20,.10) 1px,transparent 1.6px);background-size:auto,auto,26px 18px}
+body.night .tickZoom::after{background:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 7px),radial-gradient(90% 140% at 50% 0%,rgba(255,138,61,.08),transparent 60%),radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.6px);background-size:auto,auto,24px 16px}
+.tickBase{position:relative;z-index:0}
+.tickZoom{position:absolute!important;inset:0!important;z-index:2}
+.tickZoom{background:linear-gradient(90deg,transparent 28%,rgba(237,238,242,.95) 32%,rgba(237,238,242,.95) 68%,transparent 72%)}
+body.night .tickZoom{background:linear-gradient(90deg,transparent 28%,rgba(15,17,21,.95) 32%,rgba(15,17,21,.95) 68%,transparent 72%)}
+.tickZoom{transform:scale(1,1.22)}
+.tickZoom{display:none!important}
+.tickHalf i{font-style:normal;display:inline-block}
 </style>
 </head>
 <body>
@@ -407,7 +421,7 @@ body.night .tickZoom{filter:drop-shadow(0 0 6px rgba(255,138,61,.35))}
     <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><svg class="icn"><use href="#i-flame"/></svg>дело дня</button>
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
-  <div class="ticker"><div class="tickLayer tickBase"><div class="tickTrack" id="tickTrack"></div></div><div class="tickLayer tickZoom" aria-hidden="true"><div class="tickTrack" id="tickTrack2"></div></div></div>
+  <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
 </div>
 <main>
   <section id="tab-court">
@@ -428,7 +442,6 @@ body.night .tickZoom{filter:drop-shadow(0 0 6px rgba(255,138,61,.35))}
           <div class="stamp stL" id="stL">ОСУЖДАЮ</div>
           <div class="stamp stR" id="stR">НЕ ОСУЖДАЮ</div>
           <div class="stamp stU" id="stU">ЖИЗА</div>
-          <button id="speakBtn" onpointerdown="event.stopPropagation()" onclick="toggleVoice()">🔇</button>
         </div>
       </div>
     </div>
@@ -552,7 +565,7 @@ function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVot
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
 let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
-let voteCnt24 = {}, myPrefs = new Set();
+let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0;
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null, pickedMedia = null;
 const ICOS = {
@@ -1791,12 +1804,12 @@ async function loadFeed(){
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
+  const since1h = new Date(Date.now() - 3600000).toISOString();
+  const nv = await sb.from('votes').select('user_id').gte('created_at', since1h);
+  onlineNow = [...new Set((nv.data || []).map(r => r.user_id))].length;
   if (trashOpen()) {
-    const since1h = new Date(Date.now() - 3600000).toISOString();
-    const nv = await sb.from('votes').select('user_id').gte('created_at', since1h);
-    const uniq = [...new Set((nv.data || []).map(r => r.user_id))];
     const el = $('nightCount');
-    if (el) el.textContent = uniq.length ? '· сейчас в ночном суде: ' + uniq.length + ' 🌙' : '';
+    if (el) el.textContent = onlineNow ? '· сейчас в ночном суде: ' + onlineNow + ' 🌙' : '';
   }
   myPrefs = new Set();
   if (me) {
@@ -2304,10 +2317,8 @@ async function renderTicker(){
   items.push('📝 расскажи свою историю — народ рассудит');
   items.push('🤫 всё анонимно · 16+');
   const half = items.map(t => '<span>' + t + '</span>').join('<span class="sep">✦</span>') + '<span class="sep">✦</span>';
-  const tickHtml = '<div class="tickHalf">' + half + '</div><div class="tickHalf">' + half + '</div>';
-const tickDur = Math.min(90, Math.max(30, Math.round(items.join('').length * 0.2))) + 's';
-el.innerHTML = tickHtml; el.style.animationDuration = tickDur;
-const z2 = $('tickTrack2'); if (z2) { z2.innerHTML = tickHtml; z2.style.animationDuration = tickDur; }
+  el.innerHTML = '<div class="tickHalf">' + half + '</div><div class="tickHalf">' + half + '</div>';
+el.style.animationDuration = Math.min(90, Math.max(30, Math.round(items.join('').length * 0.2))) + 's';
 }
 renderTicker();
 applyNight(); setInterval(applyNight, 60000);
@@ -2326,6 +2337,26 @@ if ('serviceWorker' in navigator) window.addEventListener('load', () => navigato
 function syncNight(){ const n = trashOpen(); $('hint').textContent = n ? '👈 казнить · мне пох ↑ · помиловать 👉' : '👈 осуждаю · жиза ↑ · не осуждаю 👉'; const c = document.querySelector('.bCap'); if (c) c.textContent = n ? 'Ночной суд решает…' : 'А ты на чьей стороне?'; }
 syncNight(); setInterval(syncNight, 60000);
 window.addEventListener('error', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + (e.message || e.type); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 8000); } catch(_){} });
+async function renderTicker(){
+  const el = $('tickTrack'); if (!el) return;
+  const items = [];
+  if (trashOpen()) items.push(ic('i-moon') + ' треш-час открыт — до 5:00, правда честнее');
+  const total24 = Object.values(voteCnt24).reduce((a, b) => a + b, 0);
+  if (total24) items.push(ic('i-vote') + ' голосов за сутки: <b>' + total24 + '</b>');
+  if (onlineNow) items.push(ic('i-user') + ' сейчас судей онлайн: <b>' + onlineNow + '</b>');
+  const hot = allById([...hotCases][0]);
+  if (hot) items.push(ic('i-flame') + ' сейчас судят: ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
+  if (topCache.list[0]) {
+    const p = await profilesFor([topCache.list[0].id]);
+    const u = p[topCache.list[0].id];
+    items.push(ic('i-trophy') + ' лидер народа: ' + esc(u ? u.nick : 'аноним') + ' · <b>' + topCache.list[0].score + ' оч.</b>');
+  }
+  items.push(ic('i-doc') + ' расскажи свою историю — народ рассудит');
+  items.push(ic('i-shield') + ' всё анонимно · 16+');
+  const half = items.map(t => '<span>' + t + '</span>').join('<span class="sep">✦</span>') + '<span class="sep">✦</span>';
+  el.innerHTML = '<div class="tickHalf">' + half + '</div><div class="tickHalf">' + half + '</div>';
+  el.style.animationDuration = Math.min(90, Math.max(30, Math.round(items.join('').length * 0.2))) + 's';
+}
 load();
 maybeOg();
 </script>
