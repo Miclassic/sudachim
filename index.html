@@ -2253,6 +2253,7 @@ if (!localStorage.getItem('sud_onboard')) {
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 function syncNight(){ const n = trashOpen(); $('hint').textContent = n ? '👈 казнить · мне пох ↑ · помиловать 👉' : '👈 осуждаю · жиза ↑ · не осуждаю 👉'; const c = document.querySelector('.bCap'); if (c) c.textContent = n ? 'Ночной суд решает…' : 'А ты на чьей стороне?'; }
 syncNight(); setInterval(syncNight, 60000);
+window.addEventListener('error', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + (e.message || e.type); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 8000); } catch(_){} });
 load();
 maybeOg();
 </script>
