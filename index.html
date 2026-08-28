@@ -2680,7 +2680,21 @@ function jumpToComment(caseId, cmtId){
   }
   h.appendChild(b);
 })();
+function caseLink(id){ return location.origin + location.pathname + '?case=' + id; }
+function duelLink(id){ return location.origin + location.pathname + '?duel=' + id; }
+async function shareText(title, url){
+  if (navigator.share) { try { await navigator.share({ title: 'судачим', text: title, url }); return; } catch(e){ if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(url); toast('ссылка скопирована — кидай куда хочешь'); } catch(e2){ prompt('скопируй ссылку:', url); }
+}
+function shareCase(c){ if (!c) return; shareText('народный суд: ' + (c.text || '').slice(0, 60), caseLink(c.id)); }
+function shareDuel(d){ if (!d) return; shareText('народный суд · дуэль: ' + (d.a || d.title || '') + ' VS ' + (d.b || ''), duelLink(d.id)); }
 load();
+(function(){
+  const q = new URLSearchParams(location.search);
+  const cid = q.get('case'), did = q.get('duel');
+  if (cid) setTimeout(() => openCaseFromNotif(+cid), 900);
+  if (did) setTimeout(() => { showTab('duels'); toast('дуэль открыта — листай к 🔥'); }, 600);
+})();
 maybeOg();
 </script>
 </body>
