@@ -426,6 +426,10 @@ body.night .bn.on{color:#FFB4AA}
 .tickHalf{gap:22px;padding-right:22px}
 .tickHalf > span{display:inline-flex;align-items:center;gap:4px}
 .tickTrack .icn{width:12px;height:12px}
+.bn.dailyB{flex-direction:column;gap:1px;padding:6px 6px 5px}
+.bnRow{display:flex;align-items:center;gap:5px}
+.bnSub{font-size:8px;font-weight:800;color:var(--gray);letter-spacing:.4px;font-variant-numeric:tabular-nums}
+body.night .bnSub{color:#FF8A3D}
 </style>
 </head>
 <body>
@@ -469,7 +473,7 @@ body.night .bn.on{color:#FFB4AA}
   <div class="tabbar">
     <button class="bn on" data-t="court" onclick="showTab('court')"><svg class="icn"><use href="#i-scale"/></svg>суд</button>
     <button class="bn sizzle" data-t="duels" onclick="showTab('duels')"><svg class="icn"><use href="#i-swords"/></svg>дуэли</button>
-    <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><svg class="icn"><use href="#i-flame"/></svg>дело дня</button>
+    <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><span class="bnRow"><svg class="icn"><use href="#i-flame"/></svg>дело дня</span><span class="bnSub" id="dailyTabTimer"></span></button>
     <button class="bn" data-t="mine" onclick="showTab('mine')"><svg class="icn"><use href="#i-doc"/></svg>мои</button>
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
@@ -751,9 +755,9 @@ const catL = c => catOf(c).toLowerCase();
 const isMine = c => !!(me && c.user_id && c.user_id === me.id);
 const isAdmin = () => !!(me && me.email && ADMIN_EMAILS.includes(String(me.email).toLowerCase()));
 const QP = new URLSearchParams(location.search);
-const trashOpen = () => QP.get('night') === '1' ? true : QP.get('day') === '1' ? false : (() => { const h = new Date().getHours(); return h >= 23 || h < 5; })();
+const trashOpen = () => QP.get('night') === '1' ? true : QP.get('day') === '1' ? false : (() => { const h = mskHour(); return h >= 23 || h < 5; })();
 const visibleCase = c => catL(c) !== 'треш' || trashOpen();
-const since24 = () => new Date(Date.now() - 864e5).toISOString();
+const since24 = () => new Date(srvNow() - 864e5).toISOString();
 function vLabel(k){
   if (!trashOpen()) return k==='condemn' ? '😡 Осуждаю' : k==='life' ? '🤔 Жиза' : '👍 Не осуждаю';
   return k==='condemn' ? '⚔️ Казнить' : k==='life' ? '🤷 Мне пох' : '🕊 Помиловать';
@@ -763,7 +767,7 @@ function timerState(c){
   if (new Date(c.created_at).getTime() < TIMER_TS) return null;
   const total = (c.condemn||0) + (c.justify||0) + (c.life||0);
   const end = new Date(c.created_at).getTime() + 90*60000;
-  const now = Date.now();
+  const now = srvNow();
   if (now >= end) return total >= 10 ? 'locked' : null;
   return total >= 10 ? 'live' : null;
 }
@@ -783,7 +787,7 @@ function votesLabel(total){
 }
 function scoreCase(c, total){
   const act = voteCnt24[c.id] || 0;
-  const ageH = (Date.now() - new Date(c.created_at).getTime()) / 3600000;
+  const ageH = (srvNow() - new Date(c.created_at).getTime()) / 3600000;
   const recency = Math.exp(-ageH / 48);
   const pctC = total ? (c.condemn||0) / total : .5;
   const controversy = 1 - Math.abs(pctC - .5) * 2;
@@ -817,10 +821,11 @@ function badgeHtml(uid, s){
   return h;
 }
 function calcStreak(rows){
-  const days = [...new Set(rows.map(r => new Date(r.created_at).toDateString()))];
-  let streak = 0; const d = new Date();
-  if (!days.includes(d.toDateString())) d.setDate(d.getDate() - 1);
-  while (days.includes(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
+  const days = [...new Set(rows.map(r => mskDay(r.created_at)))];
+  let streak = 0;
+  let cur = srvNow();
+  if (!days.includes(mskDay(new Date(cur).toISOString()))) cur -= 864e5;
+  while (days.includes(mskDay(new Date(cur).toISOString()))) { streak++; cur -= 864e5; }
   return streak;
 }
 async function userStats(ids){
@@ -1417,7 +1422,7 @@ function renderCardBlobDuel(d){
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
 let dailyTimer = null;
-const dailyReveal = () => new Date().getHours() >= 21;
+const dailyReveal = () => mskHour() >= 21; 
 async function pickDaily(){
   const [c, rv] = await Promise.all([
     sb.from('cases').select('*').eq('status','approved'),
@@ -1439,8 +1444,7 @@ async function renderDaily(){
   const tick = () => {
     const el = $('dcount_' + today.id); if (!el) return;
     if (dailyReveal()) { el.textContent = 'результаты открыты'; return; }
-    const t = new Date(); t.setHours(21, 0, 0, 0);
-    let ms = t - new Date(); if (ms < 0) ms = 0;
+    let ms = msTo21();
     const h = Math.floor(ms/3600000), m = Math.floor(ms%3600000/60000), s = Math.floor(ms%60000/1000);
     el.textContent = 'результаты через ' + h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
   };
@@ -1863,7 +1867,7 @@ async function loadFeed(){
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
-  sb.from('votes').select('user_id').gte('created_at', new Date(Date.now() - 3600000).toISOString()).then(({ data }) => {
+  sb.from('votes').select('user_id').gte('created_at', new Date(srvNow() - 3600000).toISOString() ).then(({ data }) => {
     onlineNow = [...new Set((data || []).map(r => r.user_id))].length;
     if (trashOpen()) { const el = $('nightCount'); if (el) el.textContent = onlineNow ? '· сейчас в ночном суде: ' + onlineNow + ' 🌙' : ''; }
     renderTicker();
@@ -2487,6 +2491,20 @@ async function renderMine(){
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
   }).join('');
 }
+function dailyTabTick(){
+  const el = $('dailyTabTimer'); if (!el) return;
+  if (dailyReveal()) { el.textContent = 'итоги открыты'; return; }
+  let ms = msTo21();
+  const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000);
+  el.textContent = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+dailyTabTick(); setInterval(dailyTabTick, 1000);
+let SRV_OFF = 0;
+sb.rpc('server_now').then(({ data }) => { if (data) SRV_OFF = Date.parse(data) - Date.now(); }).catch(() => {});
+const srvNow = () => Date.now() + SRV_OFF;
+function mskHour(){ try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hour: '2-digit', hourCycle: 'h23' }).format(new Date(srvNow()))); } catch(e){ return (new Date(srvNow()).getUTCHours() + 3) % 24; } }
+function mskDay(iso){ try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); } catch(e){ return String(iso).slice(0, 10); } }
+function msTo21(){ try { const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(srvNow())).forEach(x => p[x.type] = x.value); const sec = 21 * 3600 - ((+p.hour) * 3600 + (+p.minute) * 60 + (+p.second)); return sec < 0 ? 0 : sec * 1000; } catch(e){ return 0; } }
 load();
 maybeOg();
 </script>
