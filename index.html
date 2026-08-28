@@ -433,6 +433,15 @@ body.night .bnSub{color:#FF8A3D}
 .betaB{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,rgba(201,151,28,.12),rgba(201,151,28,.05));border:1.5px dashed rgba(201,151,28,.5);color:var(--ink);border-radius:14px;padding:8px 12px;font-size:11px;font-weight:600;line-height:1.4;margin:0 0 12px}
 .betaB button{margin-left:auto;flex:none;background:none;border:none;color:var(--gray);font-size:12px;padding:2px 6px}
 body.night .betaB{background:linear-gradient(90deg,rgba(255,138,61,.12),rgba(255,138,61,.04));border-color:rgba(255,138,61,.45)}
+.emptyBox{background:var(--card);border-radius:24px;padding:22px 18px;box-shadow:0 12px 34px rgba(20,24,32,.08);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.emptyIc{font-size:40px}
+.emptyT{font-weight:800;font-size:16px}
+.emptyD{color:var(--gray);font-size:12px;line-height:1.5;max-width:340px}
+.emptyBtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.emptyBtns .go,.emptyBtns .pBtn{flex:1;min-width:140px;padding:12px}
+.emptyBtns .icn{width:14px;height:14px}
+.emptyTrash{font-size:11px;color:var(--gray);background:var(--bg);border-radius:12px;padding:8px 12px;border:1.5px dashed rgba(211,58,44,.4)}
+body.night .emptyTrash{color:#FFB4AA}
 </style>
 </head>
 <body>
@@ -506,7 +515,7 @@ body.night .betaB{background:linear-gradient(90deg,rgba(255,138,61,.12),rgba(255
       </div>
     </div>
     <div id="hint">👈 осуждаю · жиза ↑ · не осуждаю 👉</div>
-    <div id="empty" class="hidden">Пока все истории рассудены 🎉</div>
+    <div id="empty" class="hidden"></div>
     <div id="result" class="hidden"></div>
     <div id="comments" class="hidden"></div>
     <div id="feedHead" class="hidden"><svg class="icn"><use href="#i-flame"/></svg>народные вердикты</div>
@@ -2057,7 +2066,7 @@ function next(){
   $('pills').classList.remove('show'); $('pills').innerHTML = '';
   card.classList.remove('done'); card.classList.remove('drag');
   card.style.transform = 'none';
-  if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
+  if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); renderEmpty(); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
   $('cardWrap').classList.remove('hidden'); $('hint').classList.remove('hidden'); $('empty').classList.add('hidden');
   $('sub').textContent = 'народный суд · ' + catOf(cur);
   caseText.innerHTML = cur.text.split(/\n+/).map(p => p.split(/\s+/).filter(Boolean).map(w => '<span class="w">' + esc(w) + '</span>').join(' ')).join('<br>');
@@ -2511,6 +2520,19 @@ function mskDay(iso){ try { return new Intl.DateTimeFormat('en-CA', { timeZone: 
 function msTo21(){ try { const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(srvNow())).forEach(x => p[x.type] = x.value); const sec = 21 * 3600 - ((+p.hour) * 3600 + (+p.minute) * 60 + (+p.second)); return sec < 0 ? 0 : sec * 1000; } catch(e){ return 0; } }
 function dismissBeta(){ localStorage.setItem('sud_beta_off', '1'); $('betaBanner').classList.add('hidden'); }
 if (!localStorage.getItem('sud_beta_off')) $('betaBanner').classList.remove('hidden');
+function renderEmpty(){
+  const n = trashOpen();
+  $('empty').innerHTML =
+    '<div class="emptyBox">' +
+    '<div class="emptyIc">' + (n ? '🌙' : '⚖️') + '</div>' +
+    '<div class="emptyT">' + (n ? 'Ночная колода рассудена' : 'Дневная колода рассудена') + '</div>' +
+    '<div class="emptyD">' + (n ? 'Ты прошёл все истории этой ночи. Народ ещё шепчется в ленте ниже — или оставь свою, пусть шепчутся о ней.' : 'Ты разобрал все истории! Но народный суд не засыпает — вот куда двинуться:') + '</div>' +
+    '<div class="emptyBtns">' +
+    '<button class="go" onclick="openForm()">' + ic('i-doc') + ' рассказать свою</button>' +
+    '<button class="pBtn soft" onclick="showTab(\'duels\')">' + ic('i-swords') + ' в дуэли</button>' +
+    (n ? '<button class="pBtn soft" onclick="document.getElementById(\'feedHead\').scrollIntoView({behavior:\'smooth\'})">' + ic('i-flame') + ' вердикты народа</button>' : '<div class="emptyTrash">🔥 самые трешовые истории откроются в 23:00 — по Москве, как всё у нас</div>') +
+    '</div></div>';
+}
 load();
 maybeOg();
 </script>
