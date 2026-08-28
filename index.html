@@ -494,6 +494,7 @@ body.night .cmtFlash{animation-name:cmtFlashN}
 body.night .cardPrev{box-shadow:0 7px 18px -6px rgba(255,68,56,.4), inset 0 1px 0 rgba(255,255,255,.08)}
 .cardPrev{border-radius:0 0 16px 16px;border-top:0;padding-top:6px;margin-top:0;box-shadow:0 8px 18px -6px rgba(201,151,28,.45)}
 body.night .cardPrev{box-shadow:0 8px 18px -6px rgba(255,68,56,.45)}
+.cardPrev{margin:10px 0 2px}
 </style>
 </head>
 <body>
@@ -2077,7 +2078,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + (prevHtml ? actions.replace('<div class="fbtns">', prevHtml + '<div class="fbtns">') : actions) + '</div></div>';
+      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + prevHtml + '</div></div>';
   }).join('');
 }
 async function feedVote(id, v){
