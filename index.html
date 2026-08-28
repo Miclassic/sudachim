@@ -22,6 +22,9 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
 <link href="https://fonts.cdnfonts.com/css/opposans" rel="stylesheet">
+<script>
+(function(){ try { var q = new URLSearchParams(location.search), h = new Date().getHours(); var n = q.get('night') === '1' ? true : q.get('day') === '1' ? false : (h >= 23 || h < 5); if (n) { document.documentElement.className += ' prenight'; var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = '#0F1115'; } } catch(e){} })();
+</script>
 <style>
 :root{--bg:#EDEEF2;--card:#FFFFFF;--ink:#15181C;--gray:#8A919E;--red:#D33A2C;--yel:#E0A400;--grn:#2E9E5B;--gold:#C9971C}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'OPPO Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -385,6 +388,10 @@ body.night .tkHot{color:#FF6B5E}body.night .tkLead{color:#FF8A3D}body.night .tkO
 .chipBtn:active{transform:scale(.9)}
 #feed.rerender .fitem{animation:none}
 .evd{min-height:96px;background:linear-gradient(180deg,#171a20,#000)}
+html.prenight body{--bg:#0F1115;--card:#171A20;--ink:#EDEEF2;--gray:#9AA3AE;background:var(--bg)}
+html.prenight .topbar{background:rgba(15,17,21,.72)}
+html.prenight .fitem,html.prenight .bubble,html.prenight .ghost,html.prenight .cmt,html.prenight .miniBtn,html.prenight .bn.on,html.prenight .chipBtn,html.prenight .pill,html.prenight .fpill,html.prenight .pCard,html.prenight .secCard,html.prenight .achItem,html.prenight .lbRow,html.prenight .myCases,html.prenight .nItem,html.prenight #modal .box{background:#171A20;color:var(--ink)}
+html.prenight .ftxt,html.prenight #caseText{color:#E8EAEE;text-shadow:none}
 </style>
 </head>
 <body>
