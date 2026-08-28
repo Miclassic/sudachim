@@ -2391,6 +2391,8 @@ function renderChips(){
   $('chips').classList.toggle('hidden', allCases.length < 2);
   $('chips').innerHTML = cats.map(c => '<button class="chipBtn' + (c === feedCat ? ' on' : '') + '" onclick="setFeedCat(\'' + c + '\')">' + esc(c) + '</button>').join('');
 }
+window.addEventListener('error', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + (e.message || e.type); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 20000); } catch(_){} });
+window.addEventListener('unhandledrejection', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + ((e.reason && e.reason.message) || e.reason || 'rejection'); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 20000); } catch(_){} });
 load();
 maybeOg();
 </script>
