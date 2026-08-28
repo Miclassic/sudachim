@@ -1800,9 +1800,10 @@ async function loadFeed(){
     sb.from('comments').select('*').eq('status','approved'),
     sb.from('votes').select('case_id').gte('created_at', since24())
   ]);
-  if (c.error || cm.error || rv.error) { toast('Не удалось обновить ленту — база не ответила, повтори позже'); return; }
-  allCases = (c.data || []).filter(x => !x.hidden);
-  allComments = (cm.data || []).filter(x => !x.hidden);
+  const lerr = c.error || cm.error || rv.error;
+  if (lerr) { const t = $('toast'); t.textContent = '⚠️ лента: ' + lerr.message; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 15000); }
+  if (c.data) allCases = c.data.filter(x => !x.hidden);
+  if (cm.data) allComments = cm.data.filter(x => !x.hidden);
   const ids = allCases.map(x => x.id);
   const rq = ids.length ? await sb.from('reactions').select('case_id,kind,user_id').in('case_id', ids) : { data: [] };
   allReacts = rq.data || [];
@@ -1812,13 +1813,11 @@ async function loadFeed(){
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
-  const since1h = new Date(Date.now() - 3600000).toISOString();
-  const nv = await sb.from('votes').select('user_id').gte('created_at', since1h);
-  onlineNow = [...new Set((nv.data || []).map(r => r.user_id))].length;
-  if (trashOpen()) {
-    const el = $('nightCount');
-    if (el) el.textContent = onlineNow ? '· сейчас в ночном суде: ' + onlineNow + ' 🌙' : '';
-  }
+  sb.from('votes').select('user_id').gte('created_at', new Date(Date.now() - 3600000).toISOString()).then(({ data }) => {
+    onlineNow = [...new Set((data || []).map(r => r.user_id))].length;
+    if (trashOpen()) { const el = $('nightCount'); if (el) el.textContent = onlineNow ? '· сейчас в ночном суде: ' + onlineNow + ' 🌙' : ''; }
+    renderTicker();
+  }).catch(() => {});
   myPrefs = new Set();
   if (me) {
     const pc = {};
@@ -1828,6 +1827,7 @@ async function loadFeed(){
   await refreshTop();
   const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length + '|' + allLikes.length;
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
+  if (!$('feed').children.length && allCases.length) { renderChips(); renderFeed(); }
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
@@ -2393,6 +2393,8 @@ function renderChips(){
 }
 window.addEventListener('error', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + (e.message || e.type); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 20000); } catch(_){} });
 window.addEventListener('unhandledrejection', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + ((e.reason && e.reason.message) || e.reason || 'rejection'); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 20000); } catch(_){} });
+setTimeout(loadFeed, 4000);
+setTimeout(loadFeed, 9000);
 load();
 maybeOg();
 </script>
