@@ -384,6 +384,7 @@ body.night .tkHot{color:#FF6B5E}body.night .tkLead{color:#FF8A3D}body.night .tkO
 .chipBtn{transition:transform .15s ease,color .3s ease,box-shadow .3s ease}
 .chipBtn:active{transform:scale(.9)}
 #feed.rerender .fitem{animation:none}
+.evd{min-height:96px;background:linear-gradient(180deg,#171a20,#000)}
 </style>
 </head>
 <body>
@@ -1563,7 +1564,7 @@ function evdHtml(c){
   if (isV) {
     return '<div class="evd evdV" data-src="' + c.media_url + '" onclick="playInline(this)"><video src="' + c.media_url + '" preload="metadata" muted playsinline></video><span class="evdPlay">▶</span><span class="evdTag">📎 вещдок</span></div>';
   }
-  return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'image\',' + c.id + ')"><img src="' + c.media_url + '" loading="lazy"><span class="evdTag">📎 вещдок</span></div>';
+  return '<div class="evd" onclick="lbOpen(\'' + c.media_url + '\',\'image\',' + c.id + ')"><img src="' + c.media_url + '" loading="lazy" decoding="async" style="opacity:0;transition:opacity .5s ease" onload="this.style.opacity=1"><span class="evdTag">📎 вещдок</span></div>';
 }
 function playInline(el){
   const url = el.getAttribute('data-src');
