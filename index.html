@@ -375,6 +375,14 @@ body.night .tickZoom{background:linear-gradient(90deg,transparent 28%,rgba(15,17
 .tickZoom{transform:scale(1,1.22)}
 .tickZoom{display:none!important}
 .tickHalf i{font-style:normal;display:inline-block}
+.ticker{box-shadow:0 8px 22px -4px rgba(201,151,28,.30)}
+body.night .ticker{box-shadow:0 8px 22px -4px rgba(255,68,56,.30)}
+.tickTrack .tkL{font-weight:800;color:var(--ink)}
+.tkHot{color:var(--red)}.tkLead{color:var(--gold)}.tkOn{color:var(--grn)}.tkMoon{color:#7A5CFF}
+body.night .tickTrack .tkL{color:#EDEEF2}
+body.night .tkHot{color:#FF6B5E}body.night .tkLead{color:#FF8A3D}body.night .tkOn{color:#3DD68C}body.night .tkMoon{color:#B18CFF}
+.chipBtn{transition:transform .15s ease,color .3s ease,box-shadow .3s ease}
+.chipBtn:active{transform:scale(.9)}
 </style>
 </head>
 <body>
@@ -2356,6 +2364,32 @@ async function renderTicker(){
   const half = items.map(t => '<span>' + t + '</span>').join('<span class="sep">✦</span>') + '<span class="sep">✦</span>';
   el.innerHTML = '<div class="tickHalf">' + half + '</div><div class="tickHalf">' + half + '</div>';
   el.style.animationDuration = Math.min(90, Math.max(30, Math.round(items.join('').length * 0.2))) + 's';
+}
+async function renderTicker(){
+  const el = $('tickTrack'); if (!el) return;
+  const items = [];
+  if (trashOpen()) items.push(ic('i-moon') + ' <span class="tkL tkMoon">треш-час</span> открыт — до 5:00, правда честнее');
+  const total24 = Object.values(voteCnt24).reduce((a, b) => a + b, 0);
+  if (total24) items.push(ic('i-vote') + ' <span class="tkL">голосов за сутки:</span> <b>' + total24 + '</b>');
+  if (onlineNow) items.push(ic('i-user') + ' <span class="tkL tkOn">сейчас судей онлайн:</span> <b>' + onlineNow + '</b>');
+  const hot = allById([...hotCases][0]);
+  if (hot) items.push(ic('i-flame') + ' <span class="tkL tkHot">сейчас судят:</span> ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
+  if (topCache.list[0]) {
+    const p = await profilesFor([topCache.list[0].id]);
+    const u = p[topCache.list[0].id];
+    items.push(ic('i-trophy') + ' <span class="tkL tkLead">лидер народа:</span> ' + esc(u ? u.nick : 'аноним') + ' · <b>' + topCache.list[0].score + ' оч.</b>');
+  }
+  items.push(ic('i-doc') + ' <span class="tkL">расскажи свою историю</span> — народ рассудит');
+  items.push(ic('i-shield') + ' <span class="tkL">всё анонимно</span> · 16+');
+  const half = items.map(t => '<span>' + t + '</span>').join('<span class="sep">✦</span>') + '<span class="sep">✦</span>';
+  el.innerHTML = '<div class="tickHalf">' + half + '</div><div class="tickHalf">' + half + '</div>';
+  el.style.animationDuration = Math.min(90, Math.max(30, Math.round(items.join('').length * 0.2))) + 's';
+}
+function setFeedCat(c){ feedCat = c; renderChips(); renderFeed(); }
+function renderChips(){
+  const cats = ['все', ...new Set(allCases.map(catL))];
+  $('chips').classList.toggle('hidden', allCases.length < 2);
+  $('chips').innerHTML = cats.map(c => '<button class="chipBtn' + (c === feedCat ? ' on' : '') + '" onclick="setFeedCat(\'' + c + '\')">' + esc(c) + '</button>').join('');
 }
 load();
 maybeOg();
