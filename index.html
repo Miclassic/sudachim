@@ -485,6 +485,11 @@ body.night .cardPrev.adv{border-color:rgba(255,138,61,.6)}
 .cardPrev.adv{border-color:rgba(201,151,28,.5)}
 body.night .cardPrev{background:rgba(23,26,32,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-color:rgba(255,255,255,.14);color:#D5DAE2;box-shadow:0 4px 14px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08)}
 body.night .cardPrev.adv{border-color:rgba(255,138,61,.5);color:#EDEEF2}
+.cardPrev{cursor:pointer}
+@keyframes cmtFlash{0%{box-shadow:0 0 0 2px rgba(201,151,28,.85),0 8px 22px rgba(20,24,32,.08);transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes cmtFlashN{0%{box-shadow:0 0 0 2px rgba(255,138,61,.85),0 8px 22px rgba(0,0,0,.4);transform:scale(1.02)}100%{transform:scale(1)}}
+.cmtFlash{animation:cmtFlash 1.2s ease}
+body.night .cmtFlash{animation-name:cmtFlashN}
 </style>
 </head>
 <body>
@@ -2041,8 +2046,8 @@ async function renderFeed(){
     const lastC = cmsAll.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))[0];
     const topAdv = adv[0];
     let prevHtml = '';
-    if (lastC && (!topAdv || lastC.id !== topAdv.id)) prevHtml += '<div class="cardPrev">' + esc(nicks[lastC.user_id] || 'аноним') + ': ' + esc(lastC.text).replace(/\s+/g, ' ').slice(0, 80) + '</div>';
-    if (topAdv) prevHtml += '<div class="cardPrev adv">' + ic('i-shield') + ' ' + esc(nicks[topAdv.user_id] || 'аноним') + ': ' + esc(topAdv.text).replace(/\s+/g, ' ').slice(0, 80) + ' · 👏' + likesOf(topAdv.id) + '</div>';
+    if (lastC && (!topAdv || lastC.id !== topAdv.id)) prevHtml += '<div class="cardPrev" onclick="jumpToComment(' + c.id + ',' + lastC.id + ')">' + esc(nicks[lastC.user_id] || 'аноним') + ': ' + esc(lastC.text).replace(/\s+/g, ' ').slice(0, 80) + '</div>';
+    if (topAdv) prevHtml += '<div class="cardPrev adv" onclick="jumpToComment(' + c.id + ',' + topAdv.id + ')">' + ic('i-shield') + ' ' + esc(nicks[topAdv.user_id] || 'аноним') + ': ' + esc(topAdv.text).replace(/\s+/g, ' ').slice(0, 80) + ' · 👏' + likesOf(topAdv.id) + '</div>';
     const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + esc(k.text).slice(0,120) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       const excerpt = c.text.replace(/\s+/g,' ').slice(0, 70) + '…';
@@ -2583,6 +2588,23 @@ function renderEmpty(){
     '</div>' +
     (n ? '' : '<div class="emptyTrash">🔥 треш-истории откроются в 23:00 — по Москве, как всё у нас</div>') +
     '</div>';
+}
+function jumpToComment(caseId, cmtId){
+  const box0 = $('fc_' + caseId);
+  if (box0 && box0.classList.contains('hidden')) feedToggleComments(caseId, true);
+  setTimeout(() => {
+    const cm = (allComments || []).find(k => k.id === cmtId);
+    const b = $('fc_' + caseId); if (!b) return;
+    const nodes = b.querySelectorAll('.cmt');
+    let target = null;
+    const probe = cm ? (cm.text || '').slice(0, 30) : '';
+    nodes.forEach(n => { if (!target && probe && n.textContent.indexOf(probe) !== -1) target = n; });
+    if (!target && nodes.length) target = nodes[nodes.length - 1];
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.remove('cmtFlash'); void target.offsetWidth; target.classList.add('cmtFlash');
+    }
+  }, 350);
 }
 load();
 maybeOg();
