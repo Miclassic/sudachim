@@ -304,6 +304,19 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
 .secCard{background:#fff;border-radius:18px;box-shadow:0 8px 22px rgba(20,24,32,.06);padding:14px}
 .secCard h4{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .secCard h4 .icn{width:15px;height:15px;color:var(--gold)}
+body.night #caseText,body.night .mcTxt{color:#E8EAEE}
+body.night #modal textarea,body.night #modal select{color:var(--ink)}
+body.night .nItem{background:#171A20;color:var(--ink)}
+body.night .fart{opacity:.22}
+.sheetBox{background:#fff;border-radius:24px 24px 0 0}
+body.night .sheetBox{background:#171A20;color:var(--ink)}
+.pBtn.soft{background:var(--card);color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)}
+#feed.rerender .fitem{animation:none}
+.fitem{isolation:isolate}
+.fart{z-index:0;pointer-events:none}
+.fbody{z-index:1}
+.rbtns button{color:var(--bg)}
+.go{color:var(--bg)}
 </style>
 </head>
 <body>
@@ -448,13 +461,13 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   <button style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px" onclick="lbReport()">🚩 пожаловаться</button>
 </div>
 <div id="reactSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.5);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='reactSheet')closeReactSheet()">
-  <div style="background:#fff;border-radius:24px 24px 0 0;padding:16px 14px 22px;width:100%;max-width:560px">
+  <div class="sheetBox" style="padding:16px 14px 22px;width:100%;max-width:560px">
     <div style="text-align:center;font-size:11px;font-weight:800;color:var(--gray);margin-bottom:10px;letter-spacing:.1em">ТВОЯ РЕАКЦИЯ</div>
     <div id="reactRow" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
   </div>
 </div>
 <div id="shareSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.6);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='shareSheet')closeShareSheet()">
-  <div style="background:#fff;border-radius:24px 24px 0 0;padding:14px 14px 22px;width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px">
+  <div class="sheetBox" style="padding:14px 14px 22px;width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px">
     <img id="shareImg" style="max-height:52vh;object-fit:contain;border-radius:14px;background:#EDEEF2">
     <div style="display:flex;gap:8px">
       <button onclick="sheetShare()" style="flex:1;background:#15181C;color:#fff;border:none;border-radius:999px;padding:13px;font-weight:700">📤 Поделиться</button>
@@ -463,7 +476,7 @@ footer{padding:18px 16px 22px;color:var(--gray);font-size:10px;text-align:center
   </div>
 </div>
 <div id="onboard" class="hidden" style="position:fixed;inset:0;z-index:97;background:rgba(10,10,14,.55);display:flex;align-items:center;justify-content:center;padding:20px" onclick="this.classList.add('hidden')">
-  <div style="background:#fff;border-radius:24px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+  <div class="sheetBox" style="border-radius:24px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)">
     <div style="font-size:34px;margin-bottom:8px">⚖️</div>
     <div style="font-weight:800;font-size:16px;margin-bottom:8px">Народный суд открыт</div>
     <div style="font-size:13px;color:#8A919E;line-height:1.5">Свайпай карточку: 👈 осуждаю · 👆 жиза · 👉 не осуждаю.<br>Голосовать можно без входа!</div>
@@ -903,10 +916,10 @@ async function showProfile(){
     '<div class="secCard"><h4>' + ic('i-trophy') + 'рейтинг судей · топ-' + ts + '</h4>' + lbHtml +
       '<div class="topnote">Размер топа растёт с активностью народа: сейчас топ-' + ts + '. Ачивки активны только у судей из топа.</div></div>' +
     '<div class="secCard"><h4>' + ic('i-star') + 'ачивки</h4><div class="achGrid">' + achsHtml + '</div><div class="topnote">' + achsNote + '</div></div>' +
-    ('Notification' in window && Notification.permission === 'default' ? '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="askNotifPermission()">🔔 Включить уведомления</button>' : '') +
-    '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="pickAva()">' + ic('i-camera') + 'Сменить фото</button>' +
+    ('Notification' in window && Notification.permission === 'default' ? '<button class="pBtn soft" onclick="askNotifPermission()">🔔 Включить уведомления</button>' : '') +
+    '<button class="pBtn soft" onclick="pickAva()">' + ic('i-camera') + 'Сменить фото</button>' +
     '<input type="file" id="avaFile" accept="image/*" style="display:none" onchange="uploadAva()">' +
-    '<button class="pBtn" style="background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(20,24,32,.08)" onclick="renameMe()">Сменить никнейм</button>' +
+    '<button class="pBtn soft" onclick="renameMe()">Сменить никнейм</button>' +
     '<button class="pBtn" style="background:rgba(211,58,44,.10);color:var(--red)" onclick="logoutMe()">Выйти</button>';
 }
 function myCasesHtml(list){
@@ -1826,6 +1839,7 @@ async function renderFeed(){
   $('myCasesMain').innerHTML = me ? myCasesHtml(allCases.filter(c => isMine(c))) : '';
   const nicks = await nicksFor(allComments.map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
+  const fe = $('feed'); if (fe.dataset.once) fe.classList.add('rerender'); else fe.dataset.once = '1';
   $('feed').innerHTML = list.map(({ c, total }, i) => {
     const pct = v => total ? Math.round(v * 100 / total) : 0;
     const votedIt = (c.id in voted);
@@ -1858,13 +1872,13 @@ async function renderFeed(){
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' + advHtml +
       '<div class="fcom hidden" id="fc_' + c.id + '">' + cmHtml + '</div>'
     ) : (me ? (
-      isMine(c) ? '<button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button>' +
+      isMine(c) ? '<div class="fpills"><button class="fpill lockPill" style="flex:1">📝 это твоя история — решает народ</button></div>' +
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button>' + (total >= 100 ? '<button onclick="shareVerdict(' + c.id + ')">📜 вердикт</button>' : '') + '</div>' :
       '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="feedVote(' + c.id + ',\'condemn\')">' + vLabel('condemn') + '</button>' +
       '<button class="fpill" style="color:var(--yel)" onclick="feedVote(' + c.id + ',\'life\')">' + vLabel('life') + '</button>' +
       '<button class="fpill" style="color:var(--grn)" onclick="feedVote(' + c.id + ',\'justify\')">' + vLabel('justify') + '</button></div>'
     ) : (
-      '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button>'
+      '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button></div>' 
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div>' + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
@@ -1909,7 +1923,6 @@ async function feedSendComment(id){
 }
 function next(){
   voteLock = false;
-  stopSpeak();
   cur = queue.shift() || null;
   $('result').classList.add('hidden'); $('comments').classList.add('hidden');
   $('pills').classList.remove('show'); $('pills').innerHTML = '';
@@ -1921,7 +1934,6 @@ function next(){
   caseText.innerHTML = cur.text.split(/\n+/).map(p => p.split(/\s+/).filter(Boolean).map(w => '<span class="w">' + esc(w) + '</span>').join(' ')).join('<br>');
   $('caseMedia').innerHTML = evdHtml(cur);
   dx = dy = 0;
-  if (voiceOn) speak(cur.text);
 }
 async function vote(v){
   if (!me) { openAuth(); return; }
@@ -2017,104 +2029,7 @@ async function submitCase(){
   if (!error) track('story');
   toast(error ? 'Ошибка: ' + error.message : 'Принято! Появится после проверки ✅');
 }
-let speakSession = 0, speakStopFn = null, curAudio = null;
-function stopSpeak(){
-  speakSession++;
-  if (curAudio) { try { curAudio.pause(); } catch(_){} curAudio = null; }
-  if (speakStopFn) { const f = speakStopFn; speakStopFn = null; f(); }
-}
-function toggleVoice(){
-  voiceOn = !voiceOn;
-  $('speakBtn').textContent = voiceOn ? '🔊' : '🔇';
-  if (voiceOn && cur) speak(cur.text); else stopSpeak();
-}
-async function edgeGec(){
-  const TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
-  const secs = BigInt(Math.floor(Date.now() / 1000)) + 11644473600n;
-  let ticks = secs * 10000000n;
-  ticks -= ticks % 3000000000n;
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ticks.toString() + TOKEN));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-}
-function splitAudio(buf){
-  const head = new TextDecoder().decode(buf.slice(0, 400));
-  const i = head.indexOf('\r\n\r\n');
-  return i >= 0 ? buf.slice(i + 4) : null;
-}
-function speak(text){
-  stopSpeak();
-  const my = speakSession;
-  const alive = () => (my === speakSession && voiceOn);
-  const spans = [...caseText.querySelectorAll('.w')];
-  let wi = 0;
-  const onWord = () => { if (!alive()) return; if (wi < spans.length) { spans.forEach((s, k) => s.classList.toggle('now', k === wi)); wi++; } };
-  const clear = () => spans.forEach(s => s.classList.remove('now'));
-  speakStopFn = clear;
-  edgeSpeak(text, onWord, clear, () => {
-    if (!alive()) return;
-    seSpeak(text, onWord, clear, () => { if (alive()) toast('🔇 Нейроозвучка недоступна в этой сети'); });
-  });
-}
-function edgeSpeak(text, onWord, onEnd, onFallback){
-  const chunks = [], words = []; let failed = false, timers = [], ws = null;
-  const id = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
-  (async () => {
-    let url;
-    try {
-      const gec = await edgeGec();
-      url = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4&Sec-MS-GEC=' + gec + '&ConnectionId=' + id().replace(/-/g, '');
-    } catch (e) { onFallback(); return; }
-    try { ws = new WebSocket(url); } catch (e) { onFallback(); return; }
-    ws.binaryType = 'arraybuffer';
-    const watchdog = setTimeout(() => { failed = true; try { ws.close(); } catch(_){} }, 6000);
-    ws.onopen = () => {
-      try {
-        ws.send('X-Timestamp:' + new Date().toString() + '\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"true"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3","voiceLocale":"ru-RU"}}}}');
-        const e2 = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        ws.send('X-RequestId:' + id() + '\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n<speak version=\'1.0\' xmlns=\'http://www.w3.org/2001/10/synthesis\' xml:lang=\'ru-RU\'><voice name=\'ru-RU-SvetlanaNeural\'><prosody pitch=\'+0Hz\' rate=\'+0%\' volume=\'+0%\'>' + e2 + '</prosody></voice></speak>');
-      } catch (e) { failed = true; try { ws.close(); } catch(_){} }
-    };
-    ws.onmessage = (e) => {
-      if (typeof e.data === 'string') {
-        if (e.data.indexOf('Path:audio.metadata') >= 0) {
-          try { const j = JSON.parse(e.data.split('\r\n\r\n')[1]); (j.Metadata || []).forEach(m => { if (m.Type === 'WordBoundary') words.push({ t: (m.Data.Offset || 0) / 1e7 }); }); } catch(_){}
-        }
-      } else {
-        clearTimeout(watchdog);
-        const part = splitAudio(new Uint8Array(e.data)); if (part && part.length) chunks.push(part);
-      }
-    };
-    ws.onerror = () => { failed = true; clearTimeout(watchdog); };
-    ws.onclose = () => {
-      clearTimeout(watchdog);
-      if (failed || !chunks.length) { onFallback(); return; }
-      const a = new Audio(URL.createObjectURL(new Blob(chunks, { type: 'audio/mpeg' })));
-      curAudio = a;
-      a.onplay = () => { words.forEach(w => timers.push(setTimeout(onWord, w.t * 1000))); };
-      a.onended = () => { timers.forEach(clearTimeout); curAudio = null; onEnd(); };
-      a.onerror = () => { timers.forEach(clearTimeout); curAudio = null; onFallback(); };
-      a.play().catch(() => onFallback());
-    };
-  })();
-}
-function seSpeak(text, onWord, onEnd, onFail){
-  fetch('https://api.streamelements.com/kappa/v2/speech?voice=Tatyana&text=' + encodeURIComponent(text))
-    .then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })
-    .then(buf => {
-      const a = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/mpeg' })));
-      curAudio = a;
-      const n = text.split(/\s+/).length;
-      let timers = [];
-      a.onloadedmetadata = () => {
-        const dur = (isFinite(a.duration) && a.duration > 0 ? a.duration : n * 0.4) * 1000;
-        for (let i = 0; i < n; i++) timers.push(setTimeout(onWord, (dur * i) / n));
-      };
-      a.onended = () => { timers.forEach(clearTimeout); curAudio = null; onEnd(); };
-      a.onerror = () => { timers.forEach(clearTimeout); curAudio = null; onFail(); };
-      a.play().catch(() => onFail());
-    })
-    .catch(() => onFail());
-}
+
 async function ensureFonts(){
   try {
     await Promise.race([
@@ -2205,7 +2120,7 @@ async function shareCase(c){
   if (!c) return;
   track('share');
   const node = document.querySelector('[data-case-id="' + c.id + '"]');
-  if (node && window.htmlToImage) {
+  if (node && window.htmlToImage && !document.body.classList.contains('night')) {
     try {
       toast('Готовим карточку…');
       const prep = document.createElement('style');
@@ -2336,6 +2251,8 @@ if (!localStorage.getItem('sud_onboard')) {
   setTimeout(() => { $('onboard').classList.remove('hidden'); localStorage.setItem('sud_onboard', '1'); setTimeout(() => $('onboard').classList.add('hidden'), 6000); }, 800);
 }
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+function syncNight(){ const n = trashOpen(); $('hint').textContent = n ? '👈 казнить · мне пох ↑ · помиловать 👉' : '👈 осуждаю · жиза ↑ · не осуждаю 👉'; const c = document.querySelector('.bCap'); if (c) c.textContent = n ? 'Ночной суд решает…' : 'А ты на чьей стороне?'; }
+syncNight(); setInterval(syncNight, 60000);
 load();
 maybeOg();
 </script>
