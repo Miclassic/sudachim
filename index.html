@@ -339,6 +339,19 @@ body.night #trashBanner .icn{width:20px;height:20px;color:#FF8A3D;animation:fire
 body.night .tickTrack .sep{color:#FF8A3D}
 body.night .tickTrack{color:#B4AEB8}
 main{padding-top:142px}
+.miniBtn.cta .icn{width:14px;height:14px}
+.icNight{display:none}
+body.night .icDay{display:none}
+body.night .icNight{display:inline-block;color:#FF4438;filter:drop-shadow(0 0 6px rgba(255,68,56,.85)) drop-shadow(0 0 16px rgba(255,68,56,.45));animation:moonGlow 3.2s ease-in-out infinite}
+@keyframes moonGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.12);filter:drop-shadow(0 0 10px rgba(255,68,56,1)) drop-shadow(0 0 22px rgba(255,68,56,.6))}}
+body.night .brandName{color:#FF6B5E;text-shadow:0 0 12px rgba(255,68,56,.35)}
+.fitem.trashHot{box-shadow:0 16px 44px rgba(211,58,44,.28), inset 0 0 0 1.5px rgba(211,58,44,.5)}
+.fitem.trashHot .fart{opacity:.75}
+.trashStamp{position:absolute;top:12px;right:14px;z-index:2;background:rgba(211,58,44,.92);color:#fff;font-weight:800;font-size:10px;letter-spacing:.08em;padding:4px 10px;border-radius:8px;transform:rotate(6deg);text-transform:uppercase;box-shadow:0 6px 18px rgba(211,58,44,.45);pointer-events:none;animation:stampPulse 2.6s ease-in-out infinite}
+@keyframes stampPulse{0%,100%{box-shadow:0 6px 18px rgba(211,58,44,.45)}50%{box-shadow:0 6px 26px rgba(255,68,56,.8)}}
+.tickTrack b{color:var(--gold);font-weight:800}
+body.night .tickTrack b{color:#FF8A3D;text-shadow:0 0 10px rgba(255,138,61,.55)}
+body.night .ticker{background:linear-gradient(90deg,transparent,rgba(255,68,56,.10),transparent)}
 </style>
 </head>
 <body>
@@ -370,11 +383,11 @@ main{padding-top:142px}
 <div class="topbar">
   <div class="topbarIn">
     <div class="brand" onclick="brandTap()">
-      <span class="scale"><svg class="icn"><use href="#i-scale"/></svg></span>
+      <span class="scale"><svg class="icn icDay"><use href="#i-scale"/></svg><svg class="icn icNight"><use href="#i-moon"/></svg></span>
       <span class="brandCol"><span class="brandName">судачим</span><span class="brandSlog">народный суд бытовых историй</span></span>
     </div>
     <div class="tbR">
-      <button class="miniBtn cta" onclick="openForm()">📝 рассуди меня</button>
+      <button class="miniBtn cta" onclick="openForm()"><svg class="icn"><use href="#i-scale"/></svg> рассуди меня</button>
       <button class="bell hidden" id="bellBtn" onclick="openNotifs()"><svg class="icn"><use href="#i-bell"/></svg><span class="bdg hidden" id="bellBdg"></span></button>
       <span id="tbUser"></span>
     </div>
@@ -391,7 +404,7 @@ main{padding-top:142px}
   <section id="tab-court">
     <div class="secHead"><svg class="icn"><use href="#i-scale"/></svg>суд</div>
     <div class="secDesc">Свайпай истории и выноси вердикт. Народ решит, кто прав, — и покажет, совпадаешь ли ты с ним.</div>
-    <div id="trashBanner" class="hidden"><svg class="icn"><use href="#i-moon"/></svg>треш-час открыт — до 5:00 <span id="nightCount"></span><div class="tbDesc">Ночной суд: голоса звучат иначе, правда — честнее. К утру всё можно списать на усталость.</div></div>
+    <div id="trashBanner" class="hidden"><svg class="icn"><use href="#i-moon"/></svg>треш-час открыт — до 5:00 <span id="nightCount"></span><div class="tbDesc">Ночью иначе: «казнить / помиловать» вместо лёгкого «осуждаю». Ваши голоса имеют вес в полтора-два раза сильнее обычного. Tреш - контент объявляется открытым. К утру всё спишется на усталость.</div></div>
     <div id="myCasesMain" style="margin-bottom:14px"></div>
     <div id="cardWrap">
       <div class="stack">
@@ -1876,7 +1889,7 @@ async function renderFeed(){
     const cmsAll = allComments.filter(k => k.case_id === c.id);
     const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
     const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
-    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '');
+    const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '') + (catL(c) === 'треш' && trashOpen() ? ' trashHot' : '');
     const myR = me ? allReacts.find(r => r.case_id === c.id && r.user_id === me.id) : null;
     const myE = myR ? ((REACTS.find(r => r.k === myR.kind) || {}).e || '😀') : '😀';
     const cntR = {}; allReacts.filter(r => r.case_id === c.id).forEach(r => cntR[r.kind] = (cntR[r.kind]||0)+1);
@@ -1906,7 +1919,7 @@ async function renderFeed(){
     ) : (
       '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать</button></div>' 
     ));
-    return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div>' + timerHtml(c) + '<div class="fbody">' +
+    return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 70 + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
       '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + '</div></div>';
   }).join('');
@@ -2271,13 +2284,13 @@ async function renderTicker(){
   const items = [];
   if (trashOpen()) items.push('🌙 треш-час открыт — до 5:00, правда честнее');
   const total24 = Object.values(voteCnt24).reduce((a, b) => a + b, 0);
-  if (total24) items.push('⚖️ голосов за сутки: ' + total24);
+  if (total24) items.push('⚖️ голосов за сутки: <b>' + total24 + '</b>');
   const hot = allById([...hotCases][0]);
   if (hot) items.push('🔥 сейчас судят: ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
   if (topCache.list[0]) {
     const p = await profilesFor([topCache.list[0].id]);
     const u = p[topCache.list[0].id];
-    items.push('🏆 лидер народа: ' + esc(u ? u.nick : 'аноним') + ' · ' + topCache.list[0].score + ' оч.');
+    items.push('🏆 лидер народа: ' + esc(u ? u.nick : 'аноним') + ' · <b>' + topCache.list[0].score + ' оч.</b>');
   }
   items.push('📝 расскажи свою историю — народ рассудит');
   items.push('🤫 всё анонимно · 16+');
