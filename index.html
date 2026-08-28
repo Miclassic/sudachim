@@ -415,6 +415,12 @@ body.night .bubble{background:#171A20!important;background-image:radial-gradient
 body.night .cNew{background:linear-gradient(90deg,#D33A2C,#FF8A3D);box-shadow:0 2px 10px rgba(211,58,44,.6)}
 .laserLine{display:block;width:70%;height:2px;margin:2px 0 6px;border-radius:2px;background:radial-gradient(50% 100% at 50% 50%,#FFE9A8 0%,#C9971C 40%,rgba(201,151,28,0) 100%);box-shadow:0 0 6px rgba(201,151,28,.45)}
 body.night .laserLine{background:radial-gradient(50% 100% at 50% 50%,#FF8A7A 0%,#FF4438 40%,rgba(255,68,56,0) 100%);box-shadow:0 0 8px rgba(255,68,56,.55)}
+body.night .bell,
+body.night .avaBtn,
+body.night .bn.on,
+body.night .miniBtn:not(.cta){animation:btnGlow 3.4s ease-in-out infinite}
+@keyframes btnGlow{0%,100%{box-shadow:0 0 0 1px rgba(255,68,56,.22),0 4px 16px rgba(255,68,56,.22),0 0 22px rgba(255,68,56,.14)}50%{box-shadow:0 0 0 1px rgba(255,68,56,.32),0 4px 18px rgba(255,68,56,.36),0 0 34px rgba(255,68,56,.24)}}
+body.night .bn.on{color:#FFB4AA}
 </style>
 </head>
 <body>
