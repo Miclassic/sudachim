@@ -634,7 +634,8 @@ const catOf = c => (c.category || 'другое');
 const catL = c => catOf(c).toLowerCase();
 const isMine = c => !!(me && c.user_id && c.user_id === me.id);
 const isAdmin = () => !!(me && me.email && ADMIN_EMAILS.includes(String(me.email).toLowerCase()));
-const trashOpen = () => { const h = new Date().getHours(); return h >= 23 || h < 5; };
+const QP = new URLSearchParams(location.search);
+const trashOpen = () => QP.get('night') === '1' ? true : QP.get('day') === '1' ? false : (() => { const h = new Date().getHours(); return h >= 23 || h < 5; })();
 const visibleCase = c => catL(c) !== 'треш' || trashOpen();
 const since24 = () => new Date(Date.now() - 864e5).toISOString();
 function vLabel(k){
