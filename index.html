@@ -537,6 +537,11 @@ body.night .daPlus{color:#FF8A3D}
 body.night .bell{background:transparent;box-shadow:none;animation:none}
 #tab-duels .fmeta{position:relative}
 #tab-duels .fmeta > span:first-child{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap}
+#tab-duels .fmeta:has(.fmC){position:relative}
+#tab-duels .fmeta:has(.fmC) .fmC{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap}
+#tab-duels .fmeta:not(:has(.fmC)){position:relative;display:flex;justify-content:space-between;align-items:center}
+#tab-duels .fmeta:not(:has(.fmC)) > span:not([style]){position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap}
+#tab-duels .fmeta:has(.fmC) > span:last-child{margin-left:auto}
 </style>
 </head>
 <body>
@@ -2690,20 +2695,6 @@ async function shareText(title, url){
 }
 function shareCase(c){ if (!c) return; shareText('народный суд: ' + (c.text || '').slice(0, 60), caseLink(c.id)); }
 function shareDuel(d){ if (!d) return; shareText('народный суд · дуэль: ' + (d.a || d.title || '') + ' VS ' + (d.b || ''), duelLink(d.id)); }
-function fixDuelHeads(){
-  document.querySelectorAll('#tab-duels span, #tab-duels b, #tab-duels div').forEach(el => {
-    if (el.dataset.dfix) return;
-    const t = (el.textContent || '').trim();
-    if (t === 'меньше 100 голосов' && el.children.length === 0) {
-      const p = el.parentElement;
-      if (p && /%/.test(p.textContent) && p.textContent.length < 80) { el.dataset.dfix = '1'; el.style.display = 'none'; }
-    }
-    if ((t === 'дуэль' || t === '🔥 дуэль') && el.children.length <= 1) {
-      const p = el.parentElement;
-      if (p && p.textContent.length < 80) { el.dataset.dfix = '1'; p.style.position = 'relative'; el.style.position = 'absolute'; el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translate(-50%,-50%)'; el.style.whiteSpace = 'nowrap'; }
-    }
-  });
-}
 load();
 (function(){
   const q = new URLSearchParams(location.search);
