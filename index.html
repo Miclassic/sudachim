@@ -460,6 +460,9 @@ body.night .emptyBtns button:first-child{background:linear-gradient(90deg,#7A1D1
 .emptyBtns .icn{width:13px;height:13px}
 .emptyTrash{font-size:10.5px;color:var(--gray);background:var(--bg);border-radius:12px;padding:7px 10px;border:1.5px dashed rgba(211,58,44,.4);margin-top:2px}
 body.night .emptyTrash{color:#FFB4AA}
+.nickCol{display:inline-flex;flex-direction:column;align-items:stretch;gap:2px;margin-right:6px}
+.laserLine{display:block;width:100%;height:2px;margin:0;border-radius:2px;background:radial-gradient(50% 100% at 50% 50%,#FFE9A8 0%,#C9971C 40%,rgba(201,151,28,0) 100%);box-shadow:0 0 6px rgba(201,151,28,.45)}
+body.night .laserLine{background:radial-gradient(50% 100% at 50% 50%,#FF8A7A 0%,#FF4438 40%,rgba(255,68,56,0) 100%);box-shadow:0 0 8px rgba(255,68,56,.55)}
 </style>
 </head>
 <body>
@@ -1808,7 +1811,8 @@ async function sheetShare(){
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
 function authorHtml(cm,nicks,stats){
   const s = stats[cm.user_id];
-  return '<div class="cHead" style="padding-right:26px">' + (nicks[cm.user_id] ? '<span class="nick">' + esc(nicks[cm.user_id]) + '</span>' : '<span class="nick">аноним</span>') + (s ? badgeHtml(cm.user_id, s) : '') + '</div><span class="laserLine"></span>';
+  const nm = nicks[cm.user_id] ? esc(nicks[cm.user_id]) : 'аноним';
+  return '<div class="cHead" style="padding-right:26px"><span class="nickCol"><span class="nick">' + nm + '</span><span class="laserLine"></span></span>' + (s ? badgeHtml(cm.user_id, s) : '') + '</div>';
 }
 function cmtClass(cm){ return 'cmt' + (isPremiumUser(cm.user_id) ? ' cmt-premium' : ''); }
 function likesOf(cmId){ return allLikes.filter(l => l.comment_id === cmId).length; }
