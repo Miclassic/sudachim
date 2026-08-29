@@ -592,6 +592,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <button class="bn on" data-t="court" onclick="showTab('court')"><svg class="icn"><use href="#i-scale"/></svg>суд</button>
     <button class="bn sizzle" data-t="duels" onclick="showTab('duels')"><svg class="icn"><use href="#i-swords"/></svg>дуэли</button>
     <button class="bn dailyB" data-t="daily" onclick="showTab('daily')"><span class="bnRow"><svg class="icn"><use href="#i-flame"/></svg>дело дня</span><span class="bnSub" id="dailyTabTimer"></span></button>
+    <button class="bn" data-t="rating" onclick="showTab('rating')"><svg class="icn"><use href="#i-trophy"/></svg>рейтинг</button>
     <button class="bn" data-t="mine" onclick="showTab('mine')"><svg class="icn"><use href="#i-doc"/></svg>мои</button>
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
@@ -643,6 +644,12 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div class="secHead"><svg class="icn"><use href="#i-flame"/></svg>дело дня</div>
     <div class="secDesc">Одна история в день. Голосуй до 21:00 — вечером открывается народный вердикт.</div>
     <div id="dailyList"></div>
+  </section>
+  <section id="tab-rating" class="hidden">
+    <div class="secHead"><svg class="icn"><use href="#i-trophy"/></svg>рейтинг народа</div>
+    <div class="secDesc">Социальная витрина: кто главный по аргументам, историям и реакциям. Хочешь в топ — голосуй и спорь.</div>
+    <div class="chips" id="rateChips"></div>
+    <div id="rateList" style="display:flex;flex-direction:column;gap:6px"></div>
   </section>
   <section id="tab-mine" class="hidden">
     <div class="secHead"><svg class="icn"><use href="#i-doc"/></svg>твои истории</div>
@@ -914,12 +921,13 @@ function scoreCase(c, total){
   return act*2 + recency*3 + controversy*2 + personal + Math.log(total+1)*.5;
 }
 function showTab(t){
-  ['court','duels','daily','mine','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
+  ['court','duels','daily','rating','mine','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
   document.querySelectorAll('.bn').forEach(b => b.classList.toggle('on', b.dataset.t === t));
   if (t === 'profile') showProfile();
   if (t === 'mine') renderMine();
   if (t === 'duels') renderDuels();
   if (t === 'daily') renderDaily();
+  if (t === 'rating') renderRating();
   window.scrollTo(0, 0);
 }
 function judgeType(s){
@@ -2710,6 +2718,69 @@ async function renderMine(){
       '<div class="mcPills"><span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span><span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span><span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div>' +
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
+  }).join('');
+}
+let rateCat = 'comm';
+function setRateCat(k){ rateCat = k; renderRating(); }
+function renderRateChips(){
+  const cats = [
+    { k: 'comm', n: 'комментаторы', ic: 'i-comment' },
+    { k: 'stories', n: 'истории', ic: 'i-doc' },
+    { k: 'reacts', n: 'реакции', ic: 'i-bolt' },
+    { k: 'adv', n: 'адвокаты', ic: 'i-shield' }
+  ];
+  $('rateChips').innerHTML = cats.map(c => '<button class="chipBtn' + (c.k === rateCat ? ' on' : '') + '" onclick="setRateCat(\'' + c.k + '\')">' + ic(c.ic) + ' ' + esc(c.n) + '</button>').join('');
+}
+async function renderRating(){
+  renderRateChips();
+  const box = $('rateList');
+  box.innerHTML = '<div class="empty">считаю…</div>';
+  let rows = [];
+  if (rateCat === 'comm' || rateCat === 'adv') {
+    const per = {};
+    allComments.forEach(cm => {
+      if (!cm.user_id) return;
+      const p = per[cm.user_id] || (per[cm.user_id] = { n: 0, likes: 0 });
+      p.n++; p.likes += likesOf(cm.id);
+    });
+    rows = Object.entries(per).map(([uid, p]) => ({ uid, a: p.n, b: p.likes, score: p.n * 2 + p.likes * 3 }));
+    rows.sort((x, y) => rateCat === 'adv' ? (y.b - x.b || y.a - x.a) : (y.score - x.score));
+  } else if (rateCat === 'stories') {
+    const per = {};
+    allCases.forEach(c => {
+      if (!c.user_id) return;
+      const p = per[c.user_id] || (per[c.user_id] = { n: 0, v: 0 });
+      p.n++; p.v += (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
+    });
+    rows = Object.entries(per).map(([uid, p]) => ({ uid, a: p.n, b: p.v, score: p.v }));
+    rows.sort((x, y) => y.b - x.b || y.a - x.a);
+  } else {
+    const authorOf = {}; allCases.forEach(c => authorOf[c.id] = c.user_id);
+    const per = {};
+    allReacts.forEach(r => { const uid = authorOf[r.case_id]; if (uid) per[uid] = (per[uid] || 0) + 1; });
+    rows = Object.entries(per).map(([uid, n]) => ({ uid, a: n, b: 0, score: n }));
+    rows.sort((x, y) => y.score - x.score);
+  }
+  rows = rows.slice(0, 15);
+  if (!rows.length) { box.innerHTML = '<div class="empty">Пока тихо — стань первым в топе</div>'; return; }
+  const uids = rows.map(r => r.uid);
+  const profs = await profilesFor(uids);
+  const stats = await userStats(uids);
+  box.innerHTML = rows.map((r, i) => {
+    const pos = i + 1;
+    const p = profs[r.uid] || {};
+    const nm = p.nick || 'аноним';
+    const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+    const av = p.avatar_url ? '<img src="' + p.avatar_url + '">' : avaInitials(nm);
+    const right = rateCat === 'comm' ? r.a + ' комм. · 👏 ' + r.b
+      : rateCat === 'adv' ? '👏 ' + r.b + ' · ' + r.a + ' комм.'
+      : rateCat === 'stories' ? r.b + ' гол. · ' + r.a + ' ист.'
+      : r.a + ' реакц.';
+    return '<div class="lbRow' + (me && r.uid === me.id ? ' me' : '') + '">' +
+      '<span class="pos' + (pos <= 3 ? ' top3' : '') + '">' + medal + '</span>' +
+      '<span class="av" style="' + (p.avatar_url ? '' : 'background:' + avaColor(nm)) + '">' + av + '</span>' +
+      '<span class="nm">' + esc(nm) + badgeHtml(r.uid, stats[r.uid]) + '</span>' +
+      '<span class="sc">' + right + '</span></div>';
   }).join('');
 }
 function getSeen(){ try { return JSON.parse(localStorage.getItem('sud_cseen:' + (me ? me.id : 'anon')) || '{}'); } catch(e){ return {}; } }
