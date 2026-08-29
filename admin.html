@@ -93,7 +93,7 @@ const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'ey
 const ADMIN_EMAIL = 'artixz18@gmail.com';
 let tab = 'cases', pendCases = [], pendComments = [], pendDuels = [], caseMap = {}, adminId = null;
 let hidCases = [], hidComments = [], evNames = [];
-let evFull = [], usrStatsRange = '7';
+let evFull = [], usrStatsRange = '7', apprCases = [];
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sideRu(s){ return s === 'condemn' ? '😡 осуждает' : s === 'justify' ? '👍 не осуждает' : '🤔 жиза'; }
@@ -136,7 +136,7 @@ async function panel(){
   await refresh();
 }
 async function refresh(){
-  const [c, cm, d, cs, hc, hcm, ev, evAll] = await Promise.all([
+  const [c, cm, d, cs, hc, hcm, ev, evAll, ap] = await Promise.all([
     sb.from('cases').select('*').eq('status','pending').order('created_at'),
     sb.from('comments').select('*').eq('status','pending').order('created_at'),
     sb.from('duels').select('*').eq('status','pending').order('created_at'),
@@ -144,9 +144,10 @@ async function refresh(){
     sb.from('cases').select('*').eq('hidden',true).eq('status','approved').order('created_at', { ascending: false }),
     sb.from('comments').select('*').eq('hidden',true).order('created_at', { ascending: false }),
     sb.from('events').select('name').gte('created_at', new Date(Date.now() - 7*864e5).toISOString()),
-    sb.from('events').select('*').gte('created_at', new Date(Date.now() - 30*864e5).toISOString()).order('created_at', { ascending: true })
+    sb.from('events').select('*').gte('created_at', new Date(Date.now() - 30*864e5).toISOString()).order('created_at', { ascending: true }),
+    sb.from('cases').select('*').eq('status','approved').order('created_at', { ascending: false }).limit(10)
   ]);
-  pendCases = c.data || []; pendComments = cm.data || []; pendDuels = d.data || [];
+  pendCases = c.data || []; pendComments = cm.data || []; pendDuels = d.data || []; apprCases = ap.data || [];
   hidCases = hc.data || []; hidComments = hcm.data || []; evNames = (ev.data || []).map(r => r.name);
   evFull = evAll.data || [];
   caseMap = {}; (cs.data || []).forEach(k => caseMap[k.id] = k);
@@ -329,7 +330,7 @@ function repCard(type, o, cat){
 function renderList(){
   const box = $('list');
   if (tab === 'cases') {
-    box.innerHTML = pendCases.length ? pendCases.map(o =>
+    const queueHtml = pendCases.length ? pendCases.map(o =>
       '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · ' + (o.category || 'другое') + (o.user_id ? ' · от пользователя' : ' · без автора → станет твоим') + '</div>' +
       '<div class="mtxt">' + esc(o.text) + '</div>' + mediaHtml(o) +
       '<div class="mbtns"><button class="ok" onclick="decide(' + o.id + ',true)">✅ одобрить</button>' +
@@ -337,6 +338,14 @@ function renderList(){
       '<button class="daily" onclick="setDaily(' + o.id + ')">🔥 дело дня</button>' +
       '<button class="daily" style="background:linear-gradient(90deg,#D33A2C,#FF8A3D);color:#fff" onclick="setHype(' + o.id + ')">⚡ хайп</button></div></div>'
     ).join('') : '<div class="empty">Очередь пуста 🎉</div>';
+    const apprHtml = apprCases.length ? '<div class="mcat" style="margin-top:14px;font-weight:800;color:#15181C">опубликованные — назначить событием</div>' + apprCases.map(o =>
+      '<div class="card"><div class="mcat">' + whenRu(o.created_at) + ' · ' + (o.category || 'другое') + (o.hype ? ' · ⚡ хайп: ' + esc(o.hype_title || '') : '') + (o.daily ? ' · 🔥 дело дня' : '') + '</div>' +
+      '<div class="mtxt">' + esc(o.text).slice(0, 140) + '</div>' +
+      '<div class="mbtns"><button class="daily" style="background:linear-gradient(90deg,#D33A2C,#FF8A3D);color:#fff" onclick="setHype(' + o.id + ')">⚡ хайп</button>' +
+      '<button class="daily" onclick="setDaily(' + o.id + ')">🔥 дело дня</button>' +
+      (o.hype ? '<button class="no" onclick="clearHype(' + o.id + ')">убрать хайп</button>' : '') + '</div></div>'
+    ).join('') : '';
+    box.innerHTML = queueHtml + apprHtml;
   } else if (tab === 'comments') {
     box.innerHTML = pendComments.length ? pendComments.map(o => {
       const cs2 = caseMap[o.case_id];
