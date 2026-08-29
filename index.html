@@ -502,6 +502,27 @@ body.night .spoil{opacity:.65}
 body.night .spoil.open{background:linear-gradient(90deg,rgba(255,138,61,.08),rgba(255,138,61,.16),rgba(255,138,61,.08));box-shadow:inset 0 0 0 1px rgba(255,138,61,.3)}
 .crow .spBtn{background:var(--bg);color:var(--gray);box-shadow:none;padding:0 12px}
 .crow .spBtn .icn{width:17px;height:17px}
+.qRow{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-weight:600}
+.qRow .icn{width:15px;height:15px;color:var(--gold)}
+body.night .qRow .icn{color:#FF8A3D}
+.qN{flex:1}
+.qBar{width:90px;height:6px;border-radius:3px;background:rgba(20,24,32,.08);overflow:hidden}
+body.night .qBar{background:rgba(255,255,255,.1)}
+.qBar i{display:block;height:100%;background:linear-gradient(90deg,#C9971C,#E9C767);border-radius:3px;transition:width .6s}
+.qV{width:34px;text-align:right;color:var(--gray);font-weight:800;font-size:11px}
+.qReward,.qEquip{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.qHead{width:100%;font-size:11px;font-weight:800;color:var(--gold);display:flex;align-items:center;gap:5px}
+.cAva{width:24px;height:24px;border-radius:50%;overflow:hidden;flex:none;font-size:10px;font-weight:800;color:#fff;display:inline-flex;align-items:center;justify-content:center;margin-right:6px}
+.cAva img{width:100%;height:100%;object-fit:cover}
+.fr-gold{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--gold),0 0 10px rgba(201,151,28,.55);animation:frPulse 2.4s ease-in-out infinite}
+.fr-fire{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px #E2593F,0 0 12px rgba(226,89,63,.6);animation:frPulse 1.8s ease-in-out infinite}
+.fr-glass{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px rgba(255,255,255,.75),0 0 10px rgba(255,255,255,.45)}
+@keyframes frPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+.skin-gold{background:linear-gradient(180deg,rgba(244,193,74,.14),var(--card) 70%)!important;box-shadow:0 8px 22px rgba(201,151,28,.18),inset 0 0 0 1px rgba(201,151,28,.4)!important}
+.skin-carbon{background:repeating-linear-gradient(45deg,rgba(20,24,32,.06) 0 3px,transparent 3px 6px),var(--card)!important;box-shadow:0 8px 22px rgba(20,24,32,.12),inset 0 0 0 1px rgba(20,24,32,.25)!important}
+body.night .skin-carbon{background:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 3px,transparent 3px 6px),#171A20!important}
+.skin-glass{background:rgba(255,255,255,.45)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 22px rgba(20,24,32,.08)!important}
+body.night .skin-glass{background:rgba(23,26,32,.5)!important}
 @keyframes cmtFlash{0%{box-shadow:0 0 0 2px rgba(201,151,28,.85),0 8px 22px rgba(20,24,32,.08);transform:scale(1.02)}100%{transform:scale(1)}}
 @keyframes cmtFlashN{0%{box-shadow:0 0 0 2px rgba(255,138,61,.85),0 8px 22px rgba(0,0,0,.4);transform:scale(1.02)}100%{transform:scale(1)}}
 .cmtFlash{animation:cmtFlash 1.2s ease}
@@ -761,7 +782,7 @@ let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [
 let hotCases = new Set(), hotDuels = new Set();
 let minuteCnt = 0, liveDeltas = [], nextLiveAt = Date.now() + 40000 + Math.random() * 50000;
 let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0, hourCnt = {};
-let me = null, myNick = '', myAva = '', authMode = 'reg';
+let me = null, myNick = '', myAva = '', myFrame = '', mySkin = '', authMode = 'reg';
 let replyTo = null, pickedMedia = null;
 const ICOS = {
 'i-scale':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M9 19.5h6M5.5 6.5h13"/><circle cx="12" cy="4" r="1.1" fill="currentColor" stroke="none"/></g><path fill="currentColor" d="M5.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L5.5 7zM18.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L18.5 7z"/>',
@@ -1021,7 +1042,7 @@ function avaColor(n){
 function avaInitials(n){ return (n || '?').trim().slice(0, 1).toUpperCase(); }
 function renderTbUser(){
   $('tbUser').innerHTML = me
-    ? '<button class="avaBtn" style="background:' + avaColor(myNick) + '" onclick="showTab(\'profile\')">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</button>'
+    ? '<button class="avaBtn' + (myFrame ? ' ' + myFrame : '') + '" style="background:' + avaColor(myNick) + '" onclick="showTab(\'profile\')">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</button>'
     : '<button class="miniBtn" onclick="openAuth()">войти</button>';
   $('bellBtn').classList.toggle('hidden', !me);
   if (me) fetchUnread();
@@ -1052,14 +1073,14 @@ async function refreshMe(){
   if (u) {
     me = u;
     let pr = null;
-    const r = await sb.from('profiles').select('nick,avatar_url').eq('id', u.id).maybeSingle();
+    const r = await sb.from('profiles').select('nick,avatar_url,frame,card_skin').eq('id', u.id).maybeSingle();
     if (r.data) pr = r.data;
     else {
       const nick = ((u.user_metadata && u.user_metadata.nick) || (u.email || 'гость').split('@')[0] + Math.floor(Math.random() * 90 + 10)).slice(0, 16);
       await sb.from('profiles').insert({ id: u.id, nick });
-      pr = { nick, avatar_url: null };
+      pr = { nick, avatar_url: null, frame: '', card_skin: '' };
     }
-    myNick = pr.nick; myAva = pr.avatar_url || '';
+    myNick = pr.nick; myAva = pr.avatar_url || ''; myFrame = pr.frame || ''; mySkin = pr.card_skin || '';
   } else { me = null; myNick = ''; myAva = ''; }
   renderTbUser();
   loadVoted(); loadDuelVoted();
@@ -1153,6 +1174,7 @@ async function showProfile(){
   const pctMatch = votes.length ? Math.round(match * 100 / votes.length) : null;
   const since = new Date(me.created_at).toLocaleDateString('ru-RU');
   const myStats = votes.length ? { userId: me.id, total: votes.length, condemnShare: votes.filter(x=>x.verdict==='condemn').length/votes.length, lifeShare: votes.filter(x=>x.verdict==='life').length/votes.length, match: (match||0)/votes.length, streak: calcStreak(votes), life: votes.filter(x=>x.verdict==='life').length, nightVotes: votes.filter(x=>{const h=new Date(x.created_at).getHours();return h>=23||h<5}).length } : null;
+  const qd = await questData();
   let wrappedHtml = '';
   if (myStats && votes.length >= 5) {
     const t = judgeType(myStats);
@@ -1194,10 +1216,11 @@ async function showProfile(){
     }).join('')
     : '<div class="empty">Пока нет активных судей</div>';
   $('pBody').innerHTML =
-    '<div class="avaBig" style="background:' + (myAva ? '#fff' : avaColor(myNick)) + '">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</div>' +
+    '<div class="avaBig' + (myFrame ? ' ' + myFrame : '') + '" style="background:' + (myAva ? '#fff' : avaColor(myNick)) + '">' + (myAva ? '<img class="avaImg" src="' + myAva + '">' : avaInitials(myNick)) + '</div>' +
     '<div class="pNick">' + esc(myNick) + badgeHtml(me.id, myStats) + '</div>' +
     '<div class="pSub">на судачим с ' + since + (myRank ? ' · #' + myRank + ' в рейтинге' : '') + '</div>' +
     myCasesHtml(c.data || []) +
+    renderQuests(qd) +
     wrappedHtml +
     '<div class="pCard">' +
       '<div class="pRow"><span class="ic">' + ic('i-vote') + '</span><span class="lb">Голосов</span><span class="vl">' + votes.length + '</span></div>' +
@@ -1219,7 +1242,7 @@ function myCasesHtml(list){
   const items = list.map(c => {
     const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
     const pct = v => Math.round(v * 100 / total);
-    return '<div class="mcItem"><div class="mcTxt">' + esc(flatText(c.text)).replace(/\n/g,' ') + '</div><div class="mcPills">' +
+    return '<div class="mcItem' + (mySkin ? ' ' + mySkin : '') + '"><div class="mcTxt">' + esc(flatText(c.text)).replace(/\n/g,' ') + '</div><div class="mcPills">' +
       '<span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span>' +
       '<span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span>' +
       '<span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div></div>';
@@ -1765,7 +1788,7 @@ async function nicksFor(ids){
 async function profilesFor(ids){
   const un = [...new Set(ids.filter(Boolean))];
   if (!un.length) return {};
-  const r = await sb.from('profiles').select('id,nick,avatar_url').in('id', un);
+  const r = await sb.from('profiles').select('id,nick,avatar_url,frame,card_skin').in('id', un);
   const m = {}; (r.data || []).forEach(p => m[p.id] = p);
   return m;
 }
@@ -2022,10 +2045,12 @@ async function sheetShare(){
   sheetDownload();
 }
 function sideInfo(cm){ return cm.side==='condemn'?['осуждает','var(--red)']:cm.side==='justify'?['не осуждает','var(--grn)']:['жиза','var(--yel)']; }
-function authorHtml(cm,nicks,stats){
+function authorHtml(cm,nicks,stats,profs){
   const s = stats[cm.user_id];
-  const nm = nicks[cm.user_id] ? esc(nicks[cm.user_id]) : 'аноним';
-  return '<div class="cHead" style="padding-right:26px"><span class="nickCol"><span class="nick">' + nm + '</span><span class="laserLine"></span></span>' + (s ? badgeHtml(cm.user_id, s) : '') + '</div>';
+  const p = (profs || {})[cm.user_id] || {};
+  const nm = p.nick ? esc(p.nick) : (nicks[cm.user_id] ? esc(nicks[cm.user_id]) : 'аноним');
+  const ava = '<span class="cAva' + (p.frame ? ' ' + p.frame : '') + '" style="' + (p.avatar_url ? '' : 'background:' + avaColor(nm)) + '">' + (p.avatar_url ? '<img src="' + p.avatar_url + '">' : avaInitials(nm)) + '</span>';
+  return '<div class="cHead" style="padding-right:26px">' + ava + '<span class="nickCol"><span class="nick">' + nm + '</span><span class="laserLine"></span></span>' + (s ? badgeHtml(cm.user_id, s) : '') + '</div>';
 }
 function cmtClass(cm){ return 'cmt' + (isPremiumUser(cm.user_id) ? ' cmt-premium' : ''); }
 function isAdv(cm){ return !!(cm && cm.device && String(cm.device).indexOf('#adv') !== -1); }
@@ -2044,25 +2069,25 @@ async function likeComment(cmId){
   }
   renderFeed();
 }
-function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + advTag(cm) +
+function cmtRow(cm,nicks,stats,profs){ const [lab,col]=sideInfo(cm);
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats,profs) + advTag(cm) +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + richText(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button></div></div>';
 }
-function cmtBlock(cm,reps,nicks,stats,topId){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + advTag(cm) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
+function cmtBlock(cm,reps,nicks,stats,topId,profs){ const [lab,col]=sideInfo(cm);
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats,profs) + advTag(cm) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + richText(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
    '<button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
-   '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats)).join('') + '</div></div>';
+   '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats,profs)).join('') + '</div></div>';
 }
-function buildComments(all,nicks,stats){
+function buildComments(all,nicks,stats,profs){
   const tops = all.filter(c => !c.parent_id);
   const byP = {}; all.filter(c => c.parent_id).forEach(c => { (byP[c.parent_id] = byP[c.parent_id] || []).push(c); });
   let topId = null, topN = 2;
   tops.forEach(t => { const n = likesOf(t.id); if (n > topN) { topN = n; topId = t.id; } });
-  return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats, topId)).join('');
+  return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats, topId, profs)).join('');
 }
 function commentInput(inputId, fn, tagId){
   return me ? '<div class="crow"><input id="' + inputId + '" maxlength="500" placeholder="Твой аргумент…"><button class="spBtn" title="скрыть выделенное" onclick="spoilWrap(\'' + inputId + '\')">' + ic('i-eye') + '</button><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
@@ -2229,6 +2254,7 @@ async function renderFeed(){
   $('myCasesMain').innerHTML = '';
   const nicks = await nicksFor(allComments.map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
+  const profs = await profilesFor(Object.keys(nicks));
   let topHourId = null, topHourN = 2;
   Object.entries(hourCnt).forEach(([id, n]) => { if (n > topHourN) { topHourN = n; topHourId = +id; } });
   let contrId = null, contrBest = 0.11;
@@ -2243,7 +2269,7 @@ async function renderFeed(){
     const locked = timerState(c) === 'locked';
     const cmsAll = allComments.filter(k => k.case_id === c.id);
     const cms = cmsAll.filter(k => !k.parent_id).slice(0, 1);
-    const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats)).join('');
+    const cmHtml = cms.map(cm => cmtRow(cm, nicks, stats, profs)).join('');
     const itemClass = 'fitem' + (hot ? ' hot' : '') + (premium ? ' fitem-premium' : '') + (catL(c) === 'треш' && trashOpen() ? ' trashHot' : '');
     const myR = me ? allReacts.find(r => r.case_id === c.id && r.user_id === me.id) : null;
     const myE = myR ? ((REACTS.find(r => r.k === myR.kind) || {}).e || '😀') : '😀';
@@ -2309,7 +2335,8 @@ async function feedToggleComments(id, force){
   const { data } = await sb.from('comments').select('*').eq('case_id', id).eq('status','approved').order('created_at');
   const nicks = await nicksFor((data || []).map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
-  box.innerHTML = buildComments((data || []).filter(k => !k.hidden), nicks, stats) + commentInput('ci_' + id, 'feedSendComment(' + id + ')', 'replyTagFeed');
+  const profs = await profilesFor(Object.keys(nicks));
+  box.innerHTML = buildComments((data || []).filter(k => !k.hidden), nicks, stats, profs) + commentInput('ci_' + id, 'feedSendComment(' + id + ')', 'replyTagFeed');
   box.classList.remove('hidden');
   markCommentsSeen(id, (data || []).filter(k => !k.hidden).length);
 }
@@ -2398,7 +2425,8 @@ async function loadComments(force){
   const { data } = await sb.from('comments').select('*').eq('case_id', cur.id).eq('status','approved').order('created_at');
   const nicks = await nicksFor((data || []).map(k => k.user_id));
   const stats = await userStats(Object.keys(nicks));
-  box.innerHTML = buildComments((data || []).filter(k => !k.hidden), nicks, stats) + commentInput('cIn', 'sendComment()', 'replyTagTop');
+  const profs = await profilesFor(Object.keys(nicks));
+  box.innerHTML = buildComments((data || []).filter(k => !k.hidden), nicks, stats, profs) + commentInput('cIn', 'sendComment()', 'replyTagTop');
   box.classList.remove('hidden');
 }
 async function sendComment(){
@@ -2649,6 +2677,7 @@ let nightPrev = trashOpen();
 function applyNight(){
   const n = trashOpen();
   document.body.classList.toggle('night', n);
+  if (n && me) localStorage.setItem('sud_trash_day', mskDay(new Date(srvNow()).toISOString()));
   if (nightPrev && !n) toast('🌅 Рассвет! Ночной суд закрыт — голоса снова дневные');
   if (!nightPrev && n) { toast('🌙 Ночной суд открыт — до 5:00'); nightFx(); }
   nightPrev = n; renderTicker();
@@ -2751,11 +2780,73 @@ async function renderMine(){
   box.innerHTML = list.map(c => {
     const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
     const pct = v => Math.round(v * 100 / total);
-    return '<div class="mcItem" style="background:var(--card);box-shadow:0 8px 22px rgba(20,24,32,.06)"><div class="mcTxt" style="white-space:normal">' + esc(flatText(c.text)) + '</div>' +
+    return '<div class="mcItem ' + (mySkin || '') + '" style="background:var(--card);box-shadow:0 8px 22px rgba(20,24,32,.06)"><div class="mcTxt" style="white-space:normal">' + esc(flatText(c.text)) + '</div>' +
       '<div class="mcPills"><span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span><span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span><span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div>' +
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
   }).join('');
+}
+const QUESTS = [
+  { k: 'v', n: 'Вынеси 5 вердиктов', goal: 5, ic: 'i-vote' },
+  { k: 'c', n: 'Оставь 2 аргумента', goal: 2, ic: 'i-comment' },
+  { k: 'd', n: 'Голосни в дуэли', goal: 1, ic: 'i-swords' },
+  { k: 't', n: 'Загляни в треш-час', goal: 1, ic: 'i-moon' }
+];
+const REWARDS = [
+  { id: 'fr-gold', t: 'frame', n: 'Рамка «Золото»' },
+  { id: 'fr-fire', t: 'frame', n: 'Рамка «Огонь»' },
+  { id: 'fr-glass', t: 'frame', n: 'Рамка «Стекло»' },
+  { id: 'skin-gold', t: 'skin', n: 'Карточка «Золото»' },
+  { id: 'skin-carbon', t: 'skin', n: 'Карточка «Карбон»' },
+  { id: 'skin-glass', t: 'skin', n: 'Карточка «Стекло»' }
+];
+function mskDayStartISO(){ const day = mskDay(new Date(srvNow()).toISOString()); return new Date(Date.parse(day + 'T00:00:00Z') - 3 * 3600000).toISOString(); }
+function getQuestState(){ try { return JSON.parse(localStorage.getItem('sud_quest:' + (me ? me.id : 'anon')) || '{"unlocked":[],"days":{}}'); } catch (e) { return { unlocked: [], days: {} }; } }
+async function questData(){
+  const start = mskDayStartISO();
+  const [v, cm, dv] = await Promise.all([
+    sb.from('votes').select('id', { count: 'exact', head: true }).eq('user_id', me.id).gte('created_at', start),
+    sb.from('comments').select('id', { count: 'exact', head: true }).eq('user_id', me.id).gte('created_at', start),
+    sb.from('duel_votes').select('id', { count: 'exact', head: true }).eq('user_id', me.id).gte('created_at', start)
+  ]);
+  return { v: v.count || 0, c: cm.count || 0, d: dv.count || 0, t: localStorage.getItem('sud_trash_day') === mskDay(new Date(srvNow()).toISOString()) ? 1 : 0 };
+}
+function renderQuests(qd){
+  const day = mskDay(new Date(srvNow()).toISOString());
+  const st = getQuestState();
+  const vals = { v: qd.v, c: qd.c, d: qd.d, t: qd.t };
+  const allDone = QUESTS.every(q => vals[q.k] >= q.goal);
+  const rows = QUESTS.map(q => {
+    const cur = Math.min(vals[q.k], q.goal);
+    const done = cur >= q.goal;
+    return '<div class="qRow">' + ic(q.ic) + '<span class="qN">' + q.n + '</span><span class="qBar"><i style="width:' + Math.round(cur * 100 / q.goal) + '%"></i></span><span class="qV">' + (done ? '✓' : cur + '/' + q.goal) + '</span></div>';
+  }).join('');
+  let reward = '';
+  if (allDone && !st.days[day]) {
+    const left = REWARDS.filter(r => !st.unlocked.includes(r.id));
+    reward = '<div class="qReward"><div class="qHead">' + ic('i-trophy') + (left.length ? 'все события закрыты — выбери награду' : 'все награды уже добыты') + '</div>' + left.map(r => '<button class="chipBtn" onclick="claimReward(\'' + r.id + '\')">' + esc(r.n) + '</button>').join('') + '</div>';
+  }
+  const owned = REWARDS.filter(r => st.unlocked.includes(r.id));
+  const equip = owned.length ? '<div class="qEquip"><div class="qHead">' + ic('i-star') + 'мои украшения</div>' + owned.map(r => '<button class="chipBtn' + ((r.t === 'frame' ? myFrame === r.id : mySkin === r.id) ? ' on' : '') + '" onclick="equipReward(\'' + r.id + '\')">' + esc(r.n) + '</button>').join('') + '<button class="chipBtn' + (!myFrame && !mySkin ? ' on' : '') + '" onclick="equipReward(\'\')">без украшения</button></div>' : '';
+  return '<div class="secCard"><h4>' + ic('i-cal') + 'события дня</h4>' + rows + reward + equip + '<div class="topnote">Закрой все события за день — получи рамку на аватар или стиль карточек. Купить нельзя — только заработать.</div></div>';
+}
+async function claimReward(id){
+  const day = mskDay(new Date(srvNow()).toISOString());
+  const st = getQuestState();
+  if (st.days[day]) { toast('Награда за сегодня уже получена'); return; }
+  st.unlocked.push(id); st.days[day] = id;
+  localStorage.setItem('sud_quest:' + me.id, JSON.stringify(st));
+  await equipReward(id);
+  toast('Награда получена: ' + (REWARDS.find(r => r.id === id) || { n: '' }).n);
+}
+async function equipReward(id){
+  const r = REWARDS.find(x => x.id === id);
+  const upd = {};
+  if (!r) { upd.frame = ''; upd.card_skin = ''; myFrame = ''; mySkin = ''; }
+  else if (r.t === 'frame') { upd.frame = id; myFrame = id; }
+  else { upd.card_skin = id; mySkin = id; }
+  await sb.from('profiles').update(upd).eq('id', me.id);
+  renderTbUser(); showProfile();
 }
 let rateCat = 'comm';
 function setRateCat(k){ rateCat = k; renderRating(); }
@@ -2815,7 +2906,7 @@ async function renderRating(){
       : r.a + ' реакц.';
     return '<div class="lbRow' + (me && r.uid === me.id ? ' me' : '') + '">' +
       '<span class="pos' + (pos <= 3 ? ' top3' : '') + '">' + medal + '</span>' +
-      '<span class="av" style="' + (p.avatar_url ? '' : 'background:' + avaColor(nm)) + '">' + av + '</span>' +
+      '<span class="av' + (p.frame ? ' ' + p.frame : '') + '" style="' + (p.avatar_url ? '' : 'background:' + avaColor(nm)) + '">' + av + '</span>' +
       '<span class="nm">' + esc(nm) + badgeHtml(r.uid, stats[r.uid]) + '</span>' +
       '<span class="sc">' + right + '</span></div>';
   }).join('');
