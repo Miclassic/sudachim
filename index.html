@@ -786,7 +786,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
 const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY');
 let device = localStorage.getItem('sud_device');
 if (!device) { device = 'd' + Math.random().toString(36).slice(2) + Date.now(); localStorage.setItem('sud_device', device); }
-function track(name){ try { sb.from('events').insert({ name, device }).then(() => {}); } catch(e){} }
+function track(name){ try { sb.from('events').insert({ name, device, user_id: me ? me.id : null }).then(() => {}); } catch(e){} }
 const TIMER_TS = new Date('2026-08-27T00:00:00').getTime();
 let voted = {};
 function votedKey(){ return 'sud_voted:' + (me ? me.id : 'anon'); }
