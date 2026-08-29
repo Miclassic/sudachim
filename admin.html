@@ -31,6 +31,36 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
 .statRow{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(20,24,32,.05)}
 .statRow b{color:#C9971C}
 .who{font-size:11px;color:#8A919E;margin-bottom:10px}
+.bigStat{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.bigStat > div{flex:1;min-width:140px;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 6px 18px rgba(20,24,32,.06)}
+.bigStat .lbl{font-size:11px;color:#8A919E;font-weight:600}
+.bigStat .val{font-size:22px;font-weight:800;color:#15181C;margin-top:2px}
+.bigStat .val b{color:#C9971C}
+.bigStat .sub{font-size:10.5px;color:#8A919E;margin-top:2px}
+.funnel{background:#fff;border-radius:16px;padding:14px;box-shadow:0 6px 18px rgba(20,24,32,.06);margin-bottom:12px}
+.funnel .frow{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px}
+.funnel .fname{width:130px;font-weight:600}
+.funnel .fbar{flex:1;height:8px;background:#EDEEF2;border-radius:4px;overflow:hidden}
+.funnel .fbar i{display:block;height:100%;background:linear-gradient(90deg,#C9971C,#E9C767);border-radius:4px}
+.funnel .fnum{width:60px;text-align:right;font-weight:800;color:#C9971C}
+.dayRow{display:flex;gap:8px;align-items:center;font-size:12px;padding:6px 0;border-bottom:1px solid rgba(20,24,32,.05)}
+.dayRow .dLbl{width:90px;color:#8A919E}
+.dayRow .dBar{flex:1;height:6px;background:#EDEEF2;border-radius:3px;overflow:hidden}
+.dayRow .dBar i{display:block;height:100%;background:linear-gradient(90deg,#7A5CFF,#B18CFF);border-radius:3px}
+.dayRow .dNum{width:48px;text-align:right;font-weight:800;color:#7A5CFF}
+.usrRow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(20,24,32,.05);font-size:12.5px}
+.usrRow .pos{width:28px;font-weight:800;color:#8A919E;text-align:center}
+.usrRow .av{width:30px;height:30px;border-radius:50%;font-size:12px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.usrRow .av img{width:100%;height:100%;object-fit:cover}
+.usrRow .nm{flex:1;font-weight:600;word-break:break-word}
+.usrRow .nm small{display:block;color:#8A919E;font-weight:400;font-size:10.5px}
+.usrRow .st{font-weight:800;color:#C9971C}
+.pill{display:inline-block;background:#EDEEF2;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:4px}
+.pill.ret{background:rgba(46,158,91,.14);color:#2E9E5B}
+.pill.new{background:rgba(122,92,255,.14);color:#7A5CFF}
+.rangeSel{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.rangeSel button{background:#fff;border:none;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:600;color:#8A919E}
+.rangeSel button.on{color:#15181C;box-shadow:0 4px 12px rgba(201,151,28,.2)}
 </style>
 </head>
 <body>
@@ -50,6 +80,7 @@ input{width:100%;background:#EDEEF2;border:none;border-radius:12px;padding:12px;
     <button class="tab" id="tabComments" onclick="setTab('comments')"></button>
     <button class="tab" id="tabDuels" onclick="setTab('duels')"></button>
     <button class="tab" id="tabReports" onclick="setTab('reports')"></button>
+    <button class="tab" id="tabUsers" onclick="setTab('users')"></button>
     <button class="tab" id="tabStats" onclick="setTab('stats')"></button>
   </div>
   <div id="list"></div>
@@ -62,6 +93,7 @@ const sb = supabase.createClient('https://tfqsyovyshheqkslsjhx.supabase.co', 'ey
 const ADMIN_EMAIL = 'artixz18@gmail.com';
 let tab = 'cases', pendCases = [], pendComments = [], pendDuels = [], caseMap = {}, adminId = null;
 let hidCases = [], hidComments = [], evNames = [];
+let evFull = [], usrStatsRange = '7';
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sideRu(s){ return s === 'condemn' ? '😡 осуждает' : s === 'justify' ? '👍 не осуждает' : '🤔 жиза'; }
@@ -104,28 +136,184 @@ async function panel(){
   await refresh();
 }
 async function refresh(){
-  const [c, cm, d, cs, hc, hcm, ev] = await Promise.all([
+  const [c, cm, d, cs, hc, hcm, ev, evAll] = await Promise.all([
     sb.from('cases').select('*').eq('status','pending').order('created_at'),
     sb.from('comments').select('*').eq('status','pending').order('created_at'),
     sb.from('duels').select('*').eq('status','pending').order('created_at'),
     sb.from('cases').select('id,text,category'),
     sb.from('cases').select('*').eq('hidden',true).eq('status','approved').order('created_at', { ascending: false }),
     sb.from('comments').select('*').eq('hidden',true).order('created_at', { ascending: false }),
-    sb.from('events').select('name').gte('created_at', new Date(Date.now() - 7*864e5).toISOString())
+    sb.from('events').select('name').gte('created_at', new Date(Date.now() - 7*864e5).toISOString()),
+    sb.from('events').select('*').gte('created_at', new Date(Date.now() - 30*864e5).toISOString()).order('created_at', { ascending: true })
   ]);
   pendCases = c.data || []; pendComments = cm.data || []; pendDuels = d.data || [];
   hidCases = hc.data || []; hidComments = hcm.data || []; evNames = (ev.data || []).map(r => r.name);
+  evFull = evAll.data || [];
   caseMap = {}; (cs.data || []).forEach(k => caseMap[k.id] = k);
   $('tabCases').textContent = 'Истории (' + pendCases.length + ')';
   $('tabComments').textContent = 'Комменты (' + pendComments.length + ')';
   $('tabDuels').textContent = 'Дуэли (' + pendDuels.length + ')';
   $('tabReports').textContent = '🚩 Жалобы (' + (hidCases.length + hidComments.length) + ')';
-  $('tabStats').textContent = '📊 Статистика';
+  $('tabUsers').textContent = '👥 Пользователи';
+  $('tabStats').textContent = '📊 Метрики';
   renderList();
+}
+function setUsrRange(r){ usrStatsRange = r; renderList(); }
+function dayKey(t){ return new Date(t).toISOString().slice(0, 10); }
+function sessionsFromEvents(events){
+  // сессия = серия событий одного device, gap между соседними < 5 минут
+  const GAP = 5 * 60 * 1000;
+  const byDev = {};
+  events.forEach(e => {
+    const dev = e.device || '__anon__';
+    (byDev[dev] = byDev[dev] || []).push(new Date(e.created_at).getTime());
+  });
+  const sessions = [];
+  Object.entries(byDev).forEach(([dev, ts]) => {
+    ts.sort((a, b) => a - b);
+    let start = ts[0], last = ts[0];
+    for (let i = 1; i < ts.length; i++) {
+      if (ts[i] - last > GAP) {
+        sessions.push({ dev, start, end: last, len: last - start, acts: 0 });
+        start = ts[i];
+      }
+      last = ts[i];
+    }
+    sessions.push({ dev, start, end: last, len: last - start });
+  });
+  // кол-во действий в сессии
+  sessions.forEach(s => {
+    s.acts = events.filter(e => (e.device || '__anon__') === s.dev && new Date(e.created_at).getTime() >= s.start && new Date(e.created_at).getTime() <= s.end).length;
+  });
+  return sessions;
+}
+function computeMetrics(days){
+  const since = Date.now() - days * 864e5;
+  const ev = evFull.filter(e => new Date(e.created_at).getTime() >= since);
+  const sessions = sessionsFromEvents(ev);
+  const devs = new Set(ev.map(e => e.device || '__anon__'));
+  const dayMap = {};
+  ev.forEach(e => { const k = dayKey(e.created_at); (dayMap[k] = dayMap[k] || { devs: new Set(), ev: 0 }); dayMap[k].devs.add(e.device || '__anon__'); dayMap[k].ev++; });
+  // уникальные по дням (для возврата)
+  const daysArr = Object.keys(dayMap).sort();
+  let returners = 0;
+  for (let i = 1; i < daysArr.length; i++) {
+    const prev = dayMap[daysArr[i - 1]].devs, cur = dayMap[daysArr[i]].devs;
+    cur.forEach(d => { if (prev.has(d)) returners++; });
+  }
+  // воронка
+  const uniqByType = (name) => new Set(ev.filter(e => e.name === name).map(e => e.user_id || e.device || '__anon__')).size;
+  const funnel = {
+    open: uniqByType('open'),
+    swipe: uniqByType('swipe'),
+    comment: uniqByType('comment'),
+    story: uniqByType('story'),
+    share: uniqByType('share'),
+    reg: uniqByType('reg')
+  };
+  // топ устройств по активности
+  const devActs = {};
+  ev.forEach(e => { const d = e.user_id || e.device || '__anon__'; devActs[d] = (devActs[d] || 0) + 1; });
+  const topDev = Object.entries(devActs).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  // среднее время сессии (только те, что > 5 сек, чтобы не считать одиночные клики)
+  const real = sessions.filter(s => s.len > 5000);
+  const avgLen = real.length ? Math.round(real.reduce((a, s) => a + s.len, 0) / real.length / 1000) : 0;
+  const medianLen = real.length ? Math.round(real.sort((a, b) => a.len - b.len)[Math.floor(real.length / 2)].len / 1000) : 0;
+  return { sessions, devs, dayMap, daysArr, returners, funnel, topDev, avgLen, medianLen, ev };
+}
+async function renderStats(){
+  const days = +usrStatsRange;
+  const m = computeMetrics(days);
+  const box = $('list');
+  const big = '<div class="bigStat">' +
+    '<div><div class="lbl">уникальных устройств</div><div class="val">' + m.devs.size + '</div><div class="sub">за ' + days + ' дн.</div></div>' +
+    '<div><div class="lbl">сессий</div><div class="val">' + m.sessions.length + '</div><div class="sub">средняя ' + m.avgLen + ' сек</div></div>' +
+    '<div><div class="lbl">медиана сессии</div><div class="val">' + m.medianLen + ' сек</div><div class="sub">без одиночных кликов</div></div>' +
+    '<div><div class="lbl">возврат</div><div class="val"><b>' + m.returners + '</b></div><div class="sub">зашли ≥2 дня подряд</div></div>' +
+    '<div><div class="lbl">всего событий</div><div class="val">' + m.ev.length + '</div></div>' +
+  '</div>';
+  const funnelMax = Math.max(...Object.values(m.funnel), 1);
+  const funnelHtml = '<div class="funnel"><div class="mcat" style="margin-bottom:8px;font-weight:700;color:#15181C">🎯 воронка: уникальные пользователи</div>' +
+    [['open','Открыли сайт'], ['swipe','Проголосовали'], ['comment','Оставили коммент'], ['story','Отправили историю'], ['share','Поделились'], ['reg','Зарегистрировались']]
+    .map(r => {
+      const v = m.funnel[r[0]] || 0;
+      const pct = Math.round(v * 100 / funnelMax);
+      return '<div class="frow"><div class="fname">' + r[1] + '</div><div class="fbar"><i style="width:' + pct + '%"></i></div><div class="fnum">' + v + '</div></div>';
+    }).join('') + '</div>';
+  // график по дням
+  const maxEv = Math.max(...m.daysArr.map(d => m.dayMap[d].ev), 1);
+  const chart = '<div class="funnel"><div class="mcat" style="margin-bottom:8px;font-weight:700;color:#15181C">📈 по дням</div>' +
+    m.daysArr.map(d => {
+      const v = m.dayMap[d];
+      const pct = Math.round(v.ev * 100 / maxEv);
+      return '<div class="dayRow"><div class="dLbl">' + d.slice(5) + '</div><div class="dBar"><i style="width:' + pct + '%"></i></div><div class="dNum">' + v.ev + '</div></div>';
+    }).join('') + '</div>';
+  // события за период
+  const order = [['open','Открытий сайта'],['swipe','Голосов (свайпы)'],['heartbeat','Heartbeat (сессии)'],['reg','Регистраций'],['comment','Комментариев'],['story','Историй отправлено'],['share','Шаров'],['duel','Голосов в дуэлях']];
+  const cnt = {}; evNames.forEach(n => cnt[n] = (cnt[n] || 0) + 1);
+  const evBlock = '<div class="card"><div class="mcat" style="font-weight:700;color:#15181C;margin-bottom:8px">события за 7 дней</div>' +
+    order.map(r => '<div class="statRow"><span>' + r[1] + '</span><b>' + (cnt[r[0]] || 0) + '</b></div>').join('') + '</div>';
+  box.innerHTML =
+    '<div class="rangeSel">' +
+      [['7','7 дней'],['14','14 дней'],['30','30 дней']].map(r =>
+        '<button class="' + (usrStatsRange === r[0] ? 'on' : '') + '" onclick="setUsrRange(\'' + r[0] + '\')">' + r[1] + '</button>'
+      ).join('') +
+    '</div>' +
+    big + funnelHtml + chart + evBlock;
+}
+async function renderUsers(){
+  const days = +usrStatsRange;
+  const m = computeMetrics(days);
+  const box = $('list');
+  // профили для тех, у кого user_id
+  const userIds = m.topDev.map(d => d[0]).filter(id => id && /^[0-9a-f-]{36}$/i.test(id));
+  const profs = {};
+  if (userIds.length) {
+    const { data } = await sb.from('profiles').select('id,nick,avatar_url,frame').in('id', userIds);
+    (data || []).forEach(p => profs[p.id] = p);
+  }
+  // разбивка действий по типам для топа
+  const evByUser = {};
+  m.ev.forEach(e => {
+    const u = e.user_id || e.device || '__anon__';
+    evByUser[u] = evByUser[u] || {};
+    evByUser[u][e.name] = (evByUser[u][e.name] || 0) + 1;
+  });
+  // новые vs возвратные (первые 7 vs последние 7 дней из 14)
+  const midTs = Date.now() - 7 * 864e5;
+  const oldDevs = new Set(evFull.filter(e => new Date(e.created_at).getTime() < midTs && new Date(e.created_at).getTime() >= Date.now() - 30*864e5).map(e => e.device || '__anon__'));
+  const rows = m.topDev.map(([u, n]) => {
+    const p = profs[u];
+    const nm = p ? p.nick : (u === '__anon__' ? 'аноним' : (u.length > 12 ? u.slice(0, 12) + '…' : u));
+    const sub = p ? (p.id.slice(0, 8)) : '';
+    const acts = evByUser[u] || {};
+    const isNew = !oldDevs.has(u) && u !== '__anon__';
+    const tag = isNew ? '<span class="pill new">новый</span>' : (p ? '<span class="pill">рег</span>' : '<span class="pill">анон</span>');
+    const avHtml = p
+      ? '<div class="av' + (p.frame ? ' ' + p.frame : '') + '" style="' + (p.avatar_url ? '' : 'background:linear-gradient(135deg,#8C6A1D,#E9C767)') + '">' + (p.avatar_url ? '<img src="' + p.avatar_url + '">' : (p.nick || '?').slice(0,1).toUpperCase()) + '</div>'
+      : '<div class="av" style="background:#EDEEF2;color:#8A919E">?</div>';
+    return '<div class="usrRow">' + avHtml +
+      '<div class="nm">' + esc(nm) + tag + (sub ? '<small>' + sub + '</small>' : '') + '</div>' +
+      '<div class="st">' + n + ' <small style="font-weight:500;color:#8A919E">· ' +
+        (acts.swipe ? '🎯' + acts.swipe + ' ' : '') +
+        (acts.comment ? '💬' + acts.comment + ' ' : '') +
+        (acts.story ? '📝' + acts.story + ' ' : '') +
+        (acts.share ? '📤' + acts.share + ' ' : '') +
+      '</small></div></div>';
+  });
+  const uniqUsers = new Set(m.ev.map(e => e.user_id || e.device || '__anon__')).size;
+  box.innerHTML =
+    '<div class="rangeSel">' +
+      [['7','7 дней'],['14','14 дней'],['30','30 дней']].map(r =>
+        '<button class="' + (usrStatsRange === r[0] ? 'on' : '') + '" onclick="setUsrRange(\'' + r[0] + '\')">' + r[1] + '</button>'
+      ).join('') +
+    '</div>' +
+    '<div class="bigStat"><div><div class="lbl">топ активных</div><div class="val">' + m.topDev.length + '</div><div class="sub">из ' + uniqUsers + ' уник.</div></div></div>' +
+    '<div class="card"><div class="mcat" style="font-weight:700;color:#15181C;margin-bottom:8px">👥 топ-' + m.topDev.length + ' по активности</div>' + rows.join('') + '</div>';
 }
 function setTab(t){
   tab = t;
-  ['Cases','Comments','Duels','Reports','Stats'].forEach(k => $('tab'+k).classList.toggle('on', t === k.toLowerCase()));
+  ['Cases','Comments','Duels','Reports','Users','Stats'].forEach(k => $('tab'+k).classList.toggle('on', t === k.toLowerCase()));
   renderList();
 }
 function repCard(type, o, cat){
@@ -164,12 +352,12 @@ function renderList(){
     const items = hidCases.map(o => repCard('case', o, o.category || 'другое'))
       .concat(hidComments.map(o => repCard('comment', o, 'комментарий')));
     box.innerHTML = items.join('') || '<div class="empty">Жалоб нет 🎉</div>';
+  } else if (tab === 'stats') {
+    renderStats();
+  } else if (tab === 'users') {
+    renderUsers();
   } else {
-    const order = [['open','Открытий сайта'],['swipe','Голосов (свайпы)'],['reg','Регистраций'],['comment','Комментариев'],['story','Историй отправлено'],['share','Шаров'],['duel','Голосов в дуэлях']];
-    const cnt = {}; evNames.forEach(n => cnt[n] = (cnt[n] || 0) + 1);
-    box.innerHTML = '<div class="card">' + order.map(r =>
-      '<div class="statRow"><span>' + r[1] + '</span><b>' + (cnt[r[0]] || 0) + '</b></div>').join('') +
-      '<div class="mctx" style="margin-top:10px">за последние 7 дней</div></div>';
+    box.innerHTML = '<div class="empty">—</div>';
   }
 }
 async function decide(id, ok){

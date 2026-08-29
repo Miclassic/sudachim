@@ -2862,6 +2862,10 @@ window.addEventListener('error', e => { try { const t = $('toast'); t.textConten
 window.addEventListener('unhandledrejection', e => { try { const t = $('toast'); t.textContent = '⚠️ ' + ((e.reason && e.reason.message) || e.reason || 'rejection'); t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 20000); } catch(_){} });
 setTimeout(loadFeed, 4000);
 setTimeout(loadFeed, 9000);
+setInterval(() => {
+  if (document.hidden) return;
+  track('heartbeat');
+}, 60000);
 async function renderMine(){
   const box = $('myCasesTab'); if (!box) return;
   if (!me) { box.innerHTML = '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы видеть свои истории</button>'; return; }
