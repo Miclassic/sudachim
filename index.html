@@ -2119,7 +2119,7 @@ function myCReact(cmId, emoji){ return !!(me && allCReacts.find(r => r.comment_i
 function cReactsHtml(cmId){
   const rc = cReactsOf(cmId);
   const counts = {}; rc.forEach(r => counts[r.emoji] = (counts[r.emoji] || 0) + 1);
-  return QUICK_EMO.map(e => {
+  return QUICK_EMO.slice().sort((a, b) => (counts[b] || 0) - (counts[a] || 0)).map(e => {
     const n = counts[e] || 0;
     const on = myCReact(cmId, e);
     return '<button class="rct' + (on ? ' on' : '') + '" style="' + (on ? 'background:rgba(201,151,28,.18);border-color:rgba(201,151,28,.5)' : '') + '" onclick="cReactToggle(' + cmId + ',\'' + e + '\')"><span style="font-size:13px">' + e + '</span>' + (n ? ' ' + n : '') + '</button>';
