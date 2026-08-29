@@ -743,6 +743,7 @@ function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVot
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
 let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
+let minuteCnt = 0, liveDeltas = [], nextLiveAt = Date.now() + 40000 + Math.random() * 50000;
 let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0, hourCnt = {};
 let me = null, myNick = '', myAva = '', authMode = 'reg';
 let replyTo = null, pickedMedia = null;
@@ -1690,6 +1691,15 @@ function authErr(m){
   if (/invalid login credentials/i.test(m)) return 'Неверный email или пароль';
   return m;
 }
+function sideWord(k){ return trashOpen() ? (k === 'condemn' ? 'казнить' : k === 'life' ? 'мне пох' : 'помиловать') : (k === 'condemn' ? 'осуждаю' : k === 'life' ? 'жиза' : 'не осуждаю'); }
+function maybeLiveToast(){
+  if (!liveDeltas.length) return;
+  const now = Date.now();
+  if (now < nextLiveAt) return;
+  nextLiveAt = now + 40000 + Math.random() * 50000;
+  const p = liveDeltas[Math.floor(Math.random() * liveDeltas.length)];
+  microToast(ic('i-flame') + 'кто-то только что поставил «' + sideWord(p.k) + '» в деле «' + esc(p.c.text).replace(/\s+/g, ' ').slice(0, 40) + '…»');
+}
 function allById(id){ return allCases.find(c => c.id === id); }
 function checkSafety(t){
   t = t.toLowerCase();
@@ -2051,7 +2061,18 @@ async function loadFeed(){
   ]);
   const lerr = c.error || cm.error || rv.error;
   if (lerr) { const t = $('toast'); t.textContent = '⚠️ лента: ' + lerr.message; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 15000); }
-  if (c.data) allCases = c.data.filter(x => !x.hidden);
+  const newCases = (c.data || []).filter(x => !x.hidden);
+  if (allCases.length && newCases.length) {
+    const oldMap = {}; allCases.forEach(x => oldMap[x.id] = [x.condemn || 0, x.justify || 0, x.life || 0]);
+    liveDeltas = [];
+    newCases.forEach(x => {
+      const o = oldMap[x.id]; if (!o) return;
+      const dC = (x.condemn || 0) - o[0], dJ = (x.justify || 0) - o[1], dL = (x.life || 0) - o[2];
+      if (dC + dJ + dL <= 0) return;
+      liveDeltas.push({ c: x, k: dC >= dJ && dC >= dL ? 'condemn' : dJ >= dL ? 'justify' : 'life' });
+    });
+  } else liveDeltas = [];
+  if (c.data) allCases = newCases;
   if (cm.data) allComments = cm.data.filter(x => !x.hidden);
   const ids = allCases.map(x => x.id);
   const rq = ids.length ? await sb.from('reactions').select('case_id,kind,user_id').in('case_id', ids) : { data: [] };
@@ -2064,6 +2085,8 @@ async function loadFeed(){
   voteCnt24 = cnt;
   const h1 = new Date(srvNow() - 3600000).toISOString();
   hourCnt = {}; (rv.data || []).forEach(r => { if (r.created_at >= h1) hourCnt[r.case_id] = (hourCnt[r.case_id] || 0) + 1; });
+  const m1 = new Date(srvNow() - 60000).toISOString();
+  minuteCnt = (rv.data || []).filter(r => r.created_at >= m1).length;
   sb.from('votes').select('user_id').gte('created_at', new Date(srvNow() - 3600000).toISOString() ).then(({ data }) => {
     onlineNow = [...new Set((data || []).map(r => r.user_id))].length;
     if (trashOpen()) { const el = $('nightCount'); if (el) el.textContent = onlineNow ? '· сейчас в ночном суде: ' + onlineNow + ' 🌙' : ''; }
@@ -2079,6 +2102,7 @@ async function loadFeed(){
   const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length + '|' + allLikes.length;
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
   if (!$('feed').children.length && allCases.length) { renderChips(); renderFeed(); }
+  maybeLiveToast();
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
@@ -2643,6 +2667,7 @@ async function renderTicker(){
   const total24 = Object.values(voteCnt24).reduce((a, b) => a + b, 0);
   if (total24) items.push(ic('i-vote') + ' <span class="tkL">голосов за сутки:</span> <b>' + total24 + '</b>');
   if (onlineNow) items.push(ic('i-user') + ' <span class="tkL tkOn">сейчас судей онлайн:</span> <b>' + onlineNow + '</b>');
+  if (minuteCnt) items.push(ic('i-bolt') + ' <span class="tkL">за последнюю минуту:</span> <b>' + minuteCnt + '</b> ' + vplural(minuteCnt));
   const hot = allById([...hotCases][0]);
   if (hot) items.push(ic('i-flame') + ' <span class="tkL tkHot">сейчас судят:</span> ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
   if (topCache.list[0]) {
