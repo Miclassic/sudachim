@@ -36,6 +36,32 @@ body.night .ftxt{color:#E8EAEE;text-shadow:none}
 body.night .fmeta,body.night .fmetaCat,body.night .votesRow,body.night .secDesc,body.night .bSub{text-shadow:none}
 body.night .fbtns button{color:var(--gray)}
 body.night .stamp,body.night .lockStamp{background:rgba(23,26,32,.85)}
+.sealWrap{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;border-radius:44px;background:rgba(237,238,242,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+body.night .sealWrap{background:rgba(15,17,21,.55)}
+.seal{width:112px;height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#ffe9e2;background:radial-gradient(circle at 35% 30%,#e2725f,#a3271a 70%);border-radius:46% 54% 52% 48% / 48% 46% 54% 52%;box-shadow:inset 0 4px 8px rgba(255,255,255,.25),inset 0 -6px 10px rgba(0,0,0,.35),0 10px 30px rgba(163,39,26,.45);cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .15s ease;position:relative}
+.seal .icn{width:30px;height:30px}
+.sealNum{font-size:9px;font-weight:800;letter-spacing:.08em}
+.sealHint{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:var(--gray)}
+.seal.pressing{transform:scale(1.08)}
+.seal.pressing::after{content:"";position:absolute;inset:6px;border-radius:inherit;background:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 2px,transparent 2px 6px);opacity:.7}
+.sealWrap.broken .seal{animation:sealBreak .5s ease both}
+@keyframes sealBreak{0%{transform:scale(1.1)}40%{transform:scale(1.25) rotate(6deg)}100%{transform:scale(1.6) rotate(-10deg);opacity:0}}
+.sealWrap.broken{animation:sealWrapOff .5s ease .15s both}
+@keyframes sealWrapOff{to{opacity:0}}
+.bigStamp{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:7;border:4px solid;border-radius:14px;padding:8px 22px;font-weight:900;font-size:30px;letter-spacing:.06em;background:rgba(255,255,255,.85);animation:slam .5s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+body.night .bigStamp{background:rgba(23,26,32,.85)}
+.bigStamp.sB{color:var(--red);border-color:var(--red)}
+.bigStamp.sB2{color:var(--grn);border-color:var(--grn)}
+.bigStamp.sB3{color:var(--yel);border-color:var(--yel)}
+@keyframes slam{0%{transform:translate(-50%,-50%) scale(2.4) rotate(-16deg);opacity:0}60%{transform:translate(-50%,-50%) scale(.95) rotate(-8deg);opacity:1}100%{transform:translate(-50%,-50%) scale(1) rotate(-8deg)}}
+.stack.shake{animation:shakeS .4s ease}
+@keyframes shakeS{0%,100%{transform:none}25%{transform:translateY(3px)}50%{transform:translateY(-2px)}75%{transform:translateY(2px)}}
+.bubble.away-burn{animation:awayBurn .6s ease-in both}
+@keyframes awayBurn{to{transform:translateY(115%) rotate(7deg);opacity:0;filter:brightness(.5) saturate(1.4)}}
+.bubble.away-up{animation:awayUp .6s ease-in both}
+@keyframes awayUp{to{transform:translateY(-115%) rotate(-7deg);opacity:0}}
+.bubble.away-arch{animation:awayArch .6s ease-in both}
+@keyframes awayArch{to{transform:translate(40%,70%) scale(.5) rotate(10deg);opacity:0}}
 body.night .fart{opacity:.3}
 button{transition:transform .15s ease}
 button:active{transform:scale(.95)}
@@ -671,6 +697,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
           <div class="stamp stL" id="stL">ОСУЖДАЮ</div>
           <div class="stamp stR" id="stR">НЕ ОСУЖДАЮ</div>
           <div class="stamp stU" id="stU">ЖИЗА</div>
+          <div class="sealWrap" id="sealWrap"><div class="seal" id="seal"><svg class="icn" viewBox="0 0 24 24"><use href="#i-scale"/></svg><div class="sealNum" id="sealNum"></div><div class="sealHint">зажми — вскрыть дело</div></div></div>
         </div>
       </div>
     </div>
@@ -1790,6 +1817,23 @@ function authErr(m){
   if (/invalid login credentials/i.test(m)) return 'Неверный email или пароль';
   return m;
 }
+let AC = null;
+function ac(){ if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function sCrack(){ const a = ac(); if (!a) return; const t = a.currentTime, len = Math.floor(a.sampleRate * .12), buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2); const n = a.createBufferSource(); n.buffer = buf; const f = a.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1600; const g = a.createGain(); g.gain.value = .5; n.connect(f); f.connect(g); g.connect(a.destination); n.start(t); }
+function sStamp(){ const a = ac(); if (!a) return; const t = a.currentTime; const o = a.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(50, t + .12); const g = a.createGain(); g.gain.setValueAtTime(.6, t); g.gain.exponentialRampToValueAtTime(.001, t + .18); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + .2); }
+function buzz(p){ try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+function stampHit(v){
+  sStamp(); buzz([60, 40, 60]);
+  const st = document.createElement('div');
+  st.className = 'bigStamp ' + (v === 'condemn' ? 'sB' : v === 'justify' ? 'sB2' : 'sB3');
+  st.textContent = v === 'condemn' ? (trashOpen() ? 'КАЗНИТЬ' : 'ОСУЖДАЮ') : v === 'justify' ? (trashOpen() ? 'ПОМИЛОВАТЬ' : 'НЕ ОСУЖДАЮ') : 'ЖИЗА';
+  card.appendChild(st);
+  setTimeout(() => st.remove(), 1200);
+  const wrap = card.parentElement; if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+}
+function startPress(){ const s = $('seal'); if (!s) return; s.classList.add('pressing'); pressT = setTimeout(breakSeal, 380); }
+function cancelPress(){ clearTimeout(pressT); const s = $('seal'); if (s) s.classList.remove('pressing'); }
+function breakSeal(){ clearTimeout(pressT); sealed = false; sCrack(); buzz(35); const w = $('sealWrap'); if (w) w.classList.add('broken'); setTimeout(() => { const w2 = $('sealWrap'); if (w2) w2.style.display = 'none'; }, 600); }
 function sideWord(k){ return trashOpen() ? (k === 'condemn' ? 'казнить' : k === 'life' ? 'мне пох' : 'помиловать') : (k === 'condemn' ? 'осуждаю' : k === 'life' ? 'жиза' : 'не осуждаю'); }
 function maybeLiveToast(){
   if (!liveDeltas.length) return;
@@ -2470,8 +2514,14 @@ function next(){
   $('result').classList.add('hidden'); $('comments').classList.add('hidden');
   $('pills').classList.remove('show'); $('pills').innerHTML = '';
   card.classList.remove('done'); card.classList.remove('drag');
+  card.classList.remove('away-burn', 'away-up', 'away-arch');
   card.style.transform = 'none';
-  if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); renderEmpty(); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
+  sealed = true;
+  const sw = $('sealWrap');
+  if (!cur) { if (sw) sw.style.display = 'none'; $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); renderEmpty(); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
+  if (sw) { sw.style.display = 'flex'; sw.classList.remove('broken'); }
+  const sl = $('seal'); if (sl) sl.classList.remove('pressing');
+  $('sealNum').textContent = 'дело №' + cur.id;
   $('cardWrap').classList.remove('hidden'); $('hint').classList.remove('hidden'); $('empty').classList.add('hidden');
   $('sub').textContent = 'народный суд · ' + catOf(cur);
   caseText.innerHTML = richBlocks(cur.text);
@@ -2513,7 +2563,10 @@ async function vote(v){
     '<div class="rbtns"><button onclick="loadComments()">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('i-share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>' +
     '<div class="crow" style="margin-top:10px"><input id="advIn" maxlength="150" placeholder="🧑‍⚖️ защитить сторону (до 150 символов)"><button class="spBtn" title="скрыть выделенное" onclick="spoilWrap(\'advIn\')">' + ic('i-eye') + '</button><button onclick="sendAdvocate()">→</button></div>';
   $('result').classList.remove('hidden');
-  $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 1000);
+  stampHit(v);
+  setTimeout(() => card.classList.add('away-' + (v === 'condemn' ? 'burn' : v === 'justify' ? 'up' : 'arch')), 380);
+  setTimeout(() => next(), 950);
   renderFeed();
 }
 async function sendAdvocate(){
@@ -2692,12 +2745,17 @@ async function shareCase(c){
 }
 function shareCard(){ shareCase(cur); }
 let dx = 0, dy = 0, dragging = false, sx = 0, sy = 0;
+let sealed = true, pressT = null;
 function clampDrag(){
   const w = card.offsetWidth || 320, h = card.offsetHeight || 320;
   dx = Math.max(-w * 0.6, Math.min(w * 0.6, dx));
   dy = Math.max(-h * 0.5, Math.min(h * 0.5, dy));
 }
-card.addEventListener('pointerdown', e => { if (voteLock || card.classList.contains('done')) return; dragging = true; card.classList.add('drag'); sx = e.clientX; sy = e.clientY; });
+card.addEventListener('pointerdown', e => {
+  if (voteLock || card.classList.contains('done')) return;
+  if (sealed) { startPress(); return; }
+  dragging = true; card.classList.add('drag'); sx = e.clientX; sy = e.clientY;
+});
 card.addEventListener('pointermove', e => { if (!dragging) return; dx = e.clientX - sx; dy = e.clientY - sy; clampDrag(); apply(); });
 function endDrag(cancel){
   if (!dragging) return; dragging = false;
@@ -2706,8 +2764,8 @@ function endDrag(cancel){
   if (!cancel && (vx < -90 || vx > 90 || vy < -90)) vote(vx < -90 ? 'condemn' : vx > 90 ? 'justify' : 'life');
   apply();
 }
-window.addEventListener('pointerup', () => endDrag(false));
-window.addEventListener('pointercancel', () => endDrag(true));
+window.addEventListener('pointerup', () => { cancelPress(); endDrag(false); });
+window.addEventListener('pointercancel', () => { cancelPress(); endDrag(true); });
 function apply(){
   if (voteLock) return;
   card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (dx * 0.05) + 'deg)';
