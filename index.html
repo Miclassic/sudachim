@@ -523,6 +523,21 @@ body.night .qBar{background:rgba(255,255,255,.1)}
 body.night .skin-carbon{background:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 3px,transparent 3px 6px),#171A20!important}
 .skin-glass{background:rgba(255,255,255,.45)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 22px rgba(20,24,32,.08)!important}
 body.night .skin-glass{background:rgba(23,26,32,.5)!important}
+.myTick{box-shadow:none;padding:0 12px 6px}
+.myTick::after{background:radial-gradient(60% 130% at 50% 50%,rgba(122,92,255,.14),transparent 70%)}
+body.night .myTick::after{background:radial-gradient(60% 130% at 50% 50%,rgba(122,92,255,.2),transparent 70%)}
+.tickTrack2{display:inline-block;white-space:nowrap;color:#6a4bd8;font-size:10px;font-weight:700;animation:tick2 22s linear infinite;will-change:transform}
+@keyframes tick2{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.tickTrack2 .icn{width:12px;height:12px;vertical-align:-2px;color:#7A5CFF}
+.tmL{color:#7A5CFF;font-weight:800}
+.tmDone{color:var(--grn)}
+.myTick .tickTrack2 b{color:#5f3dd0}
+body.night .tickTrack2{color:#B4A6E8}
+body.night .tmL{color:#B18CFF}
+body.night .tmDone{color:#3DD68C}
+body.night .myTick .tickTrack2 b{color:#C9A6FF}
+body.night .tickTrack2 .icn{color:#B18CFF}
+main{padding-top:166px}
 @keyframes cmtFlash{0%{box-shadow:0 0 0 2px rgba(201,151,28,.85),0 8px 22px rgba(20,24,32,.08);transform:scale(1.02)}100%{transform:scale(1)}}
 @keyframes cmtFlashN{0%{box-shadow:0 0 0 2px rgba(255,138,61,.85),0 8px 22px rgba(0,0,0,.4);transform:scale(1.02)}100%{transform:scale(1)}}
 .cmtFlash{animation:cmtFlash 1.2s ease}
@@ -626,6 +641,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
   <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
+  <div class="ticker myTick"><div class="tickTrack2" id="myTickTrack"></div></div>
 </div>
 <main>
 
@@ -1093,6 +1109,7 @@ async function refreshMe(){
     saveDuelVoted();
   }
   requeue();
+  renderMyTicker();
 }
 function requeue(){
   queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c) && timerState(c) !== 'locked' && (!cur || c.id !== cur.id));
@@ -1767,6 +1784,25 @@ function maybeLiveToast(){
   const p = liveDeltas[Math.floor(Math.random() * liveDeltas.length)];
   microToast(ic('i-flame') + 'кто-то только что поставил «' + sideWord(p.k) + '» в деле «' + esc(p.c.text).replace(/\s+/g, ' ').slice(0, 40) + '…»');
 }
+async function renderMyTicker(){
+  const el = $('myTickTrack'); if (!el) return;
+  let line = '';
+  if (!me) {
+    line = '<span class="tmL">личное:</span> войди — закрывай события дня и получай рамки и скины';
+  } else {
+    const qd = await questData();
+    const LAB = { v: 'вердикты', c: 'аргументы', d: 'дуэль', t: 'треш-час' };
+    const parts = QUESTS.map(q => {
+      const cur = Math.min(qd[q.k], q.goal);
+      const done = cur >= q.goal;
+      return '<span class="' + (done ? 'tmDone' : '') + '">' + (done ? '✓' : '•') + ' ' + LAB[q.k] + ' ' + cur + '/' + q.goal + '</span>';
+    });
+    const allDone = QUESTS.every(q => qd[q.k] >= q.goal);
+    line = ic('i-star') + ' <span class="tmL">мои события дня:</span> ' + parts.join(' <span class="sep">·</span> ') + (allDone ? ' <span class="sep">·</span> <b>награда ждёт в профиле</b>' : ' <span class="sep">·</span> награда — рамка или скин');
+  }
+  el.innerHTML = line;
+  el.style.animationDuration = Math.min(25, Math.max(8, Math.round(el.textContent.length * 0.22))) + 's';
+}
 function allById(id){ return allCases.find(c => c.id === id); }
 function checkSafety(t){
   t = t.toLowerCase();
@@ -2173,6 +2209,7 @@ async function loadFeed(){
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
   if (!$('feed').children.length && allCases.length) { renderChips(); renderFeed(); }
   maybeLiveToast();
+  renderMyTicker();
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
