@@ -357,6 +357,13 @@ body.night .icNight{display:inline-block;color:#FF4438;filter:drop-shadow(0 0 6p
 @keyframes moonGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.12);filter:drop-shadow(0 0 10px rgba(255,68,56,1)) drop-shadow(0 0 22px rgba(255,68,56,.6))}}
 body.night .brandName{color:#FF6B5E;text-shadow:0 0 12px rgba(255,68,56,.35)}
 .fitem.trashHot{box-shadow:0 16px 44px rgba(211,58,44,.28), inset 0 0 0 1.5px rgba(211,58,44,.5)}
+.fitem.hypeHot{box-shadow:0 16px 44px rgba(211,58,44,.35), inset 0 0 0 2px rgba(211,58,44,.6)!important;animation:hypeBurn 2.2s ease-in-out infinite}
+@keyframes hypeBurn{0%,100%{box-shadow:0 16px 44px rgba(211,58,44,.30), inset 0 0 0 2px rgba(211,58,44,.55)}50%{box-shadow:0 18px 60px rgba(255,106,61,.55), inset 0 0 0 2px rgba(255,138,61,.85)}}
+body.night .fitem.hypeHot{animation-name:hypeBurnN}
+@keyframes hypeBurnN{0%,100%{box-shadow:0 16px 44px rgba(255,68,56,.3), inset 0 0 0 2px rgba(255,68,56,.55)}50%{box-shadow:0 18px 60px rgba(255,138,61,.6), inset 0 0 0 2px rgba(255,138,61,.9)}}
+.fitem.hypeHot .fart{opacity:.75}
+body.night .fitem.hypeHot .fart{opacity:.5!important}
+.artHype{--pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ctext x='10' y='44' font-size='30' opacity='.5' transform='rotate(-12 25 44)'%3E%F0%9F%94%A5%3C/text%3E%3Ctext x='54' y='88' font-size='26' opacity='.4' transform='rotate(12 65 88)'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E");--grad:linear-gradient(135deg,#FFD9C4,#FFF1E7)}
 .fitem.trashHot .fart{opacity:.75}
 .trashStamp{position:absolute;top:12px;right:14px;z-index:2;background:rgba(211,58,44,.92);color:#fff;font-weight:800;font-size:10px;letter-spacing:.08em;padding:4px 10px;border-radius:8px;transform:rotate(6deg);text-transform:uppercase;box-shadow:0 6px 18px rgba(211,58,44,.45);pointer-events:none;animation:stampPulse 2.6s ease-in-out infinite}
 @keyframes stampPulse{0%,100%{box-shadow:0 6px 18px rgba(211,58,44,.45)}50%{box-shadow:0 6px 26px rgba(255,68,56,.8)}}
@@ -2922,7 +2929,7 @@ async function renderHype(){
       '<button class="fpill" style="color:var(--grn)" onclick="hypeVote(' + c.id + ',\'justify\')">' + vLabel('justify') + '</button></div>'
       : '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать в хайп-суде</button></div>';
   }
-  box.innerHTML = '<div class="fitem hot" style="box-shadow:0 16px 44px rgba(211,58,44,.25), inset 0 0 0 1.5px rgba(211,58,44,.45)"><div class="fart ' + art + '"></div><div class="fbody">' +
+  box.innerHTML = '<div class="fitem hypeHot"><div class="fart artHype"></div><div class="fbody">' +
     '<div class="fmetaCat" style="color:var(--red);font-weight:800">' + ic('i-bolt') + ' хайп-суд · вердикт через <span data-hypeend="' + hypeEnd(c) + '">' + d + ' д ' + h + ' ч</span></div>' +
     '<div style="font-weight:800;font-size:17px;margin:6px 0 2px;line-height:1.3">' + esc(c.hype_title || catOf(c)) + '</div>' +
     '<div class="ftxt">' + richText(c.text) + '</div>' + evdHtml(c) + body + '</div></div>';
