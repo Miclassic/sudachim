@@ -683,8 +683,6 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <input id="aPass" class="aIn" type="password" placeholder="Пароль (мин. 6 символов)">
     <button class="go" id="aGo" onclick="doAuth()">Создать аккаунт</button>
     <button class="swap" id="aSwap" onclick="toggleAuthMode()">Уже есть аккаунт? Войти</button>
-    <div class="aDiv"><span>или</span></div>
-    <button class="gBtn" onclick="doGoogle()"><span class="gDot"></span>Войти через Google</button>
     <div class="aNote">VK — скоро. Анонимы могут смотреть ленту и делиться карточками.</div>
     <button class="swap" onclick="closeAuth()">Позже</button>
   </div>
@@ -1066,9 +1064,14 @@ async function doAuth(){
     const r = await sb.auth.signUp({ email, password: pass, options: { data: { nick } } });
     if (r.error) { toast(r.error.message); return; }
     const s = await sb.auth.getSession();
-    if (s.data.session) await sb.from('profiles').insert({ id: s.data.session.user.id, nick });
-    track('reg');
-    toast('Добро пожаловать, ' + nick + '!');
+    if (s.data.session) {
+      const ins = await sb.from('profiles').insert({ id: s.data.session.user.id, nick });
+      if (ins.error && ins.error.code !== '23505') { toast('Профиль: ' + ins.error.message); return; }
+      track('reg');
+      toast('Добро пожаловать, ' + nick + '!');
+    } else {
+      toast('Подтверди письмо на ' + email + ' — и входи');
+    }
   } else {
     const r = await sb.auth.signInWithPassword({ email, password: pass });
     if (r.error) { toast('Неверный email или пароль'); return; }
