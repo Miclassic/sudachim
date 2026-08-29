@@ -214,6 +214,11 @@ body.vplay .fart::before,body.vplay .ntag,body.vplay .ntag::after,body.vplay .bu
 @keyframes pctPulse{0%{transform:scale(1)}30%{transform:scale(1.18);text-shadow:0 0 12px rgba(201,151,28,.65)}100%{transform:scale(1)}}
 .pctFlash{animation:pctPulse .9s ease;display:inline-block}
 body.night .pctFlash{text-shadow:0 0 12px rgba(255,138,61,.75)}
+#microLine{margin:-4px 0 10px;color:var(--gray);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;animation:rise .4s ease}
+#microLine .icn,#toast .icn{width:13px;height:13px;color:var(--gold)}
+#microLine b{color:var(--ink)}
+body.night #microLine .icn,body.night #toast .icn{color:#FF8A3D}
+body.night #microLine b{color:#EDEEF2}
 .fbtns{display:flex;gap:8px;margin-top:8px}
 .fbtns button{flex:1;background:transparent;color:var(--gray);border:none;border-radius:999px;padding:8px 6px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
 .fbtns button:active{background:rgba(20,24,32,.06)}
@@ -1599,6 +1604,7 @@ async function voteDaily(id, v){
   if (error) { toast(error.message); return; }
   voted[id] = v; saveVoted();
   track('swipe');
+  microToast(microProgressHtml(c, v));
   renderDaily();
 }
 let brandTaps = 0, brandTimer = null;
@@ -1640,6 +1646,40 @@ function animateBars(){
     barMem.set(key, tgt);
   });
 }
+function vplural(n){ const a = n % 10, b = n % 100; if (a === 1 && b !== 11) return 'вердикт'; if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return 'вердикта'; return 'вердиктов'; }
+function nextTypeLine(){
+  let total = 0, cond = 0, life = 0;
+  Object.keys(voted).forEach(id => { const c = allById(Number(id)); if (!c) return; total++; const v = voted[id]; if (v === 'condemn') cond++; if (v === 'life') life++; });
+  if (!total) return '';
+  const need = total < 5 ? 5 - total : 0;
+  const cands = [];
+  if (cond / total > 0.25) cands.push({ x: Math.max(Math.ceil(cond / 0.25 - total), need), t: 'МИЛОСЕРДНЫЙ', ic: 'i-shield' });
+  if (cond / total < 0.6) cands.push({ x: Math.max(Math.ceil((0.6 * total - cond) / 0.4), need), t: 'ПРОКУРОР', ic: 'i-gavel' });
+  if (life / total < 0.5) cands.push({ x: Math.max(total - 2 * life, need), t: 'ВСЁ ВИДЕЛ', ic: 'i-eye' });
+  cands.sort((a, b) => a.x - b.x);
+  const b0 = cands[0];
+  if (!b0 || b0.x < 1 || b0.x > 30) return '';
+  return ic(b0.ic) + 'ещё <b>' + b0.x + '</b> ' + vplural(b0.x) + ' до типа «' + b0.t + '»';
+}
+function microProgressHtml(cs, myV){
+  const day = mskDay(new Date(srvNow()).toISOString());
+  let dc = null; try { dc = JSON.parse(localStorage.getItem('sud_daycnt') || 'null'); } catch (e) {}
+  if (!dc || dc.d !== day) dc = { d: day, n: 0 };
+  dc.n++; localStorage.setItem('sud_daycnt', JSON.stringify(dc));
+  let log = []; try { log = JSON.parse(localStorage.getItem('sud_mlog') || '[]'); } catch (e) {}
+  if (cs) {
+    const m = Math.max(cs.condemn || 0, cs.justify || 0, cs.life || 0);
+    const maj = (cs.condemn || 0) === m ? 'condemn' : (cs.justify || 0) === m ? 'justify' : 'life';
+    log.push(myV === maj ? 1 : 0); if (log.length > 10) log = log.slice(-10);
+    localStorage.setItem('sud_mlog', JSON.stringify(log));
+  }
+  const parts = [ic('i-scale') + '<b>' + dc.n + '</b> ' + vplural(dc.n) + ' сегодня'];
+  if (log.length >= 3) { const s = log.reduce((a, b) => a + b, 0); parts.push(ic('i-target') + 'совпадаешь с народом в <b>' + s + '</b> из <b>' + log.length + '</b>'); }
+  const nt = nextTypeLine();
+  if (nt) parts.push(nt);
+  return parts.join(' <span style="opacity:.5">·</span> ');
+}
+function microToast(html){ const t = $('toast'); t.innerHTML = html; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 4000); }
 function allById(id){ return allCases.find(c => c.id === id); }
 function checkSafety(t){
   t = t.toLowerCase();
@@ -2181,6 +2221,7 @@ async function feedVote(id, v){
   voted[id] = v; saveVoted();
   queue = queue.filter(q => q.id !== id);
   track('swipe');
+  microToast(microProgressHtml(c, v));
   renderFeed();
 }
 async function feedToggleComments(id, force){
@@ -2252,6 +2293,7 @@ async function vote(v){
   const my = pct(c[myVerdict]);
   $('result').innerHTML =
     '<div id="myLabel">' + (my >= 50 ? 'Ты с большинством — ' + my + '%' : 'Ты в меньшинстве — ' + my + '% 🔥') + '</div>' +
+    '<div id="microLine">' + microProgressHtml(cur, v) + '</div>' +
     '<div class="rbtns"><button onclick="loadComments()">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('i-share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>' +
     '<div class="crow" style="margin-top:10px"><input id="advIn" maxlength="150" placeholder="🧑‍⚖️ защитить сторону (до 150 символов)"><button onclick="sendAdvocate()">→</button></div>';
   $('result').classList.remove('hidden');
