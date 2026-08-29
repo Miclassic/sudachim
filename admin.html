@@ -334,7 +334,8 @@ function renderList(){
       '<div class="mtxt">' + esc(o.text) + '</div>' + mediaHtml(o) +
       '<div class="mbtns"><button class="ok" onclick="decide(' + o.id + ',true)">✅ одобрить</button>' +
       '<button class="no" onclick="decide(' + o.id + ',false)">❌ отклонить</button>' +
-      '<button class="daily" onclick="setDaily(' + o.id + ')">🔥 дело дня</button></div></div>'
+      '<button class="daily" onclick="setDaily(' + o.id + ')">🔥 дело дня</button>' +
+      '<button class="daily" style="background:linear-gradient(90deg,#D33A2C,#FF8A3D);color:#fff" onclick="setHype(' + o.id + ')">⚡ хайп</button></div></div>'
     ).join('') : '<div class="empty">Очередь пуста 🎉</div>';
   } else if (tab === 'comments') {
     box.innerHTML = pendComments.length ? pendComments.map(o => {
@@ -394,6 +395,14 @@ async function kill(type, id){
 async function setDaily(id){
   await sb.from('cases').update({ daily: false }).eq('daily', true);
   const res = await sb.from('cases').update({ daily: true, status: 'approved' }).eq('id', id).select();
+  if (!rowCheck(res)) return;
+  await refresh();
+}
+async function setHype(id){
+  const t = prompt('Заголовок темы (как в новостях, до 80 символов):', '');
+  if (!t) return;
+  await sb.from('cases').update({ hype: false }).eq('hype', true).neq('id', id);
+  const res = await sb.from('cases').update({ hype: true, hype_title: t.trim().slice(0, 80), status: 'approved' }).eq('id', id).select();
   if (!rowCheck(res)) return;
   await refresh();
 }

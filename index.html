@@ -649,6 +649,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div class="secHead"><svg class="icn"><use href="#i-scale"/></svg>суд</div>
     <div class="secDesc">народный суд над бытовыми ситуациями: анонимно кидаешь историю — народ свайпает и выносит вердикт. никто не узнает, все посмеются, а кто-то словит жизу.</div>
     <div id="trashBanner" class="hidden"><svg class="icn"><use href="#i-moon"/></svg>треш-час открыт — до 5:00 <span id="nightCount"></span><div class="tbDesc">Ночью иначе: «казнить / помиловать» вместо лёгкого «осуждаю». Ваши голоса имеют вес в полтора-два раза сильнее обычного. Tреш - контент объявляется открытым. К утру всё спишется на усталость.</div></div>
+    <div id="hypeBox" style="margin-bottom:14px"></div>
     <div id="myCasesMain" style="margin-bottom:14px"></div>
     <div id="cardWrap">
       <div class="stack">
@@ -673,6 +674,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div id="feedHead" class="hidden"><svg class="icn"><use href="#i-flame"/></svg>народные вердикты</div>
     <div class="chips hidden" id="chips"></div>
     <div id="feed"></div>
+    <div id="hypeArch" style="margin-top:18px"></div>
   </section>
   <section id="tab-duels" class="hidden">
     <div class="secHead"><svg class="icn"><use href="#i-swords"/></svg>дуэли · что хуже?</div>
@@ -1118,7 +1120,7 @@ async function refreshMe(){
   renderMyTicker();
 }
 function requeue(){
-  queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c) && timerState(c) !== 'locked' && (!cur || c.id !== cur.id));
+  queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c) && timerState(c) !== 'locked' && !c.hype && (!cur || c.id !== cur.id));
   if (!cur || (cur.id in voted) || isMine(cur) || !visibleCase(cur) || timerState(cur) === 'locked') next();
 }
 sb.auth.onAuthStateChange(() => refreshMe());
@@ -2204,7 +2206,7 @@ async function load(){
     return;
   }
   allCases = (data || []).filter(c => !c.hidden);
-  queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c) && timerState(c) !== 'locked');
+  queue = allCases.filter(c => !(c.id in voted) && !isMine(c) && visibleCase(c) && timerState(c) !== 'locked' && !c.hype);
   $('trashBanner').classList.toggle('hidden', !trashOpen());
   if (!sessionStorage.getItem('sud_open')) { sessionStorage.setItem('sud_open', '1'); track('open'); }
   next();
@@ -2264,6 +2266,8 @@ async function loadFeed(){
   if (!$('feed').children.length && allCases.length) { renderChips(); renderFeed(); }
   maybeLiveToast();
   renderMyTicker();
+  renderHype();
+  renderHypeArchive();
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
@@ -2288,11 +2292,15 @@ function renderVerdictCanvas(c){
   x.fillStyle = g; x.textAlign = 'center'; x.font = '600 56px "OPPO Sans", system-ui';
   x.fillText('С У Д А Ч И М', W / 2, 190);
   x.fillStyle = '#8A919E'; x.font = '500 34px "OPPO Sans", system-ui';
-  x.fillText('народный вердикт · ' + catOf(c), W / 2, 250);
+  x.fillText(c.hype_title ? 'хайп-суд · народный вердикт' : 'народный вердикт · ' + catOf(c), W / 2, 250);
+  let y = 380;
+  if (c.hype_title) {
+    x.fillStyle = '#D33A2C'; x.font = '800 46px "OPPO Sans", system-ui';
+    wrapCenter(x, c.hype_title.toUpperCase(), W - 200).slice(0, 2).forEach(l => { x.fillText(l, W / 2, y - 40); y += 56; });
+  }
   x.fillStyle = '#1B1E24'; x.font = '500 42px "OPPO Sans", system-ui';
   let lines = wrapCenter(x, flatText(c.text), W - 260);
   if (lines.length > 5) { lines = lines.slice(0, 5); lines[4] += '…'; }
-  let y = 380;
   for (const l of lines) { x.fillText(l, W / 2, y); y += 60; }
   const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
   const pct = v => Math.round(v * 100 / total);
@@ -2338,6 +2346,7 @@ async function renderFeed(){
   renderTicker();
   const list = allCases
     .filter(c => !isMine(c))
+    .filter(c => !c.hype)
     .filter(c => feedCat === 'все' || catL(c) === feedCat)
     .map(c => ({ c, total: (c.condemn||0) + (c.justify||0) + (c.life||0) }))
     .sort((a, b) => scoreCase(b.c, b.total) - scoreCase(a.c, a.total) || b.c.id - a.c.id);
@@ -2803,6 +2812,12 @@ setInterval(() => {
     const m = Math.floor(ms/60000), s = Math.floor(ms%60000/1000);
     el.textContent = m + ':' + String(s).padStart(2,'0');
   });
+  document.querySelectorAll('[data-hypeend]').forEach(el => {
+    const ms = Number(el.getAttribute('data-hypeend')) - srvNow();
+    if (ms <= 0) { el.textContent = '— вердикт вступил в силу'; renderHype(); return; }
+    const dd = Math.floor(ms / 864e5), hh = Math.floor(ms % 864e5 / 3600000);
+    el.textContent = dd + ' д ' + hh + ' ч';
+  });
 }, 1000);
 if (!localStorage.getItem('sud_onboard')) {
   setTimeout(() => { $('onboard').classList.remove('hidden'); localStorage.setItem('sud_onboard', '1'); setTimeout(() => $('onboard').classList.add('hidden'), 6000); }, 800);
@@ -2839,6 +2854,8 @@ async function renderTicker(){
   if (total24) items.push(ic('i-vote') + ' <span class="tkL">голосов за сутки:</span> <b>' + total24 + '</b>');
   if (onlineNow) items.push(ic('i-user') + ' <span class="tkL tkOn">сейчас судей онлайн:</span> <b>' + onlineNow + '</b>');
   if (minuteCnt) items.push(ic('i-bolt') + ' <span class="tkL">за последнюю минуту:</span> <b>' + minuteCnt + '</b> ' + vplural(minuteCnt));
+  const hypeC = allCases.find(x => x.hype && !x.hidden && hypeState(x) !== 'locked');
+  if (hypeC) items.push(ic('i-bolt') + ' <span class="tkL tkHot">хайп-суд:</span> ' + esc(hypeC.hype_title || '') + ' · вердикт через ' + Math.max(1, Math.ceil((hypeEnd(hypeC) - srvNow()) / 864e5)) + ' дн');
   const hot = allById([...hotCases][0]);
   if (hot) items.push(ic('i-flame') + ' <span class="tkL tkHot">сейчас судят:</span> ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
   if (topCache.list[0]) {
@@ -2880,6 +2897,66 @@ async function renderMine(){
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
   }).join('');
+}
+function hypeEnd(c){ return new Date(c.created_at).getTime() + 7 * 864e5; }
+function hypeState(c){ return srvNow() >= hypeEnd(c) ? 'locked' : 'live'; }
+async function renderHype(){
+  const box = $('hypeBox'); if (!box) return;
+  const c = allCases.find(x => x.hype && !x.hidden && hypeState(x) !== 'locked');
+  if (!c) { box.innerHTML = ''; return; }
+  const total = (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
+  const votedIt = c.id in voted;
+  const pct = v => total ? Math.round(v * 100 / total) : 0;
+  const left = hypeEnd(c) - srvNow();
+  const d = Math.floor(left / 864e5), h = Math.floor(left % 864e5 / 3600000);
+  const art = ART[catL(c)] || 'artV';
+  let body;
+  if (votedIt) {
+    body = fbarsHtml('h' + c.id, pct(c.condemn), pct(c.life), pct(c.justify)) +
+      '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span>' + votesLabel(total) + '</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>' +
+      '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
+      '<div class="fcom hidden" id="fc_' + c.id + '"></div>';
+  } else {
+    body = me ? '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="hypeVote(' + c.id + ',\'condemn\')">' + vLabel('condemn') + '</button>' +
+      '<button class="fpill" style="color:var(--yel)" onclick="hypeVote(' + c.id + ',\'life\')">' + vLabel('life') + '</button>' +
+      '<button class="fpill" style="color:var(--grn)" onclick="hypeVote(' + c.id + ',\'justify\')">' + vLabel('justify') + '</button></div>'
+      : '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать в хайп-суде</button></div>';
+  }
+  box.innerHTML = '<div class="fitem hot" style="box-shadow:0 16px 44px rgba(211,58,44,.25), inset 0 0 0 1.5px rgba(211,58,44,.45)"><div class="fart ' + art + '"></div><div class="fbody">' +
+    '<div class="fmetaCat" style="color:var(--red);font-weight:800">' + ic('i-bolt') + ' хайп-суд · вердикт через <span data-hypeend="' + hypeEnd(c) + '">' + d + ' д ' + h + ' ч</span></div>' +
+    '<div style="font-weight:800;font-size:17px;margin:6px 0 2px;line-height:1.3">' + esc(c.hype_title || catOf(c)) + '</div>' +
+    '<div class="ftxt">' + richText(c.text) + '</div>' + evdHtml(c) + body + '</div></div>';
+  animateBars();
+}
+function renderHypeArchive(){
+  const box = $('hypeArch'); if (!box) return;
+  const list = allCases.filter(c => c.hype && !c.hidden && hypeState(c) === 'locked').sort((a, b) => hypeEnd(b) - hypeEnd(a));
+  if (!list.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="secHead" style="margin-top:8px">' + ic('i-trophy') + 'архив народных вердиктов</div>' +
+    list.map(c => {
+      const total = ((c.condemn || 0) + (c.justify || 0) + (c.life || 0)) || 1;
+      const pct = v => Math.round(v * 100 / total);
+      const maj = Math.max(c.condemn || 0, c.justify || 0, c.life || 0);
+      const verdict = (c.life || 0) === maj && maj > 0 ? 'народ сказал: ЖИЗА' : (c.justify || 0) === maj ? 'народ решил: НЕ ОСУЖДАЮ' : 'народ решил: ОСУЖДАЮ';
+      return '<div class="fitem" style="margin-bottom:10px"><div class="fbody">' +
+        '<div class="fmetaCat">' + esc(c.hype_title || catOf(c)) + ' · вердикт от ' + new Date(hypeEnd(c)).toLocaleDateString('ru-RU') + '</div>' +
+        fbarsHtml('ha' + c.id, pct(c.condemn), pct(c.life), pct(c.justify)) +
+        '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span>' + plural(total) + '</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>' +
+        '<div style="text-align:center;font-weight:800;font-size:15px;color:var(--gold);margin-top:8px">' + verdict + '</div>' +
+        '<div class="fbtns"><button onclick="shareVerdict(' + c.id + ')">📜 вердикт</button><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button></div>' +
+        '<div class="fcom hidden" id="fc_' + c.id + '"></div></div></div>';
+    }).join('');
+  animateBars();
+}
+async function hypeVote(id, v){
+  if (!me) { openAuth(); return; }
+  const c = allById(id); if (!c) return;
+  const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
+  if (error) { toast(error.message); return; }
+  c[v] = (c[v] || 0) + 1;
+  voted[id] = v; saveVoted();
+  track('swipe');
+  renderHype(); renderFeed();
 }
 const QUESTS = [
   { k: 'v', n: 'Вынеси 5 вердиктов', goal: 5, ic: 'i-vote' },
