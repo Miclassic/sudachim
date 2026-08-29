@@ -494,6 +494,15 @@ body.night .cardPrev.adv{border-color:rgba(255,138,61,.6)}
 body.night .cardPrev{background:rgba(23,26,32,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-color:rgba(255,255,255,.14);color:#D5DAE2;box-shadow:0 4px 14px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08)}
 body.night .cardPrev.adv{border-color:rgba(255,138,61,.5);color:#EDEEF2}
 .cardPrev{cursor:pointer}
+.spoil{position:relative;cursor:pointer;border-radius:6px;padding:0 5px;margin:0 1px;background:repeating-linear-gradient(45deg,rgba(20,24,32,.88) 0 2px,rgba(20,24,32,.62) 2px 4px);color:transparent;text-shadow:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.spoil::after{content:"";position:absolute;inset:-1px;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(255,255,255,.30) 0 1px,transparent 1px 2px),repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 1px,transparent 1px 3px);animation:tvnoise .3s steps(2) infinite;mix-blend-mode:overlay;pointer-events:none}
+@keyframes tvnoise{0%{background-position:0 0,0 0}50%{background-position:1px 2px,-2px 1px}100%{background-position:-1px -1px,2px -2px}}
+.spoil.open{background:rgba(201,151,28,.14);color:inherit;user-select:text;-webkit-user-select:text}
+.spoil.open::after{display:none}
+body.night .spoil{background:repeating-linear-gradient(45deg,rgba(0,0,0,.9) 0 2px,rgba(0,0,0,.6) 2px 4px)}
+body.night .spoil.open{background:rgba(255,138,61,.16)}
+.crow .spBtn{background:var(--bg);color:var(--gray);box-shadow:none;padding:0 12px}
+.crow .spBtn .icn{width:17px;height:17px}
 @keyframes cmtFlash{0%{box-shadow:0 0 0 2px rgba(201,151,28,.85),0 8px 22px rgba(20,24,32,.08);transform:scale(1.02)}100%{transform:scale(1)}}
 @keyframes cmtFlashN{0%{box-shadow:0 0 0 2px rgba(255,138,61,.85),0 8px 22px rgba(0,0,0,.4);transform:scale(1.02)}100%{transform:scale(1)}}
 .cmtFlash{animation:cmtFlash 1.2s ease}
@@ -669,6 +678,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <textarea id="fText" maxlength="2000" placeholder="например: свекровь приходит без звонка и переставляет вещи. я стала запирать дверь. кто не прав?"></textarea>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <button type="button" class="miniBtn" onclick="$('fMedia').click()">📎 приложить вещдок</button>
+      <button type="button" class="miniBtn" onclick="spoilWrap('fText')"><svg class="icn"><use href="#i-eye"/></svg> скрыть выделенное</button>
       <span id="fMediaName" style="font-size:11px;color:var(--gray)"></span>
     </div>
     <input type="file" id="fMedia" accept="image/*,video/*" style="display:none" onchange="onMediaPick(this)">
@@ -677,7 +687,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     </select>
     <button class="go" onclick="submitCase()">Отправить на модерацию</button>
     <button style="background:none;border:none;color:var(--gray)" onclick="closeForm()">Отмена</button>
-    <div style="font-size:11px;color:var(--gray)">Без имён, телефонов, адресов и ссылок. «треш» виден только с 23:00 до 5:00. Фото до 8 МБ, видео до 15 МБ и до 60 сек.</div>
+    <div style="font-size:11px;color:var(--gray)">Без имён, телефонов, адресов и ссылок. Мат — только под спойлером: выдели и нажми «скрыть». «треш» виден только с 23:00 до 5:00. Фото до 8 МБ, видео до 15 МБ и до 60 сек.</div>
   </div>
 </div>
 <div id="auth" class="hidden">
@@ -906,6 +916,33 @@ function timerHtml(c){
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function notifText(t){ t = String(t || '').replace(/\s+/g,' ').trim(); if (t.length <= 60) return t; const cut = t.slice(0, 57); const sp = cut.lastIndexOf(' '); return (sp > 30 ? cut.slice(0, sp) : cut) + '…'; }
 function nl2br(t){ return esc(t).replace(/\n/g,'<br>'); }
+function flatText(t){ return String(t).replace(/\|\|[\s\S]+?\|\|/g, '[скрыто]'); }
+function spoilTap(e, el){ if (e) e.stopPropagation(); el.classList.toggle('open'); }
+function spoilHtml(w){ return '<span class="spoil" onclick="spoilTap(event,this)">' + esc(w) + '</span>'; }
+function richText(t){
+  return String(t).split(/\n+/).map(p => {
+    let out = '', last = 0, m, re = /\|\|([\s\S]+?)\|\|/g;
+    while ((m = re.exec(p))) { out += esc(p.slice(last, m.index)); out += spoilHtml(m[1]); last = m.index + m[0].length; }
+    return out + esc(p.slice(last));
+  }).join('<br>');
+}
+function richBlocks(t){
+  const words = s => esc(s).split(/\s+/).filter(Boolean).map(w => '<span class="w">' + w + '</span>').join(' ');
+  return String(t).split(/\n+/).map(p => {
+    let out = '', last = 0, m, re = /\|\|([\s\S]+?)\|\|/g;
+    while ((m = re.exec(p))) { out += (out ? ' ' : '') + words(p.slice(last, m.index)) + ' ' + spoilHtml(m[1]); last = m.index + m[0].length; }
+    out += (out ? ' ' : '') + words(p.slice(last));
+    return out;
+  }).join('<br>');
+}
+function spoilWrap(id){
+  const el = $(id); if (!el) return;
+  const v = el.value, s = el.selectionStart || 0, e = el.selectionEnd || 0;
+  if (e <= s) { toast('Сначала выдели слово в тексте'); return; }
+  el.value = v.slice(0, s) + '||' + v.slice(s, e) + '||' + v.slice(e);
+  el.selectionStart = s + 2; el.selectionEnd = e + 2;
+  el.focus();
+}
 function votesLabel(total){
   if (total >= 100) return plural(total);
   const masked = 'меньше 100 голосов';
@@ -1183,7 +1220,7 @@ function myCasesHtml(list){
   const items = list.map(c => {
     const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
     const pct = v => Math.round(v * 100 / total);
-    return '<div class="mcItem"><div class="mcTxt">' + esc(c.text).replace(/\n/g,' ') + '</div><div class="mcPills">' +
+    return '<div class="mcItem"><div class="mcTxt">' + esc(flatText(c.text)).replace(/\n/g,' ') + '</div><div class="mcPills">' +
       '<span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span>' +
       '<span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span>' +
       '<span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div></div>';
@@ -1426,12 +1463,12 @@ function duelCard(d){
   const art = '<div class="fart artV"></div>';
   let body;
   if (my) {
-    body = '<div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
+    body = '<div class="dVs">' + esc(flatText(d.a)) + ' <b>VS</b> ' + esc(flatText(d.b)) + '</div>' +
       '<div class="fbars"><i class="fbar" style="width:' + pa + '%;background:var(--red)"></i><i class="fbar" style="width:' + (100 - pa) + '%;background:var(--grn)"></i></div>' +
       '<div class="fmeta"><span style="color:var(--red)">' + pa + '%</span><span>' + votesLabel(total) + '</span><span style="color:var(--grn)">' + (100 - pa) + '%</span></div>' +
       '<div class="fbtns"><button onclick="shareDuel(' + d.id + ')">' + ic('i-share') + 'Поделиться</button></div>';
   } else {
-    body = '<div class="dVs">' + esc(d.a) + ' <b>VS</b> ' + esc(d.b) + '</div>' +
+    body = '<div class="dVs">' + esc(flatText(d.a)) + ' <b>VS</b> ' + esc(flatText(d.b)) + '</div>' +
       '<div class="fpills"><button class="fpill" style="color:var(--red)" onclick="duelVote(' + d.id + ',\'a\')">👈 хуже</button>' +
       '<button class="fpill" style="color:var(--grn)" onclick="duelVote(' + d.id + ',\'b\')">хуже 👉</button></div>' +
       '<div class="dHint">что хуже?</div>' +
@@ -1527,7 +1564,7 @@ function renderCardBlobDuel(d){
     x.textBaseline = 'alphabetic';
     return h;
   }
-  const hA = drawPill(d.a, red, 'rgba(211,58,44,.35)', 410);
+  const hA = drawPill(flatText(d.a), red, 'rgba(211,58,44,.35)', 410);
   const vsY = 410 + hA + 52;
   x.save(); x.shadowColor = 'rgba(20,24,32,.18)'; x.shadowBlur = 16; x.shadowOffsetY = 6;
   x.fillStyle = '#fff'; x.beginPath(); x.arc(W / 2, vsY, 56, 0, Math.PI * 2); x.fill(); x.restore();
@@ -1536,7 +1573,7 @@ function renderCardBlobDuel(d){
   x.fillStyle = vg; x.beginPath(); x.arc(W / 2, vsY, 46, 0, Math.PI * 2); x.fill();
   x.fillStyle = '#fff'; x.font = '800 32px "OPPO Sans", system-ui';
   x.fillText('VS', W / 2, vsY + 11);
-  const hB = drawPill(d.b, grn, 'rgba(46,158,91,.35)', vsY + 52);
+  const hB = drawPill(flatText(d.b), grn, 'rgba(46,158,91,.35)', vsY + 52);
   const by = vsY + 52 + hB + 70;
   const total = (d.a_votes || 0) + (d.b_votes || 0) || 1;
   const pa = Math.round((d.a_votes || 0) * 100 / total);
@@ -1605,7 +1642,7 @@ function dailyCard(c){
   }
   return '<div class="fitem hot"><div class="fart '+art+'"></div>' + timerHtml(c) + '<div class="fbody">' +
     '<div class="dTop">🔥 дело дня · <span id="dcount_'+c.id+'"></span></div>' +
-    '<div class="ftxt">'+nl2br(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
+    '<div class="ftxt">'+richText(c.text)+'</div>' + evdHtml(c) + body + '</div></div>';
 }
 async function voteDaily(id, v){
   if (!me) { openAuth(); return; }
@@ -1715,7 +1752,8 @@ function checkSafety(t){
   if (/(https?:\/\/|www\.|t\.me|vk\.com|wa\.me)/.test(t)) return 'Ссылки нельзя';
   if (/[авекмнорстух]\d{3}[авекмнорстух]{2,3}\s?\d{2,3}/.test(t)) return 'Убери госномер';
   if (/(зовут|его имя|её имя)\s+[а-яё]+/.test(t)) return 'Убери имя';
-  if (/(хуй|пизд|ебан|ебат|ебуч|бляд|мраз|гандон|мудак|долбоеб|говн|дерьм|шлюх)/.test(t)) return 'Без мата и оскорблений — иначе 18+';
+  const noSpoil = t.replace(/\|\|[\s\S]+?\|\|/g, ' ');
+  if (/(хуй|пизд|ебан|ебат|ебуч|бляд|мраз|гандон|мудак|долбоеб|говн|дерьм|шлюх)/.test(noSpoil)) return 'Мат и оскорбления — только под спойлером: выдели и нажми «скрыть»';
   return null;
 }
 async function nicksFor(ids){
@@ -2009,12 +2047,12 @@ async function likeComment(cmId){
 }
 function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
   return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + advTag(cm) +
-   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + richText(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button></div></div>';
 }
 function cmtBlock(cm,reps,nicks,stats,topId){ const [lab,col]=sideInfo(cm);
   return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + advTag(cm) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
-   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
+   '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + richText(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
    '<button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
@@ -2028,7 +2066,7 @@ function buildComments(all,nicks,stats){
   return tops.map(cm => cmtBlock(cm, byP[cm.id] || [], nicks, stats, topId)).join('');
 }
 function commentInput(inputId, fn, tagId){
-  return me ? '<div class="crow"><input id="' + inputId + '" maxlength="500" placeholder="Твой аргумент…"><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
+  return me ? '<div class="crow"><input id="' + inputId + '" maxlength="500" placeholder="Твой аргумент…"><button class="spBtn" title="скрыть выделенное" onclick="spoilWrap(\'' + inputId + '\')">' + ic('i-eye') + '</button><button onclick="' + fn + '">→</button></div><div id="' + tagId + '" class="hidden" style="font-size:11px;color:var(--gray);margin-top:4px"></div>'
    : '<button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы комментировать</button>';
 }
 function setReply(id, nick){
@@ -2137,7 +2175,7 @@ function renderVerdictCanvas(c){
   x.fillStyle = '#8A919E'; x.font = '500 34px "OPPO Sans", system-ui';
   x.fillText('народный вердикт · ' + catOf(c), W / 2, 250);
   x.fillStyle = '#1B1E24'; x.font = '500 42px "OPPO Sans", system-ui';
-  let lines = wrapCenter(x, c.text, W - 260);
+  let lines = wrapCenter(x, flatText(c.text), W - 260);
   if (lines.length > 5) { lines = lines.slice(0, 5); lines[4] += '…'; }
   let y = 380;
   for (const l of lines) { x.fillText(l, W / 2, y); y += 60; }
@@ -2169,7 +2207,7 @@ function shareVerdict(id){
 async function notifyCaseAuthor(caseId, text, parentId){
   const c = allById(caseId);
   if (c && c.user_id && c.user_id !== me.id) {
-    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: notifText(text) }).then(() => {});
+    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: notifText(flatText(text)) }).then(() => {});
   }
   if (parentId) {
     let pAuthor = null;
@@ -2177,7 +2215,7 @@ async function notifyCaseAuthor(caseId, text, parentId){
     if (loc) pAuthor = loc.user_id;
     else { const { data } = await sb.from('comments').select('user_id').eq('id', parentId).maybeSingle(); pAuthor = data ? data.user_id : null; }
     if (pAuthor && pAuthor !== me.id && (!c || pAuthor !== c.user_id)) {
-      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: notifText(text) }).then(() => {});
+      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: notifText(flatText(text)) }).then(() => {});
     }
   }
 }
@@ -2217,15 +2255,15 @@ async function renderFeed(){
     const lastC = cmsAll.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))[0];
     const topAdv = adv[0];
     let prevHtml = '';
-    if (lastC && (!topAdv || lastC.id !== topAdv.id)) prevHtml += '<div class="cardPrev" onclick="jumpToComment(' + c.id + ',' + lastC.id + ')">' + esc(nicks[lastC.user_id] || 'аноним') + ': ' + esc(lastC.text).replace(/\s+/g, ' ').slice(0, 80) + '</div>';
-    if (topAdv) prevHtml += '<div class="cardPrev adv" onclick="jumpToComment(' + c.id + ',' + topAdv.id + ')">' + ic('i-shield') + ' ' + esc(nicks[topAdv.user_id] || 'аноним') + ': ' + esc(topAdv.text).replace(/\s+/g, ' ').slice(0, 80) + ' · 👏' + likesOf(topAdv.id) + '</div>';
+    if (lastC && (!topAdv || lastC.id !== topAdv.id)) prevHtml += '<div class="cardPrev" onclick="jumpToComment(' + c.id + ',' + lastC.id + ')">' + esc(nicks[lastC.user_id] || 'аноним') + ': ' + esc(flatText(lastC.text)).replace(/\s+/g, ' ').slice(0, 80) + '</div>';
+    if (topAdv) prevHtml += '<div class="cardPrev adv" onclick="jumpToComment(' + c.id + ',' + topAdv.id + ')">' + ic('i-shield') + ' ' + esc(nicks[topAdv.user_id] || 'аноним') + ': ' + esc(flatText(topAdv.text)).replace(/\s+/g, ' ').slice(0, 80) + ' · 👏' + likesOf(topAdv.id) + '</div>';
     let hotHtml = '';
     if (c.id === topHourId) hotHtml += '<span class="hotChip hotFire">' + ic('i-flame') + 'голоса часа</span>';
     if (c.id === contrId) { const a = c.condemn || 0, b = c.justify || 0, t = a + b || 1; hotHtml += '<span class="hotChip hotContr">' + ic('i-scale') + 'спорное · ' + Math.round(a * 100 / t) + '/' + Math.round(b * 100 / t) + '</span>'; }
     if (hotHtml) hotHtml = '<div class="hotRow">' + hotHtml + '</div>';
-    const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + nl2br(k.text) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
+    const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + richText(k.text) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
-      const excerpt = c.text.replace(/\s+/g,' ').slice(0, 70) + '…';
+      const excerpt = flatText(c.text).replace(/\s+/g,' ').slice(0, 70) + '…';
       return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
         '<div class="fmetaCat">🌙 треш · откроется с 23:00</div><div class="fmeta"><span></span><span>' + votesLabel(total) + '</span></div>' +
         '<div class="ftxt" style="color:var(--gray)">' + esc(excerpt) + '</div>' +
@@ -2248,7 +2286,7 @@ async function renderFeed(){
     ));
     return '<div class="' + itemClass + '" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div>' + (catL(c) === 'треш' && trashOpen() ? '<span class="trashStamp">⚠️ треш-час</span>' : '') + timerHtml(c) + '<div class="fbody">' +
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
-      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + hotHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + prevHtml + '</div></div>';
+      '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + richText(c.text) + '</div>' + evdHtml(c) + sumHtml + hotHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + prevHtml + '</div></div>';
   }).join('');
   animateBars();
 }
@@ -2303,7 +2341,7 @@ function next(){
   if (!cur) { $('cardWrap').classList.add('hidden'); $('hint').classList.add('hidden'); renderEmpty(); $('empty').classList.remove('hidden'); $('caseMedia').innerHTML = ''; return; }
   $('cardWrap').classList.remove('hidden'); $('hint').classList.remove('hidden'); $('empty').classList.add('hidden');
   $('sub').textContent = 'народный суд · ' + catOf(cur);
-  caseText.innerHTML = cur.text.split(/\n+/).map(p => p.split(/\s+/).filter(Boolean).map(w => '<span class="w">' + esc(w) + '</span>').join(' ')).join('<br>');
+  caseText.innerHTML = richBlocks(cur.text);
   $('caseMedia').innerHTML = evdHtml(cur);
   dx = dy = 0;
 }
@@ -2340,7 +2378,7 @@ async function vote(v){
     '<div id="myLabel">' + (my >= 50 ? 'Ты с большинством — ' + my + '%' : 'Ты в меньшинстве — ' + my + '% 🔥') + '</div>' +
     '<div id="microLine">' + microProgressHtml(cur, v) + '</div>' +
     '<div class="rbtns"><button onclick="loadComments()">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCard()">' + ic('i-share') + 'Поделиться</button><button onclick="afterVote()">Дальше →</button></div>' +
-    '<div class="crow" style="margin-top:10px"><input id="advIn" maxlength="150" placeholder="🧑‍⚖️ защитить сторону (до 150 символов)"><button onclick="sendAdvocate()">→</button></div>';
+    '<div class="crow" style="margin-top:10px"><input id="advIn" maxlength="150" placeholder="🧑‍⚖️ защитить сторону (до 150 символов)"><button class="spBtn" title="скрыть выделенное" onclick="spoilWrap(\'advIn\')">' + ic('i-eye') + '</button><button onclick="sendAdvocate()">→</button></div>';
   $('result').classList.remove('hidden');
   $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   renderFeed();
@@ -2458,7 +2496,7 @@ function renderCardBlob(c){
   x.fillStyle = gray; x.font = '500 36px "OPPO Sans", system-ui';
   x.fillText('народный суд · ' + catOf(c), W / 2, 318);
   x.fillStyle = '#1B1E24'; x.font = '500 44px "OPPO Sans", system-ui';
-  let lines = wrapCenter(x, c.text, W - 260);
+  let lines = wrapCenter(x, flatText(c.text), W - 260);
   if (lines.length > 6) { lines = lines.slice(0, 6); lines[5] += '…'; }
   let y = 430;
   for (const l of lines) { x.fillText(l, W / 2, y); y += 62; }
@@ -2714,7 +2752,7 @@ async function renderMine(){
   box.innerHTML = list.map(c => {
     const total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
     const pct = v => Math.round(v * 100 / total);
-    return '<div class="mcItem" style="background:var(--card);box-shadow:0 8px 22px rgba(20,24,32,.06)"><div class="mcTxt" style="white-space:normal">' + esc(c.text) + '</div>' +
+    return '<div class="mcItem" style="background:var(--card);box-shadow:0 8px 22px rgba(20,24,32,.06)"><div class="mcTxt" style="white-space:normal">' + esc(flatText(c.text)) + '</div>' +
       '<div class="mcPills"><span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span><span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span><span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div>' +
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
