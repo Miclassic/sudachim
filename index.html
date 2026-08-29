@@ -2928,6 +2928,7 @@ async function renderHype(){
       '<button class="fpill" style="color:var(--yel)" onclick="hypeVote(' + c.id + ',\'life\')">' + vLabel('life') + '</button>' +
       '<button class="fpill" style="color:var(--grn)" onclick="hypeVote(' + c.id + ',\'justify\')">' + vLabel('justify') + '</button></div>'
       : '<div class="fpills"><button class="fpill lockPill" style="flex:1" onclick="openAuth()">🔒 войди, чтобы голосовать в хайп-суде</button></div>';
+  body += '<div class="fbtns" style="margin-top:6px"><button onclick="shareHype(\'vk\',' + c.id + ')">ВК</button><button onclick="shareHype(\'tg\',' + c.id + ')">Telegram</button><button onclick="shareHype(\'tt\',' + c.id + ')">Там-Там</button><button onclick="shareHype(\'copy\',' + c.id + ')">копировать</button></div>';
   }
   box.innerHTML = '<div class="fitem hypeHot"><div class="fart artHype"></div><div class="fbody">' +
     '<div class="fmetaCat" style="color:var(--red);font-weight:800">' + ic('i-bolt') + ' хайп-суд · вердикт через <span data-hypeend="' + hypeEnd(c) + '">' + d + ' д ' + h + ' ч</span></div>' +
@@ -2951,6 +2952,7 @@ function renderHypeArchive(){
         '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span>' + plural(total) + '</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>' +
         '<div style="text-align:center;font-weight:800;font-size:15px;color:var(--gold);margin-top:8px">' + verdict + '</div>' +
         '<div class="fbtns"><button onclick="shareVerdict(' + c.id + ')">📜 вердикт</button><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button></div>' +
+        '<div class="fbtns" style="margin-top:2px"><button onclick="shareHype(\'vk\',' + c.id + ')">ВК</button><button onclick="shareHype(\'tg\',' + c.id + ')">Telegram</button><button onclick="shareHype(\'tt\',' + c.id + ')">Там-Там</button><button onclick="shareHype(\'copy\',' + c.id + ')">копировать</button></div>' +
         '<div class="fcom hidden" id="fc_' + c.id + '"></div></div></div>';
     }).join('');
   animateBars();
@@ -2964,6 +2966,22 @@ async function hypeVote(id, v){
   voted[id] = v; saveVoted();
   track('swipe');
   renderHype(); renderFeed();
+}
+function hypeTeaser(c){
+  const d = Math.max(1, Math.ceil((hypeEnd(c) - srvNow()) / 864e5));
+  return (c.hype_title ? c.hype_title + '. ' : '') + 'Народный суд уже голосует — вердикт через ' + d + ' дн. А ты на чьей стороне?';
+}
+function shareHype(net, id){
+  const c = allById(id); if (!c) return;
+  track('share');
+  const url = caseLink(id);
+  const text = hypeTeaser(c);
+  if (net === 'vk') window.open('https://vk.com/share.php?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(text), '_blank');
+  if (net === 'tg') window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
+  if (net === 'tt') window.open('https://tt.me/share?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
+  if (net === 'copy') {
+    navigator.clipboard.writeText(text + ' ' + url).then(() => toast('Ссылка скопирована — вставляй куда хочешь'));
+  }
 }
 const QUESTS = [
   { k: 'v', n: 'Вынеси 5 вердиктов', goal: 5, ic: 'i-vote' },
