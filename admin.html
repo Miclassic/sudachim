@@ -407,6 +407,11 @@ async function setDaily(id){
   if (!rowCheck(res)) return;
   await refresh();
 }
+async function clearHype(id){
+  const res = await sb.from('cases').update({ hype: false, hype_title: '' }).eq('id', id).select();
+  if (!rowCheck(res)) return;
+  await refresh();
+}
 async function setHype(id){
   const t = prompt('Заголовок темы (как в новостях, до 80 символов):', '');
   if (!t) return;
