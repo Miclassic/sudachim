@@ -210,7 +210,10 @@ body.vplay .fart::before,body.vplay .ntag,body.vplay .ntag::after,body.vplay .bu
 .fpill .icn{width:13px;height:13px}
 .fpills{display:flex;gap:6px}
 .fbars{display:flex;gap:4px;height:8px}
-.fbar{display:block;height:100%;border-radius:4px}
+.fbar{display:block;height:100%;border-radius:4px;transition:width .6s cubic-bezier(.2,.8,.3,1)}
+@keyframes pctPulse{0%{transform:scale(1)}30%{transform:scale(1.18);text-shadow:0 0 12px rgba(201,151,28,.65)}100%{transform:scale(1)}}
+.pctFlash{animation:pctPulse .9s ease;display:inline-block}
+body.night .pctFlash{text-shadow:0 0 12px rgba(255,138,61,.75)}
 .fbtns{display:flex;gap:8px;margin-top:8px}
 .fbtns button{flex:1;background:transparent;color:var(--gray);border:none;border-radius:999px;padding:8px 6px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
 .fbtns button:active{background:rgba(20,24,32,.06)}
@@ -988,7 +991,7 @@ async function openNotifs(){
   $('nList').innerHTML = (data || []).map(n => {
     const who = nicks[n.actor_id] || 'кто-то';
     const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : n.type === 'verdict' ? '📜 твоя история набрала 100 голосов — вердикт готов' : 'прокомментировал(а) твою историю';
-    return '<div class="nItem' + (n.read ? '' : ' unread') + '" onclick="openCaseFromNotif(' + (n.case_id || 0) + ')"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + '»</div>' : '') + '</div>';
+    return '<div class="nItem' + (n.read ? '' : ' unread') + '" onclick="openCaseFromNotif(' + (n.case_id || 0) + ')"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + (/[.!?,…]$/.test(n.text) ? '' : (n.text.length >= 57 ? '…' : '')) + '»</div>' : '') + '</div>';
   }).join('') || '<div class="empty">Пока тихо 🔕</div>';
   await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false);
   document.querySelectorAll('#nList .nItem.unread').forEach(el => el.classList.remove('unread'));
@@ -1554,6 +1557,7 @@ async function renderDaily(){
   const box = $('dailyList');
   if (!today) { box.innerHTML = '<div class="empty">Скоро будет первое дело дня 🔥</div>'; return; }
   box.innerHTML = dailyCard(today);
+  animateBars();
   const tick = () => {
     const el = $('dcount_' + today.id); if (!el) return;
     if (dailyReveal()) { el.textContent = 'результаты открыты'; return; }
@@ -1573,7 +1577,7 @@ function dailyCard(c){
   let body;
   if (locked || (revealed && total > 0)) {
     body = (locked ? '<div class="lockStamp" style="position:static;display:inline-block;transform:rotate(-3deg);margin-bottom:6px">ПРИГОВОР ВСТУПИЛ В СИЛУ</div>' : '') +
-      '<div class="fbars"><i class="fbar" style="width:'+pct(c.condemn)+'%;background:var(--red)"></i><i class="fbar" style="width:'+pct(c.life)+'%;background:var(--yel)"></i><i class="fbar" style="width:'+pct(c.justify)+'%;background:var(--grn)"></i></div>' +
+      fbarsHtml('d' + c.id, pct(c.condemn), pct(c.life), pct(c.justify)) +
       '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают '+pct(c.condemn)+'%</span><span style="color:var(--grn)">не осуждают '+pct(c.justify)+'%</span></div>';
   } else if (votedIt) {
     body = '<div class="fpills"><button class="fpill lockPill" style="flex:1">✅ голос учтён'+(revealed?'':' — результаты в 21:00')+'</button></div>';
@@ -1611,6 +1615,31 @@ function plural(n){
   return n + ' голосов';
 }
 function toast(m){ const t = $('toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 3000); }
+function fbarsHtml(key, a, l, j){
+  return '<div class="fbars" data-key="' + key + '" data-w="' + a + ',' + l + ',' + j + '"><i class="fbar" style="width:0%;background:var(--red)"></i><i class="fbar" style="width:0%;background:var(--yel)"></i><i class="fbar" style="width:0%;background:var(--grn)"></i></div>';
+}
+const barMem = new Map();
+function animateBars(){
+  document.querySelectorAll('.fbars[data-key]').forEach(b => {
+    const key = b.dataset.key;
+    const tgt = (b.dataset.w || '0,0,0').split(',').map(Number);
+    const bars = b.querySelectorAll('.fbar');
+    const prev = barMem.get(key) || [0, 0, 0];
+    bars.forEach((el, i) => { el.style.width = prev[i] + '%'; });
+    void b.offsetWidth;
+    requestAnimationFrame(() => { bars.forEach((el, i) => { el.style.width = tgt[i] + '%'; }); });
+    if (barMem.has(key) && (prev[0] !== tgt[0] || prev[1] !== tgt[1] || prev[2] !== tgt[2])) {
+      const meta = b.nextElementSibling;
+      if (meta && meta.classList.contains('fmeta')) {
+        const spans = meta.querySelectorAll('span');
+        const flash = el => { if (!el) return; el.classList.remove('pctFlash'); void el.offsetWidth; el.classList.add('pctFlash'); };
+        if (prev[0] !== tgt[0]) flash(spans[0]);
+        if (prev[2] !== tgt[2]) flash(spans[1]);
+      }
+    }
+    barMem.set(key, tgt);
+  });
+}
 function allById(id){ return allCases.find(c => c.id === id); }
 function checkSafety(t){
   t = t.toLowerCase();
@@ -2122,7 +2151,7 @@ async function renderFeed(){
     }
     const actions = (votedIt || locked) ? (
       (locked ? '<div class="lockStamp">ПРИГОВОР ВСТУПИЛ В СИЛУ</div>' : '') +
-      '<div class="fbars"><i class="fbar" style="width:' + pct(c.condemn) + '%;background:var(--red)"></i><i class="fbar" style="width:' + pct(c.life) + '%;background:var(--yel)"></i><i class="fbar" style="width:' + pct(c.justify) + '%;background:var(--grn)"></i></div>' +
+      fbarsHtml('c' + c.id, pct(c.condemn), pct(c.life), pct(c.justify)) +
       '<div class="fmeta" style="margin-top:6px"><span style="color:var(--red)">осуждают ' + pct(c.condemn) + '%</span><span style="color:var(--grn)">не осуждают ' + pct(c.justify) + '%</span></div>' +
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + cmsAll.length + ')</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' + advHtml +
       '<div class="fcom hidden" id="fc_' + c.id + '">' + cmHtml + '</div>'
@@ -2139,6 +2168,7 @@ async function renderFeed(){
       '<div class="fmetaCat">' + (hot ? '🔥 ' : '') + (catL(c) === '18+' ? '🔞 ' : '') + esc(catOf(c)) + (premium ? ' <span class="premTag">✦ прем</span>' : '') + '</div>' +
       '<div class="ftxt" style="cursor:pointer" onclick="openReactPicker(' + c.id + ')">' + nl2br(c.text) + '</div>' + evdHtml(c) + sumHtml + hotHtml + '<div class="votesRow"><button class="repBtn" onclick="reportItem(\'case\',' + c.id + ')">' + ic('i-flag') + '</button>' + votesLabel(total) + '<button class="rctOpen" onclick="openReactPicker(' + c.id + ')">' + myE + '</button></div>' + actions + prevHtml + '</div></div>';
   }).join('');
+  animateBars();
 }
 async function feedVote(id, v){
   if (!me) { openAuth(); return; }
