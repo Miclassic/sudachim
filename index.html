@@ -2270,17 +2270,20 @@ async function feedToggleComments(id, force){
 }
 async function feedSendComment(id){
   if (!me) { openAuth(); return; }
-  const inp = $('ci_' + id), t = inp.value.trim(); if (!t) return;
+  const inp = $('ci_' + id), t = inp.value.trim(); if (!t || inp.dataset.busy) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-  const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
-  inp.value = '';
-  if (!error) {
-    track('comment');
-    notifyCaseAuthor(id, t, replyTo ? replyTo.id : null);
-    clearReply();
-    await feedToggleComments(id, true);
-  }
-  toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
+  inp.dataset.busy = '1';
+  try {
+    const { error } = await sb.from('comments').insert({ case_id: id, text: t, side: voted[id] || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
+    inp.value = '';
+    if (!error) {
+      track('comment');
+      notifyCaseAuthor(id, t, replyTo ? replyTo.id : null);
+      clearReply();
+      await feedToggleComments(id, true);
+    }
+    toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
+  } finally { inp.dataset.busy = ''; }
 }
 function next(){
   voteLock = false;
@@ -2356,17 +2359,20 @@ async function loadComments(force){
 async function sendComment(){
   if (!me) { openAuth(); return; }
   const inp = $('cIn'), t = inp.value.trim();
-  if (!t) return;
+  if (!t || inp.dataset.busy) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
-  inp.value = '';
-  if (!error) {
-    track('comment');
-    notifyCaseAuthor(cur.id, t, replyTo ? replyTo.id : null);
-    clearReply();
-    await loadComments(true);
-  }
-  toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
+  inp.dataset.busy = '1';
+  try {
+    const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: replyTo ? replyTo.id : null });
+    inp.value = '';
+    if (!error) {
+      track('comment');
+      notifyCaseAuthor(cur.id, t, replyTo ? replyTo.id : null);
+      clearReply();
+      await loadComments(true);
+    }
+    toast(error ? 'Ошибка: ' + error.message : 'Комментарий опубликован ✅');
+  } finally { inp.dataset.busy = ''; }
 }
 function openForm(){ if (!me) { openAuth(); return; } $('modal').classList.remove('hidden'); }
 function closeForm(){ $('modal').classList.add('hidden'); }
