@@ -523,19 +523,19 @@ body.night .qBar{background:rgba(255,255,255,.1)}
 body.night .skin-carbon{background:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 3px,transparent 3px 6px),#171A20!important}
 .skin-glass{background:rgba(255,255,255,.45)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 22px rgba(20,24,32,.08)!important}
 body.night .skin-glass{background:rgba(23,26,32,.5)!important}
-.myTick{box-shadow:none;padding:0 12px 6px}
+.myTick{box-shadow:none;padding:0 12px 4px}
 .myTick::after{background:radial-gradient(60% 130% at 50% 50%,rgba(122,92,255,.14),transparent 70%)}
 body.night .myTick::after{background:radial-gradient(60% 130% at 50% 50%,rgba(122,92,255,.2),transparent 70%)}
-.tickTrack2{display:inline-block;white-space:nowrap;color:#6a4bd8;font-size:10px;font-weight:700;animation:tick2 22s linear infinite;will-change:transform}
+.tickTrack2{display:inline-block;white-space:nowrap;color:#8d7bea;font-size:9px;font-weight:500;animation:tick2 22s linear infinite;will-change:transform}
 @keyframes tick2{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
 .tickTrack2 .icn{width:12px;height:12px;vertical-align:-2px;color:#7A5CFF}
-.tmL{color:#7A5CFF;font-weight:800}
+.tmL{color:var(--ink);font-weight:800}
 .tmDone{color:var(--grn)}
-.myTick .tickTrack2 b{color:#5f3dd0}
-body.night .tickTrack2{color:#B4A6E8}
-body.night .tmL{color:#B18CFF}
+.myTick .tickTrack2 b{color:var(--ink);font-weight:800}
+body.night .tickTrack2{color:#C3B4F0}
+body.night .tmL{color:#F2F4F8}
 body.night .tmDone{color:#3DD68C}
-body.night .myTick .tickTrack2 b{color:#C9A6FF}
+body.night .myTick .tickTrack2 b{color:#F2F4F8}
 body.night .tickTrack2 .icn{color:#B18CFF}
 main{padding-top:166px}
 @keyframes cmtFlash{0%{box-shadow:0 0 0 2px rgba(201,151,28,.85),0 8px 22px rgba(20,24,32,.08);transform:scale(1.02)}100%{transform:scale(1)}}
@@ -1804,7 +1804,7 @@ async function renderMyTicker(){
       return '<span class="' + (done ? 'tmDone' : '') + '">' + (done ? '✓' : '•') + ' ' + LAB[q.k] + ' ' + cur + '/' + q.goal + '</span>';
     });
     const allDone = QUESTS.every(q => qd[q.k] >= q.goal);
-    line = ic('i-star') + ' <span class="tmL">мои события дня:</span> ' + parts.join(' <span class="sep">·</span> ') + (allDone ? ' <span class="sep">·</span> <b>награда ждёт в профиле</b>' : ' <span class="sep">·</span> награда — рамка или скин');
+    line = ic('i-star') + ' <span class="tmL">мои события дня:</span> ' + parts.join(' <span class="sep">·</span> ') + (allDone ? ' <span class="sep">·</span> <b>награда ждёт в профиле</b>' : ' <span class="sep">·</span> <b>награда — рамка или скин</b>');
   }
   el.innerHTML = line;
   el.style.animationDuration = Math.min(25, Math.max(8, Math.round(el.textContent.length * 0.22))) + 's';
