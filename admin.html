@@ -187,11 +187,15 @@ function sessionsFromEvents(events){
   });
   return sessions;
 }
+let devToUser = {};
+function actorKey(e){ return e.user_id || devToUser[e.device] || e.device || '__anon__'; }
 function computeMetrics(days){
   const since = Date.now() - days * 864e5;
   const ev = evFull.filter(e => new Date(e.created_at).getTime() >= since);
+  devToUser = {};
+  ev.forEach(e => { if (e.user_id && e.device) devToUser[e.device] = e.user_id; });
   const sessions = sessionsFromEvents(ev);
-  const devs = new Set(ev.map(e => e.device || '__anon__'));
+  const devs = new Set(ev.map(actorKey));
   const dayMap = {};
   ev.forEach(e => { const k = dayKey(e.created_at); (dayMap[k] = dayMap[k] || { devs: new Set(), ev: 0 }); dayMap[k].devs.add(e.device || '__anon__'); dayMap[k].ev++; });
   // уникальные по дням (для возврата)
@@ -202,7 +206,7 @@ function computeMetrics(days){
     cur.forEach(d => { if (prev.has(d)) returners++; });
   }
   // воронка
-  const uniqByType = (name) => new Set(ev.filter(e => e.name === name).map(e => e.user_id || e.device || '__anon__')).size;
+  const uniqByType = (name) => new Set(ev.filter(e => e.name === name).map(actorKey)).size;
   const funnel = {
     open: uniqByType('open'),
     swipe: uniqByType('swipe'),
@@ -213,7 +217,7 @@ function computeMetrics(days){
   };
   // топ устройств по активности
   const devActs = {};
-  ev.forEach(e => { const d = e.user_id || e.device || '__anon__'; devActs[d] = (devActs[d] || 0) + 1; });
+  ev.forEach(e => { const d = actorKey(e); devActs[d] = (devActs[d] || 0) + 1; });
   const topDev = Object.entries(devActs).sort((a, b) => b[1] - a[1]).slice(0, 15);
   // среднее время сессии (только те, что > 5 сек, чтобы не считать одиночные клики)
   const real = sessions.filter(s => s.len > 5000);
@@ -275,13 +279,13 @@ async function renderUsers(){
   // разбивка действий по типам для топа
   const evByUser = {};
   m.ev.forEach(e => {
-    const u = e.user_id || e.device || '__anon__';
+    const u = actorKey(e);
     evByUser[u] = evByUser[u] || {};
     evByUser[u][e.name] = (evByUser[u][e.name] || 0) + 1;
   });
   // новые vs возвратные (первые 7 vs последние 7 дней из 14)
   const midTs = Date.now() - 7 * 864e5;
-  const oldDevs = new Set(evFull.filter(e => new Date(e.created_at).getTime() < midTs && new Date(e.created_at).getTime() >= Date.now() - 30*864e5).map(e => e.device || '__anon__'));
+  const oldDevs = new Set(evFull.filter(e => new Date(e.created_at).getTime() < midTs && new Date(e.created_at).getTime() >= Date.now() - 30*864e5).map(actorKey));
   const rows = m.topDev.map(([u, n]) => {
     const p = profs[u];
     const nm = p ? p.nick : (u === '__anon__' ? 'аноним' : (u.length > 12 ? u.slice(0, 12) + '…' : u));
