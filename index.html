@@ -890,6 +890,7 @@ function timerHtml(c){
   return '';
 }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function notifText(t){ t = String(t || '').replace(/\s+/g,' ').trim(); if (t.length <= 60) return t; const cut = t.slice(0, 57); const sp = cut.lastIndexOf(' '); return (sp > 30 ? cut.slice(0, sp) : cut) + '…'; }
 function nl2br(t){ return esc(t).replace(/\n/g,'<br>'); }
 function votesLabel(total){
   if (total >= 100) return plural(total);
@@ -990,6 +991,7 @@ async function openNotifs(){
     return '<div class="nItem' + (n.read ? '' : ' unread') + '" onclick="openCaseFromNotif(' + (n.case_id || 0) + ')"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + '»</div>' : '') + '</div>';
   }).join('') || '<div class="empty">Пока тихо 🔕</div>';
   await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false);
+  document.querySelectorAll('#nList .nItem.unread').forEach(el => el.classList.remove('unread'));
   fetchUnread();
 }
 function closeNotifs(){ $('notifs').classList.add('hidden'); }
@@ -1892,6 +1894,8 @@ function authorHtml(cm,nicks,stats){
   return '<div class="cHead" style="padding-right:26px"><span class="nickCol"><span class="nick">' + nm + '</span><span class="laserLine"></span></span>' + (s ? badgeHtml(cm.user_id, s) : '') + '</div>';
 }
 function cmtClass(cm){ return 'cmt' + (isPremiumUser(cm.user_id) ? ' cmt-premium' : ''); }
+function isAdv(cm){ return !!(cm && cm.device && String(cm.device).indexOf('#adv') !== -1); }
+function advTag(cm){ return isAdv(cm) ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">🧑‍️ адвокат</span>' : ''; }
 function likesOf(cmId){ return allLikes.filter(l => l.comment_id === cmId).length; }
 async function likeComment(cmId){
   if (!me) { openAuth(); return; }
@@ -1907,12 +1911,12 @@ async function likeComment(cmId){
   renderFeed();
 }
 function cmtRow(cm,nicks,stats){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) +
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + advTag(cm) +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button></div></div>';
 }
 function cmtBlock(cm,reps,nicks,stats,topId){ const [lab,col]=sideInfo(cm);
-  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
+  return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats) + advTag(cm) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + nl2br(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
    '<button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button>' +
@@ -2054,7 +2058,7 @@ function shareVerdict(id){
 async function notifyCaseAuthor(caseId, text, parentId){
   const c = allById(caseId);
   if (c && c.user_id && c.user_id !== me.id) {
-    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
+    sb.from('notifications').insert({ user_id: c.user_id, actor_id: me.id, type: 'comment', case_id: caseId, text: notifText(text) }).then(() => {});
   }
   if (parentId) {
     let pAuthor = null;
@@ -2062,7 +2066,7 @@ async function notifyCaseAuthor(caseId, text, parentId){
     if (loc) pAuthor = loc.user_id;
     else { const { data } = await sb.from('comments').select('user_id').eq('id', parentId).maybeSingle(); pAuthor = data ? data.user_id : null; }
     if (pAuthor && pAuthor !== me.id && (!c || pAuthor !== c.user_id)) {
-      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: text.slice(0, 60) }).then(() => {});
+      sb.from('notifications').insert({ user_id: pAuthor, actor_id: me.id, type: 'reply', case_id: caseId, text: notifText(text) }).then(() => {});
     }
   }
 }
@@ -2098,7 +2102,7 @@ async function renderFeed(){
     const cntR = {}; allReacts.filter(r => r.case_id === c.id).forEach(r => cntR[r.kind] = (cntR[r.kind]||0)+1);
     const sumList = REACTS.map(r => ({ r, n: cntR[r.k]||0 })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
     const sumHtml = sumList.length ? '<div class="reactsSum">' + sumList.map(x => { const on = myR && myR.kind === x.r.k; const col = RCOLORS[x.r.k] || '#8A919E'; return '<button class="rsChip' + (on ? ' on' : '') + '" style="color:' + col + ';background:' + col + '14;border-color:' + (on ? col + '66' : 'transparent') + '" onclick="reactToggle(' + c.id + ',\'' + x.r.k + '\')">' + x.r.e + ' ' + x.n + '</button>'; }).join('') + '</div>' : '';
-    const adv = cmsAll.slice().sort((a,b)=>likesOf(b.id)-likesOf(a.id)).filter(k=>likesOf(k.id)>0).slice(0,3);
+    const adv = cmsAll.slice().sort((a,b)=>(likesOf(b.id)+(isAdv(b)?1:0))-(likesOf(a.id)+(isAdv(a)?1:0))).filter(k=>likesOf(k.id)>0||isAdv(k)).slice(0,3);
     const lastC = cmsAll.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))[0];
     const topAdv = adv[0];
     let prevHtml = '';
@@ -2108,7 +2112,7 @@ async function renderFeed(){
     if (c.id === topHourId) hotHtml += '<span class="hotChip hotFire">' + ic('i-flame') + 'голоса часа</span>';
     if (c.id === contrId) { const a = c.condemn || 0, b = c.justify || 0, t = a + b || 1; hotHtml += '<span class="hotChip hotContr">' + ic('i-scale') + 'спорное · ' + Math.round(a * 100 / t) + '/' + Math.round(b * 100 / t) + '</span>'; }
     if (hotHtml) hotHtml = '<div class="hotRow">' + hotHtml + '</div>';
-    const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + esc(k.text).slice(0,120) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
+    const advHtml = adv.length ? '<div class="advBlock"><div class="advHead">🧑‍⚖️ лучшие адвокаты</div>' + adv.map(k=>'<div class="advItem"><b>' + esc((nicks[k.user_id]||'аноним')) + ':</b> ' + nl2br(k.text) + ' <span class="advLike">👏 ' + likesOf(k.id) + '</span></div>').join('') + '</div>' : '';
     if (catL(c) === 'треш' && !trashOpen() && !isAdmin()) {
       const excerpt = c.text.replace(/\s+/g,' ').slice(0, 70) + '…';
       return '<div class="fitem" data-case-id="' + c.id + '" style="animation-delay:' + Math.min(i, 6) * 40  + 'ms"><div class="fart ' + art + '"></div><div class="fbody">' +
@@ -2228,7 +2232,7 @@ async function sendAdvocate(){
   if (!me) { openAuth(); return; }
   const inp = $('advIn'), t = inp.value.trim(); if (!t) return;
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
-  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device, user_id: me.id, status: 'approved', parent_id: null });
+  const { error } = await sb.from('comments').insert({ case_id: cur.id, text: t, side: myVerdict || 'life', device: device + '#adv', user_id: me.id, status: 'approved', parent_id: null });
   inp.value = '';
   toast(error ? 'Ошибка: ' + error.message : '🧑‍⚖️ Аргумент подан — собирай 👏');
   renderFeed();
@@ -2470,7 +2474,7 @@ async function maybeOg(){
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) loadFeed(); });
 setInterval(() => {
-  if (!document.hidden) { loadFeed(); return; }
+  if (!document.hidden) { loadFeed(); if (me) fetchUnread(); return; }
   if (me && 'Notification' in window && Notification.permission === 'granted') {
     sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', me.id).eq('read', false).then(({ count }) => {
       const n = count || 0;
