@@ -755,6 +755,12 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div id="reactRow" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
   </div>
 </div>
+<div id="cReactSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.5);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='cReactSheet')closeCReactSheet()">
+  <div class="sheetBox" style="padding:16px 14px 22px;width:100%;max-width:560px">
+    <div style="text-align:center;font-size:11px;font-weight:800;color:var(--gray);margin-bottom:10px;letter-spacing:.1em">РЕАКЦИЯ НА АРГУМЕНТ</div>
+    <div id="cReactRow" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+  </div>
+</div>
 <div id="shareSheet" class="hidden" style="position:fixed;inset:0;background:rgba(10,10,14,.6);z-index:96;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target.id==='shareSheet')closeShareSheet()">
   <div class="sheetBox" style="padding:14px 14px 22px;width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px">
     <img id="shareImg" style="max-height:52vh;object-fit:contain;border-radius:14px;background:#EDEEF2">
@@ -794,7 +800,7 @@ function duelKey(){ return 'sud_duelv:' + (me ? me.id : 'anon'); }
 function loadDuelVoted(){ duelVoted = JSON.parse(localStorage.getItem(duelKey()) || '{}'); }
 function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVoted)); }
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
-let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], feedCat = 'все';
+let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], allCReacts = [], feedCat = 'все';
 let hotCases = new Set(), hotDuels = new Set();
 let minuteCnt = 0, liveDeltas = [], nextLiveAt = Date.now() + 40000 + Math.random() * 50000;
 let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0, hourCnt = {};
@@ -2105,17 +2111,63 @@ async function likeComment(cmId){
   }
   renderFeed();
 }
+const QUICK_EMO = ['🔥', '😂', '⚖️', '❤️'];
+const PICK_EMO = ['🔥', '😂', '⚖️', '❤️', '🤯', '👀', '💀', '🙏', '', '😡'];
+let cReactCaseId = null, holdT = null, holdFired = false;
+function cReactsOf(cmId){ return allCReacts.filter(r => r.comment_id === cmId); }
+function myCReact(cmId, emoji){ return !!(me && allCReacts.find(r => r.comment_id === cmId && r.user_id === me.id && r.emoji === emoji)); }
+function cReactsHtml(cmId){
+  const rc = cReactsOf(cmId);
+  const counts = {}; rc.forEach(r => counts[r.emoji] = (counts[r.emoji] || 0) + 1);
+  return QUICK_EMO.map(e => {
+    const n = counts[e] || 0;
+    const on = myCReact(cmId, e);
+    return '<button class="rct' + (on ? ' on' : '') + '" style="' + (on ? 'background:rgba(201,151,28,.18);border-color:rgba(201,151,28,.5)' : '') + '" onclick="cReactToggle(' + cmId + ',\'' + e + '\')"><span style="font-size:13px">' + e + '</span>' + (n ? ' ' + n : '') + '</button>';
+  }).join('');
+}
+function refreshCReacts(cmId){ const el = $('cr_' + cmId); if (el) el.innerHTML = cReactsHtml(cmId); }
+async function cReactToggle(cmId, emoji){
+  if (!me) { openAuth(); return; }
+  const cur = allCReacts.find(r => r.comment_id === cmId && r.user_id === me.id && r.emoji === emoji);
+  if (cur) {
+    await sb.from('comment_reactions').delete().eq('id', cur.id);
+    allCReacts = allCReacts.filter(r => r.id !== cur.id);
+  } else {
+    const { data, error } = await sb.from('comment_reactions').insert({ comment_id: cmId, emoji, user_id: me.id, device }).select();
+    if (error) { toast('Реакция: ' + error.message); return; }
+    allCReacts.push((data && data[0]) || { id: Date.now(), comment_id: cmId, emoji, user_id: me.id });
+  }
+  refreshCReacts(cmId);
+}
+function cmtHoldStart(e, id){ holdFired = false; clearTimeout(holdT); holdT = setTimeout(() => { holdFired = true; openCReactPicker(id); }, 450); }
+function cmtHoldEnd(){ clearTimeout(holdT); setTimeout(() => { holdFired = false; }, 80); }
+function openCReactPicker(id){
+  if (!me) { openAuth(); return; }
+  cReactCaseId = id;
+  const rc = cReactsOf(id);
+  const counts = {}; rc.forEach(r => counts[r.emoji] = (counts[r.emoji] || 0) + 1);
+  $('cReactRow').innerHTML = PICK_EMO.map(e => {
+    const n = counts[e] || 0;
+    const on = myCReact(id, e);
+    return '<button class="rct' + (on ? ' on' : '') + '" style="font-size:12px;padding:8px 12px;' + (on ? 'background:rgba(201,151,28,.18);border-color:rgba(201,151,28,.5)' : '') + '" onclick="pickCReact(\'' + e + '\')"><span style="font-size:20px">' + e + '</span>' + (n ? ' ' + n : '') + '</button>';
+  }).join('');
+  $('cReactSheet').classList.remove('hidden');
+}
+function closeCReactSheet(){ $('cReactSheet').classList.add('hidden'); }
+async function pickCReact(e){ const id = cReactCaseId; closeCReactSheet(); if (id) await cReactToggle(id, e); }
 function cmtRow(cm,nicks,stats,profs){ const [lab,col]=sideInfo(cm);
   return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats,profs) + advTag(cm) +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + richText(cm.text) + '</div>' +
-   '<div class="cActions"><button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button></div></div>';
+   '<div class="cActions"><button onpointerdown="cmtHoldStart(event,' + cm.id + ')" onpointerup="cmtHoldEnd()" onpointerleave="cmtHoldEnd()" onclick="if(!holdFired) likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button></div>' +
+   '<div class="reacts" id="cr_' + cm.id + '">' + cReactsHtml(cm.id) + '</div></div>';
 }
 function cmtBlock(cm,reps,nicks,stats,topId,profs){ const [lab,col]=sideInfo(cm);
   return '<div class="' + cmtClass(cm) + '" style="position:relative"><button style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--red);opacity:.85;padding:4px" onclick="reportItem(\'comment\',' + cm.id + ')">' + ic('i-flag') + '</button>' + authorHtml(cm,nicks,stats,profs) + advTag(cm) + (cm.id === topId ? '<span class="tag" style="background:linear-gradient(90deg,#8C6A1D,#E9C767)">👏 аргумент дня</span>' : '') +
    '<div class="cBody"><span class="side" style="background:var(--bg);color:' + col + '">' + lab + '</span> ' + richText(cm.text) + '</div>' +
    '<div class="cActions"><button onclick="setReply(' + cm.id + ',\'' + esc(nicks[cm.user_id]||'') + '\')">↩ ответить</button>' +
-   '<button onclick="likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button>' +
+   '<button onpointerdown="cmtHoldStart(event,' + cm.id + ')" onpointerup="cmtHoldEnd()" onpointerleave="cmtHoldEnd()" onclick="if(!holdFired) likeComment(' + cm.id + ')">👏' + (likesOf(cm.id) ? ' ' + likesOf(cm.id) : '') + '</button>' +
    (reps.length ? '<button onclick="toggleReplies(' + cm.id + ')"><span id="reptxt_' + cm.id + '">открыть ответы (' + reps.length + ')</span></button>' : '') + '</div>' +
+   '<div class="reacts" id="cr_' + cm.id + '">' + cReactsHtml(cm.id) + '</div>' +
    '<div class="replies hidden" id="rep_' + cm.id + '">' + reps.map(r => cmtRow(r,nicks,stats,profs)).join('') + '</div></div>';
 }
 function buildComments(all,nicks,stats,profs){
@@ -2186,6 +2238,8 @@ async function loadFeed(){
   const cmIds = allComments.map(k => k.id);
   const lq = cmIds.length ? await sb.from('comment_likes').select('comment_id,user_id').in('id', cmIds) : { data: [] };
   allLikes = lq.data || [];
+  const rq2 = cmIds.length ? await sb.from('comment_reactions').select('id,comment_id,emoji,user_id').in('comment_id', cmIds) : { data: [] };
+  allCReacts = rq2.data || [];
   const cnt = {}; (rv.data || []).forEach(r => cnt[r.case_id] = (cnt[r.case_id] || 0) + 1);
   hotCases = new Set(Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => Number(e[0])));
   voteCnt24 = cnt;
@@ -2205,7 +2259,7 @@ async function loadFeed(){
     myPrefs = new Set(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]));
   }
   await refreshTop();
-  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length + '|' + allLikes.length;
+  const sig = allCases.map(c => c.id + '.' + (c.condemn||0) + '.' + (c.justify||0) + '.' + (c.life||0) + '.' + (c.media_url||'')).join(',') + '|' + allComments.length + '|' + allReacts.length + '|' + allLikes.length + '|' + allCReacts.length;
   if (sig !== loadFeed.sig) { loadFeed.sig = sig; renderChips(); renderFeed(); }
   if (!$('feed').children.length && allCases.length) { renderChips(); renderFeed(); }
   maybeLiveToast();
