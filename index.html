@@ -1062,7 +1062,7 @@ async function doAuth(){
     if (nick.length < 2) { toast('Придумай никнейм (мин. 2 символа)'); return; }
     if (await nickTaken(nick, null)) { toast('Такой ник уже занят'); return; }
     const r = await sb.auth.signUp({ email, password: pass, options: { data: { nick } } });
-    if (r.error) { toast(r.error.message); return; }
+    if (r.error) { toast(authErr(r.error.message)); return; }
     const s = await sb.auth.getSession();
     if (s.data.session) {
       const ins = await sb.from('profiles').insert({ id: s.data.session.user.id, nick });
@@ -1074,7 +1074,7 @@ async function doAuth(){
     }
   } else {
     const r = await sb.auth.signInWithPassword({ email, password: pass });
-    if (r.error) { toast('Неверный email или пароль'); return; }
+    if (r.error) { toast(authErr(r.error.message)); return; }
     toast('С возвращением!');
   }
   closeAuth(); await refreshMe(); renderFeed();
@@ -1683,6 +1683,13 @@ function microProgressHtml(cs, myV){
   return parts.join(' <span style="opacity:.5">·</span> ');
 }
 function microToast(html){ const t = $('toast'); t.innerHTML = html; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 4000); }
+function authErr(m){
+  if (/rate limit/i.test(m)) return 'Слишком много попыток — попробуй через час';
+  if (/already registered/i.test(m)) return 'Этот email уже зарегистрирован — войди';
+  if (/database error/i.test(m)) return 'Ошибка базы при создании профиля — повтори или напиши админу';
+  if (/invalid login credentials/i.test(m)) return 'Неверный email или пароль';
+  return m;
+}
 function allById(id){ return allCases.find(c => c.id === id); }
 function checkSafety(t){
   t = t.toLowerCase();
