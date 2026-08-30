@@ -584,6 +584,7 @@ body.night .cardPrev{box-shadow:0 8px 18px -6px rgba(255,68,56,.45)}
 body.night .cardPrev{border-color:rgba(255,255,255,.10);background:rgba(0,0,0,.35);box-shadow:0 6px 16px -6px rgba(255,68,56,.35)}
 .tabbar{padding-top:16px;padding-bottom:4px;margin-top:-16px;margin-bottom:0}
 .tabbar2{padding-top:0;padding-bottom:16px;margin-top:0;margin-bottom:-16px}
+main{padding-top:200px}
 #toast{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%);background:rgba(23,26,32,.92);color:#EDEEF2;border:1px solid rgba(233,199,103,.4);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 24px rgba(201,151,28,.18);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-weight:700;font-size:13px;padding:12px 20px;text-align:center;max-width:82vw;z-index:99}
 body.night #toast{background:rgba(10,11,14,.92);border-color:rgba(255,138,61,.45);box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 28px rgba(255,68,56,.22);color:#F2F4F8}
 #toast:not(.hidden){animation:toastIn .35s ease}
@@ -3068,15 +3069,15 @@ function renderStoryWrapped(c, top){
   x.fillStyle = '#8A919E'; x.font = '500 28px system-ui';
   x.fillText('дело №' + c.id + ' · ' + catOf(c) + ' · ' + new Date().toLocaleDateString('ru-RU'), W / 2, 150);
   x.fillStyle = '#EDEEF2'; x.font = '600 40px system-ui';
-  const lines = wrapCenter(x, flatText(c.text), W - 200).slice(0, 3);
-  let y = 240; lines.forEach(l => { x.fillText(l, W / 2, y); y += 54; });
+  const lines = wrapCenter(x, flatText(c.text), W - 180).slice(0, 4);
+  let y = 235; lines.forEach(l => { x.fillText(l, W / 2, y); y += 50; });
   const total = (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
-  x.fillStyle = '#E9C767'; x.font = '900 150px system-ui';
-  x.fillText(String(total), W / 2, y + 130);
-  x.fillStyle = '#8A919E'; x.font = '600 34px system-ui';
-  x.fillText(plural(total), W / 2, y + 185);
+  x.fillStyle = '#E9C767'; x.font = '900 120px system-ui';
+  x.fillText(String(total), W / 2, y + 110);
+  x.fillStyle = '#8A919E'; x.font = '600 32px system-ui';
+  x.fillText(plural(total), W / 2, y + 160);
   const pct = v => total ? Math.round(v * 100 / total) : 0;
-  const by = y + 250;
+  const by = y + 220;
   [['осуждают', '#FF4438', c.condemn], ['жиза', '#FFB020', c.life], ['не осуждают', '#3DD68C', c.justify]].forEach((r, i) => {
     const yy = by + i * 78;
     x.textAlign = 'left'; x.fillStyle = r[1]; x.font = '700 30px system-ui';
@@ -3085,8 +3086,9 @@ function renderStoryWrapped(c, top){
     x.fillStyle = r[1]; rr(x, 400, yy, Math.max(10, 460 * pct(r[2]) / 100), 26, 13); x.fill();
     x.textAlign = 'right'; x.fillText(pct(r[2]) + '%', 940, yy + 24);
   });
-  const maj = Math.max(c.condemn || 0, c.justify || 0, c.life || 0);
-  const verdict = (c.life || 0) === maj && maj > 0 ? 'народ сказал: ЖИЗА' : (c.justify || 0) === maj ? 'народ решил: НЕ ОСУЖДАЮ' : 'народ решил: ОСУЖДАЮ';
+  const vals = [c.condemn || 0, c.justify || 0, c.life || 0];
+  const maj = Math.max(...vals);
+  const verdict = vals.filter(v => v === maj).length > 1 ? 'народ раскололся' : (c.life || 0) === maj ? 'народ сказал: ЖИЗА' : (c.justify || 0) === maj ? 'народ решил: НЕ ОСУЖДАЮ' : 'народ решил: ОСУЖДАЮ';
   x.textAlign = 'center'; x.fillStyle = '#E9C767'; x.font = '800 52px system-ui';
   x.fillText(verdict, W / 2, by + 300);
   if (top) {
