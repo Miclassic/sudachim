@@ -837,7 +837,7 @@ function duelKey(){ return 'sud_duelv:' + (me ? me.id : 'anon'); }
 function loadDuelVoted(){ duelVoted = JSON.parse(localStorage.getItem(duelKey()) || '{}'); }
 function saveDuelVoted(){ localStorage.setItem(duelKey(), JSON.stringify(duelVoted)); }
 let queue = [], cur = null, myVerdict = null, voiceOn = false, voteLock = false;
-let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], allCReacts = [], feedCat = 'все';
+let allCases = [], allComments = [], allDuels = [], allReacts = [], allLikes = [], allCReacts = [], feedCat = 'все', researchData = [];
 let hotCases = new Set(), hotDuels = new Set();
 let minuteCnt = 0, liveDeltas = [], nextLiveAt = Date.now() + 40000 + Math.random() * 50000;
 let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0, hourCnt = {};
@@ -2966,7 +2966,6 @@ async function renderMine(){
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
   }).join('');
 }
-let researchData = [];
 function computeResearch(){
   const cs = allCases.filter(c => !c.hidden);
   const tot = c => (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
