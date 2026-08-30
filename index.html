@@ -582,7 +582,8 @@ body.night .cardPrev{box-shadow:0 8px 18px -6px rgba(255,68,56,.45)}
 .cardPrev{margin:10px 0 2px}
 .cardPrev{border-radius:999px;border:1px solid rgba(20,24,32,.08);background:rgba(255,255,255,.5);padding:7px 14px;margin:8px 0 0;text-align:center;box-shadow:0 6px 16px -6px rgba(201,151,28,.35)}
 body.night .cardPrev{border-color:rgba(255,255,255,.10);background:rgba(0,0,0,.35);box-shadow:0 6px 16px -6px rgba(255,68,56,.35)}
-.tabbar{padding-top:16px;padding-bottom:16px;margin-top:-16px;margin-bottom:-16px}
+.tabbar{padding-top:16px;padding-bottom:4px;margin-top:-16px;margin-bottom:0}
+.tabbar2{padding-top:0;padding-bottom:16px;margin-top:0;margin-bottom:-16px}
 #toast{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%);background:rgba(23,26,32,.92);color:#EDEEF2;border:1px solid rgba(233,199,103,.4);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 24px rgba(201,151,28,.18);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-weight:700;font-size:13px;padding:12px 20px;text-align:center;max-width:82vw;z-index:99}
 body.night #toast{background:rgba(10,11,14,.92);border-color:rgba(255,138,61,.45);box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 28px rgba(255,68,56,.22);color:#F2F4F8}
 #toast:not(.hidden){animation:toastIn .35s ease}
@@ -673,6 +674,9 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <button class="bn" data-t="mine" onclick="showTab('mine')"><svg class="icn"><use href="#i-doc"/></svg>мои</button>
     <button class="bn" data-t="profile" onclick="showTab('profile')"><svg class="icn"><use href="#i-user"/></svg>профиль</button>
   </div>
+  <div class="tabbar tabbar2">
+    <button class="bn" data-t="research" onclick="showTab('research')"><svg class="icn"><use href="#i-doc"/></svg>исследования</button>
+  </div>
   <div class="ticker"><div class="tickTrack" id="tickTrack"></div></div>
   <div class="ticker myTick"><div class="tickTrack2" id="myTickTrack"></div></div>
 </div>
@@ -709,7 +713,11 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div class="chips hidden" id="chips"></div>
     <div id="feed"></div>
     <div id="hypeArch" style="margin-top:18px"></div>
-    <div id="researchBox" style="margin-top:18px"></div>
+    </section>
+  <section id="tab-research" class="hidden">
+    <div class="secHead"><svg class="icn"><use href="#i-doc"/></svg>судачим выяснил</div>
+    <div class="secDesc">Статистика народного суда: какие категории осуждают чаще, где народ раскололся, как меняется настроение народа. Всё считается из голосов — без опросов.</div>
+    <div id="researchTab"></div>
   </section>
   <section id="tab-duels" class="hidden">
     <div class="secHead"><svg class="icn"><use href="#i-swords"/></svg>дуэли · что хуже?</div>
@@ -1037,13 +1045,14 @@ function scoreCase(c, total){
   return act*2 + recency*3 + controversy*2 + personal + Math.log(total+1)*.5;
 }
 function showTab(t){
-  ['court','duels','daily','rating','mine','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
+  ['court','research','duels','daily','rating','mine','profile'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== t));
   document.querySelectorAll('.bn').forEach(b => b.classList.toggle('on', b.dataset.t === t));
   if (t === 'profile') showProfile();
   if (t === 'mine') renderMine();
   if (t === 'duels') renderDuels();
   if (t === 'daily') renderDaily();
   if (t === 'rating') renderRating();
+  if (t === 'research') renderResearchTab();
   window.scrollTo(0, 0);
 }
 function judgeType(s){
@@ -1118,7 +1127,7 @@ async function openNotifs(){
   const nicks = await nicksFor((data || []).map(n => n.actor_id));
   $('nList').innerHTML = (data || []).map(n => {
     const who = nicks[n.actor_id] || 'кто-то';
-    const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : n.type === 'verdict' ? '📜 твоя история набрала 100 голосов — вердикт готов' : 'прокомментировал(а) твою историю';
+    const label = n.type === 'reply' ? 'ответил(а) на твой комментарий' : n.type === 'verdict' ? '📜 ' + (n.text || 'твоя история набрала 100 голосов — вердикт готов') : 'прокомментировал(а) твою историю';
     return '<div class="nItem' + (n.read ? '' : ' unread') + '" onclick="openCaseFromNotif(' + (n.case_id || 0) + ')"><b>' + esc(who) + '</b> ' + label + (n.text ? '<div style="color:var(--gray);margin-top:4px">«' + esc(n.text) + (/[.!?,…]$/.test(n.text) ? '' : (n.text.length >= 57 ? '…' : '')) + '»</div>' : '') + '</div>';
   }).join('') || '<div class="empty">Пока тихо 🔕</div>';
   await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false);
@@ -1305,7 +1314,8 @@ function myCasesHtml(list){
     return '<div class="mcItem' + (mySkin ? ' ' + mySkin : '') + '"><div class="mcTxt">' + esc(flatText(c.text)).replace(/\n/g,' ') + '</div><div class="mcPills">' +
       '<span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span>' +
       '<span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span>' +
-      '<span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div></div>';
+      '<span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div>' +
+      '<div class="fbtns"><button onclick="shareStoryWrapped(' + c.id + ')">📜 лист вердикта</button></div></div>';
   }).join('');
   return '<div class="myCases"><div class="mcHead">' + ic('i-doc') + 'твои истории — решает народ</div>' + items + '</div>';
 }
@@ -1734,6 +1744,7 @@ async function voteDaily(id, v){
   const { error } = await sb.rpc('vote', { p_case: id, p_verdict: v, p_device: device });
   if (error) { toast(error.message); return; }
   voted[id] = v; saveVoted();
+  const cc2 = allById(id); if (cc2) { cc2[v] = (cc2[v] || 0) + 1; milestoneNotify(cc2, (cc2.condemn || 0) + (cc2.justify || 0) + (cc2.life || 0)); }
   track('swipe');
   microToast(microProgressHtml(c, v));
   renderDaily();
@@ -2478,6 +2489,7 @@ async function feedVote(id, v){
   c[v] = (c[v] || 0) + 1;
   voted[id] = v; saveVoted();
   queue = queue.filter(q => q.id !== id);
+  milestoneNotify(c, (c.condemn || 0) + (c.justify || 0) + (c.life || 0));
   track('swipe');
   microToast(microProgressHtml(c, v));
   renderFeed();
@@ -2551,6 +2563,7 @@ async function vote(v){
   if (nt100 === 100 && cur.user_id && cur.user_id !== me.id) {
     sb.from('notifications').insert({ user_id: cur.user_id, actor_id: me.id, type: 'verdict', case_id: cur.id, text: '100 голосов — народный вердикт готов' }).then(() => {});
   }
+  milestoneNotify(cur, nt100);
   const c = cur, total = ((c.condemn||0) + (c.justify||0) + (c.life||0)) || 1;
   const pct = x => Math.round(x * 100 / total);
   $('pills').innerHTML =
@@ -2969,21 +2982,38 @@ async function renderMine(){
 function computeResearch(){
   const cs = allCases.filter(c => !c.hidden);
   const tot = c => (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
-  const withVotes = cs.filter(c => tot(c) >= 5);
+  const withVotes = cs.filter(c => tot(c) >= 3);
   const byCat = {};
   withVotes.forEach(c => {
     const k = c.category || 'drugoe';
     const b = byCat[k] = byCat[k] || { votes: 0, cond: 0, life: 0 };
     b.votes += tot(c); b.cond += c.condemn || 0; b.life += c.life || 0;
   });
-  const cats = Object.entries(byCat).map(([k, b]) => ({ label: catOf({ category: k }), votes: b.votes, condPct: Math.round(b.cond * 100 / b.votes), lifePct: Math.round(b.life * 100 / b.votes) })).filter(b => b.votes >= 10);
+  const cats = Object.entries(byCat).map(([k, b]) => ({ label: catOf({ category: k }), votes: b.votes, condPct: Math.round(b.cond * 100 / b.votes), lifePct: Math.round(b.life * 100 / b.votes) })).filter(b => b.votes >= 5);
   let V = 0, C = 0; withVotes.forEach(c => { V += tot(c); C += c.condemn || 0; });
-  const split = withVotes.filter(c => tot(c) >= 20).map(c => ({ c, gap: Math.abs((c.condemn || 0) - (c.justify || 0)), t: tot(c) })).sort((a, b) => a.gap - b.gap)[0];
+  const split = withVotes.filter(c => tot(c) >= 6).map(c => ({ c, gap: Math.abs((c.condemn || 0) - (c.justify || 0)), t: tot(c) })).sort((a, b) => a.gap - b.gap)[0];
   const now = srvNow();
   const avg = arr => { let v = 0, cc = 0; arr.forEach(c => { v += tot(c); cc += c.condemn || 0; }); return v ? Math.round(cc * 100 / v) : null; };
   const t1 = avg(withVotes.filter(c => now - new Date(c.created_at).getTime() < 7 * 864e5));
   const t0 = avg(withVotes.filter(c => { const d = now - new Date(c.created_at).getTime(); return d >= 7 * 864e5 && d < 14 * 864e5; }));
   return { cats, V, split, t1, t0, topCond: cats.slice().sort((a, b) => b.condPct - a.condPct)[0], topLife: cats.slice().sort((a, b) => b.lifePct - a.lifePct)[0] };
+}
+function renderResearchTab(){
+  const box = $('researchTab'); if (!box) return;
+  const r = computeResearch();
+  if (!r.topCond && !r.topLife && !r.split && !r.V) {
+    box.innerHTML = '<div class="empty">суд собирает статистику: чем больше голосов, тем интереснее выводы. возвращайся, когда народ раскурит ленту.</div>';
+    return;
+  }
+  const items = [];
+  if (r.topCond) items.push({ big: r.topCond.condPct + '%', title: 'осуждают в категории «' + r.topCond.label + '»', sub: 'из ' + r.topCond.votes + ' голосов · самая осуждаемая категория' });
+  if (r.topLife) items.push({ big: r.topLife.lifePct + '%', title: 'жиза в категории «' + r.topLife.label + '»', sub: 'из ' + r.topLife.votes + ' голосов · самая жизненная категория' });
+  if (r.split) { const c = r.split.c, p1 = Math.round((c.condemn || 0) * 100 / r.split.t), p2 = Math.round((c.justify || 0) * 100 / r.split.t);
+    items.push({ big: p1 + '% / ' + p2 + '%', title: 'народ раскололся в деле «' + (c.hype_title || flatText(c.text).slice(0, 60)) + '»', sub: 'осуждают / не осуждают · самое спорное дело' }); }
+  if (r.V) items.push({ big: Math.round(CPct(r)) + '%', title: 'всех дел заканчиваются вердиктом «осуждаю»', sub: r.V + ' голосов суммарно · общий баланс суда' });
+  if (r.t1 != null && r.t0 != null) { const d = r.t1 - r.t0;
+    items.push({ big: (d > 0 ? '+' : '') + d + '%', title: d >= 0 ? 'народ стал строже за неделю' : 'народ стал мягче за неделю', sub: 'осуждают: ' + r.t1 + '% на этой неделе против ' + r.t0 + '% на прошлой' }); }
+  box.innerHTML = items.map((s, i) => '<div class="fitem" style="margin-bottom:10px"><div class="fbody"><div class="fmetaCat">исследование · по голосам народа</div><div style="font-weight:900;font-size:30px;color:var(--gold)">' + s.big + '</div><div class="ftxt" style="font-weight:700">' + esc(s.title) + '</div><div class="fmeta" style="margin-top:4px"><span>' + esc(s.sub) + '</span></div></div></div>').join('');
 }
 function renderResearch(){
   const box = $('researchBox'); if (!box) return;
@@ -2996,7 +3026,7 @@ function renderResearch(){
   if (r.V) researchData.push({ big: Math.round(CPct(r)) + '%', title: 'всех дел заканчиваются вердиктом «осуждаю»', sub: r.V + ' голосов суммарно · общий баланс суда', text: 'Судачим выяснил: в среднем народ осуждает ' + Math.round(CPct(r)) + '% всех дел.' });
   if (r.t1 != null && r.t0 != null) { const d = r.t1 - r.t0;
     researchData.push({ big: (d > 0 ? '+' : '') + d + '%', title: d >= 0 ? 'народ стал строже за неделю' : 'народ стал мягче за неделю', sub: 'осуждают: ' + r.t1 + '% на этой неделе против ' + r.t0 + '% на прошлой', text: 'Судачим выяснил: народ ' + (d >= 0 ? 'строже' : 'мягче') + ' — осуждают ' + r.t1 + '% против ' + r.t0 + '% неделей раньше.' }); }
-  if (!researchData.length) { box.innerHTML = ''; return; }
+  if (!researchData.length) { box.innerHTML = '<div class="secHead">' + ic('i-doc') + 'судачим выяснил</div><div class="fitem" style="margin-bottom:10px"><div class="fbody"><div class="ftxt">суд собирает статистику: чем больше голосов, тем интереснее выводы. возвращайся, когда народ раскурит ленту.</div></div></div>'; return; }
   box.innerHTML = '<div class="secHead">' + ic('i-doc') + 'судачим выяснил</div>' +
     researchData.map((s, i) => '<div class="fitem" style="margin-bottom:10px"><div class="fbody"><div class="fmetaCat">исследование · по голосам народа</div><div style="font-weight:900;font-size:30px;color:var(--gold)">' + s.big + '</div><div class="ftxt" style="font-weight:700">' + esc(s.title) + '</div><div class="fmeta" style="margin-top:4px"><span>' + esc(s.sub) + '</span></div><div class="fbtns"><button onclick="shareResearch(' + i + ')">' + ic('i-share') + 'Поделиться выводом</button></div></div></div>').join('');
 }
@@ -3024,6 +3054,61 @@ function shareResearch(i){
     const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'sudachim-research.png'; a.click();
     toast('Картинка сохранена — кинь в чат с подписью: ' + s.text);
   });
+}
+function renderStoryWrapped(c, top){
+  const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#15181C'); g.addColorStop(1, '#3A2E4A');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(233,199,103,.2)';
+  for (let i = 0; i < 10; i++) for (let j = 0; j < 6; j++) { x.beginPath(); x.arc(80 + j * 30 + i * 8, 90 + i * 30, 2.5, 0, 7); x.fill(); }
+  x.textAlign = 'center';
+  x.fillStyle = '#C9971C'; x.font = '700 34px system-ui';
+  x.fillText('СУДАЧИМ · ЛИСТ ВЕРДИКТА', W / 2, 100);
+  x.fillStyle = '#8A919E'; x.font = '500 28px system-ui';
+  x.fillText('дело №' + c.id + ' · ' + catOf(c) + ' · ' + new Date().toLocaleDateString('ru-RU'), W / 2, 150);
+  x.fillStyle = '#EDEEF2'; x.font = '600 40px system-ui';
+  const lines = wrapCenter(x, flatText(c.text), W - 200).slice(0, 3);
+  let y = 240; lines.forEach(l => { x.fillText(l, W / 2, y); y += 54; });
+  const total = (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
+  x.fillStyle = '#E9C767'; x.font = '900 150px system-ui';
+  x.fillText(String(total), W / 2, y + 130);
+  x.fillStyle = '#8A919E'; x.font = '600 34px system-ui';
+  x.fillText(plural(total), W / 2, y + 185);
+  const pct = v => total ? Math.round(v * 100 / total) : 0;
+  const by = y + 250;
+  [['осуждают', '#FF4438', c.condemn], ['жиза', '#FFB020', c.life], ['не осуждают', '#3DD68C', c.justify]].forEach((r, i) => {
+    const yy = by + i * 78;
+    x.textAlign = 'left'; x.fillStyle = r[1]; x.font = '700 30px system-ui';
+    x.fillText(r[0], 140, yy + 24);
+    x.fillStyle = 'rgba(255,255,255,.12)'; rr(x, 400, yy, 460, 26, 13); x.fill();
+    x.fillStyle = r[1]; rr(x, 400, yy, Math.max(10, 460 * pct(r[2]) / 100), 26, 13); x.fill();
+    x.textAlign = 'right'; x.fillText(pct(r[2]) + '%', 940, yy + 24);
+  });
+  const maj = Math.max(c.condemn || 0, c.justify || 0, c.life || 0);
+  const verdict = (c.life || 0) === maj && maj > 0 ? 'народ сказал: ЖИЗА' : (c.justify || 0) === maj ? 'народ решил: НЕ ОСУЖДАЮ' : 'народ решил: ОСУЖДАЮ';
+  x.textAlign = 'center'; x.fillStyle = '#E9C767'; x.font = '800 52px system-ui';
+  x.fillText(verdict, W / 2, by + 300);
+  if (top) {
+    x.fillStyle = 'rgba(255,255,255,.06)'; rr(x, 120, by + 340, W - 240, 150, 24); x.fill();
+    x.fillStyle = '#C9CFDA'; x.font = '500 30px system-ui';
+    const q = wrapCenter(x, '«' + flatText(top.text).slice(0, 90) + '»', W - 320).slice(0, 2);
+    q.forEach((l, i) => x.fillText(l, W / 2, by + 400 + i * 42));
+    x.fillStyle = '#8A919E'; x.font = '600 26px system-ui';
+    x.fillText('— ' + top.nick + (top.likes ? ' · 👏 ' + top.likes : ''), W / 2, by + 400 + q.length * 42 + 8);
+  }
+  drawSeal(x, W / 2, H - 120, 70);
+  return cv.toDataURL('image/png');
+}
+async function shareStoryWrapped(id){
+  const c = allById(id); if (!c) return;
+  track('share');
+  await ensureFonts();
+  const cms = allComments.filter(k => k.case_id === id && !k.parent_id);
+  const top = cms.slice().sort((a, b) => likesOf(b.id) - likesOf(a.id))[0];
+  let topData = null;
+  if (top && likesOf(top.id) > 0) { const p = await profilesFor([top.user_id]); topData = { text: top.text, nick: (p[top.user_id] || {}).nick || 'аноним', likes: likesOf(top.id) }; }
+  downloadOrShare(renderStoryWrapped(c, topData));
 }
 function hypeEnd(c){ return new Date(c.created_at).getTime() + 7 * 864e5; }
 function hypeState(c){ return srvNow() >= hypeEnd(c) ? 'locked' : 'live'; }
@@ -3084,8 +3169,14 @@ async function hypeVote(id, v){
   if (error) { toast(error.message); return; }
   c[v] = (c[v] || 0) + 1;
   voted[id] = v; saveVoted();
+  milestoneNotify(c, (c.condemn || 0) + (c.justify || 0) + (c.life || 0));
   track('swipe');
   renderHype(); renderFeed();
+}
+function milestoneNotify(c, total){
+  if (!c || !c.user_id || (me && c.user_id === me.id)) return;
+  if (![25, 50, 250, 500].includes(total)) return;
+  sb.from('notifications').insert({ user_id: c.user_id, actor_id: me ? me.id : null, type: 'verdict', case_id: c.id, text: 'твою историю голосуют: уже ' + total + ' голосов' }).then(() => {});
 }
 function hypeTeaser(c){
   const d = Math.max(1, Math.ceil((hypeEnd(c) - srvNow()) / 864e5));
@@ -3262,7 +3353,7 @@ async function renderMine(){
     const isNew = n > (seen[c.id] || 0);
     return '<div class="mcItem" style="background:var(--card);box-shadow:0 8px 22px rgba(20,24,32,.06)"><div class="mcTxt" style="white-space:normal">' + esc(c.text) + '</div>' +
       '<div class="mcPills"><span class="mcPill" style="color:var(--red)">😡 ' + pct(c.condemn) + '%</span><span class="mcPill" style="color:var(--yel)">🤔 ' + pct(c.life) + '%</span><span class="mcPill" style="color:var(--grn)">👍 ' + pct(c.justify) + '%</span></div>' +
-      '<div class="fbtns"><span class="cNewWrap"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + n + ')</button>' + (isNew ? '<span class="cNew" data-cnew="' + c.id + '">новый</span>' : '') + '</span><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
+      '<div class="fbtns"><span class="cNewWrap"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии (' + n + ')</button>' + (isNew ? '<span class="cNew" data-cnew="' + c.id + '">новый</span>' : '') + '</span><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button><button onclick="shareStoryWrapped(' + c.id + ')">📜 лист</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
   }).join('');
 }
