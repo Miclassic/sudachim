@@ -709,6 +709,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div class="chips hidden" id="chips"></div>
     <div id="feed"></div>
     <div id="hypeArch" style="margin-top:18px"></div>
+    <div id="researchBox" style="margin-top:18px"></div>
   </section>
   <section id="tab-duels" class="hidden">
     <div class="secHead"><svg class="icn"><use href="#i-swords"/></svg>дуэли · что хуже?</div>
@@ -2319,6 +2320,7 @@ async function loadFeed(){
   renderMyTicker();
   renderHype();
   renderHypeArchive();
+  renderResearch();
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
@@ -2921,6 +2923,7 @@ async function renderTicker(){
   if (minuteCnt) items.push(ic('i-bolt') + ' <span class="tkL">за последнюю минуту:</span> <b>' + minuteCnt + '</b> ' + vplural(minuteCnt));
   const hypeC = allCases.find(x => x.hype && !x.hidden && hypeState(x) !== 'locked');
   if (hypeC) items.push(ic('i-bolt') + ' <span class="tkL tkHot">хайп-суд:</span> ' + esc(hypeC.hype_title || '') + ' · вердикт через ' + Math.max(1, Math.ceil((hypeEnd(hypeC) - srvNow()) / 864e5)) + ' дн');
+  if (researchData.length) items.push(ic('i-doc') + ' <span class="tkL">судачим выяснил:</span> ' + esc(researchData[0].title) + ' — ' + researchData[0].big);
   const hot = allById([...hotCases][0]);
   if (hot) items.push(ic('i-flame') + ' <span class="tkL tkHot">сейчас судят:</span> ' + esc(hot.text.replace(/\s+/g, ' ').slice(0, 60)) + '…');
   if (topCache.list[0]) {
@@ -2962,6 +2965,66 @@ async function renderMine(){
       '<div class="fbtns"><button onclick="feedToggleComments(' + c.id + ')">' + ic('i-comment') + 'Комментарии</button><button onclick="shareCase(allById(' + c.id + '))">' + ic('i-share') + 'Поделиться</button></div>' +
       '<div class="fcom hidden" id="fc_' + c.id + '"></div></div>';
   }).join('');
+}
+let researchData = [];
+function computeResearch(){
+  const cs = allCases.filter(c => !c.hidden);
+  const tot = c => (c.condemn || 0) + (c.justify || 0) + (c.life || 0);
+  const withVotes = cs.filter(c => tot(c) >= 5);
+  const byCat = {};
+  withVotes.forEach(c => {
+    const k = c.category || 'drugoe';
+    const b = byCat[k] = byCat[k] || { votes: 0, cond: 0, life: 0 };
+    b.votes += tot(c); b.cond += c.condemn || 0; b.life += c.life || 0;
+  });
+  const cats = Object.entries(byCat).map(([k, b]) => ({ label: catOf({ category: k }), votes: b.votes, condPct: Math.round(b.cond * 100 / b.votes), lifePct: Math.round(b.life * 100 / b.votes) })).filter(b => b.votes >= 10);
+  let V = 0, C = 0; withVotes.forEach(c => { V += tot(c); C += c.condemn || 0; });
+  const split = withVotes.filter(c => tot(c) >= 20).map(c => ({ c, gap: Math.abs((c.condemn || 0) - (c.justify || 0)), t: tot(c) })).sort((a, b) => a.gap - b.gap)[0];
+  const now = srvNow();
+  const avg = arr => { let v = 0, cc = 0; arr.forEach(c => { v += tot(c); cc += c.condemn || 0; }); return v ? Math.round(cc * 100 / v) : null; };
+  const t1 = avg(withVotes.filter(c => now - new Date(c.created_at).getTime() < 7 * 864e5));
+  const t0 = avg(withVotes.filter(c => { const d = now - new Date(c.created_at).getTime(); return d >= 7 * 864e5 && d < 14 * 864e5; }));
+  return { cats, V, split, t1, t0, topCond: cats.slice().sort((a, b) => b.condPct - a.condPct)[0], topLife: cats.slice().sort((a, b) => b.lifePct - a.lifePct)[0] };
+}
+function renderResearch(){
+  const box = $('researchBox'); if (!box) return;
+  const r = computeResearch();
+  researchData = [];
+  if (r.topCond) researchData.push({ big: r.topCond.condPct + '%', title: 'осуждают в категории «' + r.topCond.label + '»', sub: 'из ' + r.topCond.votes + ' голосов · самая осуждаемая категория', text: 'Судачим выяснил: категория «' + r.topCond.label + '» — народ осуждает в ' + r.topCond.condPct + '% случаев.' });
+  if (r.topLife) researchData.push({ big: r.topLife.lifePct + '%', title: 'жиза в категории «' + r.topLife.label + '»', sub: 'из ' + r.topLife.votes + ' голосов · самая жизненная категория', text: 'Судачим выяснил: «' + r.topLife.label + '» — самая жизненная категория, ' + r.topLife.lifePct + '% говорят «жиза».' });
+  if (r.split) { const c = r.split.c, p1 = Math.round((c.condemn || 0) * 100 / r.split.t), p2 = Math.round((c.justify || 0) * 100 / r.split.t);
+    researchData.push({ big: p1 + '% / ' + p2 + '%', title: 'народ раскололся в деле «' + (c.hype_title || flatText(c.text).slice(0, 60)) + '»', sub: 'осуждают / не осуждают · самое спорное дело', text: 'Судачим выяснил: дело «' + (c.hype_title || flatText(c.text).slice(0, 60)) + '» раскололо народ ' + p1 + '/' + p2 + '.' }); }
+  if (r.V) researchData.push({ big: Math.round(CPct(r)) + '%', title: 'всех дел заканчиваются вердиктом «осуждаю»', sub: r.V + ' голосов суммарно · общий баланс суда', text: 'Судачим выяснил: в среднем народ осуждает ' + Math.round(CPct(r)) + '% всех дел.' });
+  if (r.t1 != null && r.t0 != null) { const d = r.t1 - r.t0;
+    researchData.push({ big: (d > 0 ? '+' : '') + d + '%', title: d >= 0 ? 'народ стал строже за неделю' : 'народ стал мягче за неделю', sub: 'осуждают: ' + r.t1 + '% на этой неделе против ' + r.t0 + '% на прошлой', text: 'Судачим выяснил: народ ' + (d >= 0 ? 'строже' : 'мягче') + ' — осуждают ' + r.t1 + '% против ' + r.t0 + '% неделей раньше.' }); }
+  if (!researchData.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="secHead">' + ic('i-doc') + 'судачим выяснил</div>' +
+    researchData.map((s, i) => '<div class="fitem" style="margin-bottom:10px"><div class="fbody"><div class="fmetaCat">исследование · по голосам народа</div><div style="font-weight:900;font-size:30px;color:var(--gold)">' + s.big + '</div><div class="ftxt" style="font-weight:700">' + esc(s.title) + '</div><div class="fmeta" style="margin-top:4px"><span>' + esc(s.sub) + '</span></div><div class="fbtns"><button onclick="shareResearch(' + i + ')">' + ic('i-share') + 'Поделиться выводом</button></div></div></div>').join('');
+}
+function CPct(r){ let V = 0, C = 0; allCases.filter(c => !c.hidden && (c.condemn || 0) + (c.justify || 0) + (c.life || 0) >= 5).forEach(c => { V += (c.condemn || 0) + (c.justify || 0) + (c.life || 0); C += c.condemn || 0; }); return V ? C * 100 / V : 0; }
+function researchCanvas(s){
+  const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#15181C'); g.addColorStop(1, '#3A2E4A'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(233,199,103,.22)';
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 6; j++) { x.beginPath(); x.arc(80 + j * 30 + i * 8, 90 + i * 26, 2.5, 0, 7); x.fill(); }
+  x.textAlign = 'left'; x.fillStyle = '#C9971C'; x.font = '700 30px system-ui'; x.fillText('СУДАЧИМ ВЫЯСНИЛ', 60, 84);
+  x.fillStyle = '#E9C767'; x.font = '900 110px system-ui'; x.fillText(s.big, 60, 230);
+  x.fillStyle = '#EDEEF2'; x.font = '700 42px system-ui';
+  const words = s.title.split(' '); let line = '', y = 300;
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (x.measureText(t).width > W - 120 && line) { x.fillText(line, 60, y); y += 54; line = w; } else line = t; }
+  x.fillText(line, 60, y);
+  x.fillStyle = '#8A919E'; x.font = '500 28px system-ui'; x.fillText(s.sub + ' · народный суд бытовых историй', 60, H - 50);
+  return cv;
+}
+function shareResearch(i){
+  const s = researchData[i]; if (!s) return;
+  track('share');
+  researchCanvas(s).toBlob(async b => {
+    const f = new File([b], 'sudachim-research.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], text: s.text }); return; } catch (e) {} }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'sudachim-research.png'; a.click();
+    toast('Картинка сохранена — кинь в чат с подписью: ' + s.text);
+  });
 }
 function hypeEnd(c){ return new Date(c.created_at).getTime() + 7 * 864e5; }
 function hypeState(c){ return srvNow() >= hypeEnd(c) ? 'locked' : 'live'; }
@@ -3029,10 +3092,11 @@ function hypeTeaser(c){
   const d = Math.max(1, Math.ceil((hypeEnd(c) - srvNow()) / 864e5));
   return (c.hype_title ? c.hype_title + '. ' : '') + 'Народный суд уже голосует — вердикт через ' + d + ' дн. А ты на чьей стороне?';
 }
+function vUrl(id){ return location.origin + (location.pathname.indexOf('/sudachim') === 0 ? '/sudachim' : '') + '/v/case-' + id + '.html'; }
 function shareHype(net, id){
   const c = allById(id); if (!c) return;
   track('share');
-  const url = caseLink(id);
+  const url = vUrl(id);
   const text = hypeTeaser(c);
   if (net === 'vk') window.open('https://vk.com/share.php?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(text), '_blank');
   if (net === 'tg') window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
