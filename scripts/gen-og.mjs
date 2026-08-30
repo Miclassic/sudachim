@@ -27,8 +27,7 @@ for (const c of cases) {
     '<meta property="og:url" content="' + page + '">' +
     '<meta property="og:image" content="' + SITE + '/og.png">' +
     '<meta name="twitter:card" content="summary_large_image">' +
-    '<meta http-equiv="refresh" content="0; url=' + app + '">' +
-    '<scr' + 'ipt>location.replace("' + app + '")</scr' + 'ipt>' +
+    '<scr' + 'ipt>setTimeout(function(){ location.replace("' + app + '") }, 1500);</scr' + 'ipt>' +
     '</head><body>Открываем народный суд… <a href="' + app + '">перейти</a></body></html>';
   writeFileSync('v/case-' + c.id + '.html', html);
 }
