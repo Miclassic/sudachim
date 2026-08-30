@@ -3199,18 +3199,7 @@ function hypeTeaser(c){
   const d = Math.max(1, Math.ceil((hypeEnd(c) - srvNow()) / 864e5));
   return (c.hype_title ? c.hype_title + '. ' : '') + 'Народный суд уже голосует — вердикт через ' + d + ' дн. А ты на чьей стороне?';
 }
-function shareHype(net, id){
-  const c = allById(id); if (!c) return;
-  track('share');
-  const url = caseLink(id);
-  const text = hypeTeaser(c);
-  if (net === 'vk') window.open('https://vk.com/share.php?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(text), '_blank');
-  if (net === 'tg') window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
-  if (net === 'tt') window.open('https://tt.me/share?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
-  if (net === 'copy') {
-    navigator.clipboard.writeText(text + ' ' + url).then(() => toast('Ссылка скопирована — вставляй куда хочешь'));
-  }
-}
+/* дубликат shareHype удалён — работает версия с vUrl() выше */
 const QUESTS = [
   { k: 'v', n: 'Вынеси 5 вердиктов', goal: 5, ic: 'i-vote' },
   { k: 'c', n: 'Оставь 2 аргумента', goal: 2, ic: 'i-comment' },
