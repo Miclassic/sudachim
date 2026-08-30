@@ -343,7 +343,8 @@ function renderList(){
       '<div class="mtxt">' + esc(o.text).slice(0, 140) + '</div>' +
       '<div class="mbtns"><button class="daily" style="background:linear-gradient(90deg,#D33A2C,#FF8A3D);color:#fff" onclick="setHype(' + o.id + ')">⚡ хайп</button>' +
       '<button class="daily" onclick="setDaily(' + o.id + ')">🔥 дело дня</button>' +
-      (o.hype ? '<button class="no" onclick="clearHype(' + o.id + ')">убрать хайп</button>' : '') + '</div></div>'
+      (o.hype ? '<button class="no" onclick="clearHype(' + o.id + ')">убрать хайп</button>' : '') +
+      '<button class="ok" onclick="seoPage(' + o.id + ')">📄 og-страница</button></div></div>'
     ).join('') : '';
     box.innerHTML = queueHtml + apprHtml;
   } else if (tab === 'comments') {
@@ -424,6 +425,54 @@ async function decideDuel(id, ok){
   const res = await sb.from('duels').update({ status: ok ? 'approved' : 'rejected' }).eq('id', id).select();
   if (!rowCheck(res)) return;
   await refresh();
+}
+const SITE = 'https://miclassic.github.io/sudachim';
+function flatTxt(s){ return String(s).replace(/\|\|[\s\S]+?\|\|/g, '[скрыто]').replace(/\s+/g, ' ').trim(); }
+function dlText(name, text){ const a = document.createElement('a'); a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(text); a.download = name; a.click(); }
+function dlData(name, dataUrl){ const a = document.createElement('a'); a.href = dataUrl; a.download = name + '.png'; a.click(); }
+function ogCanvas(c){
+  const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#15181C'); bg.addColorStop(1, '#3A2E4A');
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(233,199,103,.22)';
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 6; j++) { x.beginPath(); x.arc(80 + j * 30 + i * 8, 90 + i * 26, 2.5, 0, 7); x.fill(); }
+  x.fillStyle = '#C9971C'; x.font = '700 34px system-ui'; x.textAlign = 'left';
+  x.fillText('СУДАЧИМ · НАРОДНЫЙ СУД', 60, 90);
+  x.fillStyle = '#EDEEF2'; x.font = '800 64px system-ui';
+  const words = (c.hype_title || flatTxt(c.text).slice(0, 80)).split(' ');
+  let line = '', y = 210, lines = [];
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (x.measureText(t).width > W - 120 && line) { lines.push(line); line = w; } else line = t; }
+  lines.push(line);
+  lines.slice(0, 3).forEach(l => { x.fillText(l, 60, y); y += 78; });
+  x.fillStyle = '#C9971C'; x.font = '700 36px system-ui';
+  x.fillText('А ты на чьей стороне?', 60, H - 70);
+  return cv;
+}
+async function seoPage(id){
+  const c = apprCases.find(o => o.id === id) || caseMap[id];
+  if (!c) { alert('Кейс не найден — обнови админку'); return; }
+  const png = ogCanvas(c).toDataURL('image/png');
+  const title = (c.hype_title || flatTxt(c.text).slice(0, 70)) + ' — народный суд';
+  const desc = 'Свайпай истории и выноси вердикт. Народ решит, кто прав.';
+  const pageUrl = SITE + '/v/case-' + id + '.html';
+  const appUrl = SITE + '/?case=' + id;
+  const html = '<!doctype html><html lang="ru"><head><meta charset="utf-8">' +
+    '<title>' + esc(title) + '</title>' +
+    '<meta name="description" content="' + esc(desc) + '">' +
+    '<meta property="og:type" content="article">' +
+    '<meta property="og:title" content="' + esc(title) + '">' +
+    '<meta property="og:description" content="' + esc(desc) + '">' +
+    '<meta property="og:url" content="' + pageUrl + '">' +
+    '<meta property="og:image" content="' + SITE + '/v/img/case-' + id + '.png">' +
+    '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">' +
+    '<meta name="twitter:card" content="summary_large_image">' +
+    '<meta http-equiv="refresh" content="0; url=' + appUrl + '">' +
+    '<script>location.replace("' + appUrl + '")</script>' +
+    '</head><body>Открываем народный суд… <a href="' + appUrl + '">перейти</a></body></html>';
+  dlData('case-' + id, png);
+  dlText('case-' + id + '.html', html);
+  alert('Готово, скачались 2 файла:\n1) case-' + id + '.png → в папку v/img/\n2) case-' + id + '.html → в папку v/\n\nПосле деплоя делись ссылкой:\n' + pageUrl);
 }
 async function logout(){ await sb.auth.signOut(); location.reload(); }
 boot();
