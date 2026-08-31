@@ -3235,7 +3235,11 @@ function renderShowcase(){
   requestAnimationFrame(animateBars);
 }
 function gToggle(el){ el.classList.toggle('open'); }
-function gsToggle(el){ el.classList.toggle('open'); }
+function gsToggle(el){
+  const open = el.classList.toggle('open');
+  const inner = el.firstElementChild;
+  if (inner) inner.style.transform = open ? 'translateX(-50%)' : 'translateX(0)';
+}
 function renderShow(){
   const box = $('showGrid'); if (!box) return;
   const wrap = $('showWrap');
@@ -3259,15 +3263,15 @@ function renderShow(){
     const coverInner = c.cover_url
       ? '<img src="' + c.cover_url + '" loading="lazy" decoding="async">'
       : '<span class="gsEmo">' + (EMO[catL(c)] || '⚖️') + '</span>';
-    return '<div class="gsCard" onclick="gsToggle(this)">' +
-      '<div class="gsInner">' +
-      '<div class="gsFront">' +
+    return '<div class="gsCard" style="height:280px;overflow:hidden;border-radius:20px;background:var(--card);box-shadow:0 10px 26px rgba(20,24,32,.08);cursor:pointer;position:relative" onclick="gsToggle(this)">' +
+      '<div class="gsInner" style="display:flex;width:200%;height:100%;transition:transform .45s ease">' +
+      '<div class="gsFront" style="width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">' +
         '<div class="gsHead"><span>' + date + (hotCases.has(c.id) ? ' 🔥' : '') + '</span><span class="gsMore">подробнее →</span></div>' +
         '<div class="gsCover ' + (ART[catL(c)] || 'artD') + '">' + coverInner + '</div>' +
         '<div class="gsTitle">' + esc(title) + '</div>' +
         '<div class="gsBar ' + cls + '">' + lab + '</div>' +
       '</div>' +
-      '<div class="gsBack">' +
+      '<div class="gsBack" style="width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">' +
         '<div class="gsBackTitle">' + esc(title) + '</div>' +
         '<div class="gsBackText">' + esc(flatText(c.text)) + '</div>' +
         fbarsHtml('gs' + c.id, pctC, pctL, pctJ) +
@@ -3278,6 +3282,7 @@ function renderShow(){
   }).join('');
   requestAnimationFrame(animateBars);
 }
+function renderShowcase(){ renderShow(); }
 function gOpen(id){
   if (feedCat !== 'все') setFeedCat('все');
   setTimeout(() => {
