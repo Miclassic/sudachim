@@ -627,11 +627,34 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
 #tab-duels .fmeta:has(.fmC){position:relative}
 #tab-duels .fmeta:has(.fmC) .fmC{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap}
 #tab-duels .fmeta:has(.fmC) > span:last-child{margin-left:auto}
-.showGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:4px}
+.showGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
 @media (min-width:700px){.showGrid{grid-template-columns:repeat(3,1fr)}}
-.gCard2{cursor:pointer}
-.gBar{margin-top:8px;background:var(--bg);border-radius:999px;padding:8px 10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px}
-body.night .gBar{background:rgba(255,255,255,.06)}
+.gCard{background:var(--card);border-radius:20px;box-shadow:0 10px 26px rgba(20,24,32,.08);border:1px solid rgba(20,24,32,.05);overflow:hidden;cursor:pointer;height:280px;position:relative}
+body.night .gCard{box-shadow:0 10px 26px rgba(0,0,0,.4);border-color:rgba(255,255,255,.06)}
+.gInner{display:flex;width:200%;height:100%;transition:transform .45s cubic-bezier(.4,.1,.2,1)}
+.gCard.open .gInner{transform:translateX(-50%)}
+.gFront,.gBack{width:50%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box}
+.gHead{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--gray)}
+.gFire{font-size:12px;filter:drop-shadow(0 0 6px rgba(255,138,61,.8))}
+.gMore{color:var(--gold);font-weight:800;font-size:10px}
+body.night .gMore{color:#FF8A3D}
+.gCover{position:relative;height:120px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background-image:var(--grad)}
+.gCover::before{content:"";position:absolute;inset:-40px;background-image:var(--pat);background-size:96px 96px;opacity:.55}
+.gCover img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1}
+.gEmo{position:relative;font-size:48px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+.gTitle{font-size:12px;font-weight:700;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body.night .gTitle{color:#E8EAEE}
+.gBar{border-radius:999px;padding:7px 8px;text-align:center;font-size:10.5px;font-weight:800;margin-top:auto}
+.gBar.red{background:rgba(211,58,44,.12);color:var(--red)}
+.gBar.grn{background:rgba(46,158,91,.12);color:var(--grn)}
+.gBar.yel{background:rgba(224,164,0,.14);color:var(--yel)}
+body.night .gBar.red{background:rgba(255,68,56,.14);color:#FF6B5E}
+body.night .gBar.grn{background:rgba(61,214,140,.12);color:#3DD68C}
+body.night .gBar.yel{background:rgba(255,176,32,.14);color:#FFB020}
+.gBackTitle{font-size:11px;font-weight:800;color:var(--ink);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gBackText{font-size:11px;line-height:1.45;color:var(--ink);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+body.night .gBackTitle,body.night .gBackText{color:#D5DAE2}
+.gBackOpen{margin-top:auto;border:none;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px;font-weight:700;font-size:11px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -770,11 +793,14 @@ body.night .gBar{background:rgba(255,255,255,.06)}
     <textarea id="fText" maxlength="2000" placeholder="например: свекровь приходит без звонка и переставляет вещи. я стала запирать дверь. кто не прав?"></textarea>
     <input id="fShort" class="aIn" maxlength="70" placeholder="кратко, о чём история — эта строка попадёт в витрину">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button type="button" class="miniBtn" onclick="$('fCover').click()">🖼 превью для витрины</button>
       <button type="button" class="miniBtn" onclick="$('fMedia').click()">📎 приложить вещдок</button>
       <button type="button" class="miniBtn" onclick="spoilWrap('fText')"><svg class="icn"><use href="#i-eye"/></svg> скрыть выделенное</button>
       <span id="fMediaName" style="font-size:11px;color:var(--gray)"></span>
     </div>
     <input type="file" id="fMedia" accept="image/*,video/*" style="display:none" onchange="onMediaPick(this)">
+    <input type="file" id="fCover" accept="image/*" style="display:none" onchange="onCoverPick(this)">
+    <span id="fCoverName" style="font-size:11px;color:var(--gray)"></span>
     <select id="fCat">
       <option>семья</option><option>деньги</option><option>соседи</option><option>работа</option><option>отношения</option><option>этикет</option><option>медиа</option><option>гейминг</option><option>мемы</option><option>спорт</option><option>родственники</option><option>18+</option><option>треш</option><option>другое</option>
     </select>
@@ -862,7 +888,7 @@ let hotCases = new Set(), hotDuels = new Set();
 let minuteCnt = 0, liveDeltas = [], nextLiveAt = Date.now() + 40000 + Math.random() * 50000;
 let voteCnt24 = {}, myPrefs = new Set(), onlineNow = 0, hourCnt = {};
 let me = null, myNick = '', myAva = '', myFrame = '', mySkin = '', authMode = 'reg';
-let replyTo = null, pickedMedia = null;
+let replyTo = null, pickedMedia = null, pickedCover = null;
 const ICOS = {
 'i-scale':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M9 19.5h6M5.5 6.5h13"/><circle cx="12" cy="4" r="1.1" fill="currentColor" stroke="none"/></g><path fill="currentColor" d="M5.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L5.5 7zM18.5 7l-2.7 5.6a2.9 2.9 0 0 0 5.4 0L18.5 7z"/>',
 'i-swords':'<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l13.5 13.5M20 4L6.5 17.5"/><path d="M15 18l3-3M9 18l-3-3"/><path d="M18.5 18.5l2 2M5.5 18.5l-2 2"/></g>',
@@ -2090,6 +2116,13 @@ function videoDuration(f){
     v.src = URL.createObjectURL(f);
   });
 }
+async function onCoverPick(inp){
+  const f = inp.files[0]; if (!f) return;
+  if (!f.type.startsWith('image/')) { toast('Только картинки'); inp.value = ''; return; }
+  if (f.size > 4*1024*1024) { toast('Миниатюра до 4 МБ'); inp.value = ''; return; }
+  pickedCover = f;
+  $('fCoverName').textContent = '🖼 ' + f.name.slice(0, 20) + ' · ' + (f.size/1048576).toFixed(1) + ' МБ';
+}
 async function onMediaPick(inp){
   const f = inp.files[0];
   if (!f) { pickedMedia = null; $('fMediaName').textContent = ''; return; }
@@ -2641,6 +2674,13 @@ async function submitCase(){
   const t = $('fText').value.trim(), cat = $('fCat').value, shortT = $('fShort').value.trim();
   if (t.length < 20) { toast('Опиши подробнее (мин. 20 символов)'); return; }
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
+  let cover_url = null;
+  if (pickedCover) {
+    const blob = await compressImage(pickedCover);
+    const path = me.id + '/' + Date.now() + '-cover.jpg';
+    const up = await sb.storage.from('covers').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (!up.error) cover_url = sb.storage.from('covers').getPublicUrl(path).data.publicUrl;
+  }
   let media_url = null, media_type = null;
   if (pickedMedia) {
     toast('📎 Грузим вещдок…');
@@ -2652,8 +2692,8 @@ async function submitCase(){
     media_url = sb.storage.from('evidence').getPublicUrl(path).data.publicUrl;
     media_type = isV ? 'video' : 'image';
   }
-  const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id, media_url, media_type, short_title: shortT || null });
-  $('fText').value = ''; $('fShort').value = ''; pickedMedia = null; $('fMedia').value = ''; $('fMediaName').textContent = '';
+  const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id, media_url, media_type, short_title: shortT || null, cover_url });
+  $('fText').value = ''; $('fShort').value = ''; pickedMedia = null; pickedCover = null; $('fMedia').value = ''; $('fMediaName').textContent = ''; $('fCover').value = ''; $('fCoverName').textContent = '';
   closeForm();
   if (!error) track('story');
   toast(error ? 'Ошибка: ' + error.message : 'Принято! Появится после проверки ✅');
@@ -3134,20 +3174,40 @@ function renderShowcase(){
     .slice(0, 6);
   if (!list.length) { wrap.classList.add('hidden'); return; }
   wrap.classList.remove('hidden');
+  const MON = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
   box.innerHTML = list.map(({ c, total }) => {
     const pctC = Math.round((c.condemn || 0) * 100 / total), pctJ = Math.round((c.justify || 0) * 100 / total), pctL = Math.round((c.life || 0) * 100 / total);
     const maj = Math.max(pctC, pctJ, pctL);
     const lab = maj === pctC ? pctC + '% осуждают' : maj === pctJ ? pctJ + '% не осуждают' : pctL + '% жиза';
-    const col = maj === pctC ? 'var(--red)' : maj === pctJ ? 'var(--grn)' : 'var(--yel)';
+    const cls = maj === pctC ? 'red' : maj === pctJ ? 'grn' : 'yel';
+    const d = new Date(c.created_at);
+    const date = String(d.getDate()).padStart(2, '0') + ' | ' + MON[d.getMonth()];
     const title = (c.short_title || flatText(c.text).replace(/\s+/g, ' ').slice(0, 60)).trim();
-    return '<div class="fitem gCard2' + (hotCases.has(c.id) ? ' hot' : '') + '" onclick="gOpen(' + c.id + ')">' +
-      '<div class="fart ' + (ART[catL(c)] || 'artD') + '"></div><div class="fbody">' +
-      '<div class="fmetaCat">' + (hotCases.has(c.id) ? '🔥 ' : '') + esc(catOf(c)) + '</div>' +
-      '<div class="ftxt">' + esc(title) + '</div>' +
-      '<div class="gBar"><span style="color:' + col + '">' + lab + '</span></div>' +
+    const art = ART[catL(c)] || 'artD';
+    const coverInner = c.cover_url
+      ? '<img src="' + c.cover_url + '" loading="lazy" decoding="async">'
+      : '<span class="gEmo">' + (EMO[catL(c)] || '⚖️') + '</span>';
+    const bars = fbarsHtml('sc' + c.id, pctC, pctL, pctJ) +
+      '<div class="fmeta" style="margin-top:6px;font-size:10px"><span style="color:var(--red)">осужд. ' + pctC + '%</span><span style="color:var(--grn)">не осужд. ' + pctJ + '%</span></div>';
+    return '<div class="gCard" onclick="gToggle(this)">' +
+      '<div class="gInner">' +
+      '<div class="gFront">' +
+        '<div class="gHead"><span>' + date + (hotCases.has(c.id) ? ' <span class="gFire">🔥</span>' : '') + '</span><span class="gMore">подробнее →</span></div>' +
+        '<div class="gCover ' + art + '">' + coverInner + '</div>' +
+        '<div class="gTitle">' + esc(title) + '</div>' +
+        '<div class="gBar ' + cls + '">' + lab + '</div>' +
+      '</div>' +
+      '<div class="gBack">' +
+        '<div class="gBackTitle">' + esc(title) + '</div>' +
+        '<div class="gBackText">' + esc(flatText(c.text)) + '</div>' +
+        bars +
+        '<button class="gBackOpen" onclick="event.stopPropagation();gOpen(' + c.id + ')">открыть в ленте →</button>' +
+      '</div>' +
       '</div></div>';
   }).join('');
+  requestAnimationFrame(animateBars);
 }
+function gToggle(el){ el.classList.toggle('open'); }
 function gOpen(id){
   showTab('court');
   if (feedCat !== 'все') setFeedCat('все');
