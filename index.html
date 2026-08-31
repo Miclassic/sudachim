@@ -627,6 +627,11 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
 #tab-duels .fmeta:has(.fmC){position:relative}
 #tab-duels .fmeta:has(.fmC) .fmC{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap}
 #tab-duels .fmeta:has(.fmC) > span:last-child{margin-left:auto}
+.showGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:4px}
+@media (min-width:700px){.showGrid{grid-template-columns:repeat(3,1fr)}}
+.gCard2{cursor:pointer}
+.gBar{margin-top:8px;background:var(--bg);border-radius:999px;padding:8px 10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px}
+body.night .gBar{background:rgba(255,255,255,.06)}
 </style>
 </head>
 <body>
@@ -710,6 +715,11 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
     <div id="empty" class="hidden"></div>
     <div id="result" class="hidden"></div>
     <div id="comments" class="hidden"></div>
+    <div id="showWrap" class="hidden">
+      <div class="secHead" style="margin-top:18px"><svg class="icn"><use href="#i-flame"/></svg>витрина суда</div>
+      <div class="secDesc">шесть самых заметных дел недели — тапни, чтобы открыть полностью</div>
+      <div class="showGrid" id="showGrid"></div>
+    </div>
     <div id="feedHead" class="hidden"><svg class="icn"><use href="#i-flame"/></svg>народные вердикты</div>
     <div class="chips hidden" id="chips"></div>
     <div id="feed"></div>
@@ -758,6 +768,7 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
   <div class="box">
     <h3>Расскажи свою ситуацию</h3>
     <textarea id="fText" maxlength="2000" placeholder="например: свекровь приходит без звонка и переставляет вещи. я стала запирать дверь. кто не прав?"></textarea>
+    <input id="fShort" class="aIn" maxlength="70" placeholder="кратко, о чём история — эта строка попадёт в витрину">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <button type="button" class="miniBtn" onclick="$('fMedia').click()">📎 приложить вещдок</button>
       <button type="button" class="miniBtn" onclick="spoilWrap('fText')"><svg class="icn"><use href="#i-eye"/></svg> скрыть выделенное</button>
@@ -2333,6 +2344,7 @@ async function loadFeed(){
   renderHype();
   renderHypeArchive();
   renderResearch();
+  renderShowcase();
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
@@ -2626,7 +2638,7 @@ async function sendComment(){
 function openForm(){ if (!me) { openAuth(); return; } $('modal').classList.remove('hidden'); }
 function closeForm(){ $('modal').classList.add('hidden'); }
 async function submitCase(){
-  const t = $('fText').value.trim(), cat = $('fCat').value;
+  const t = $('fText').value.trim(), cat = $('fCat').value, shortT = $('fShort').value.trim();
   if (t.length < 20) { toast('Опиши подробнее (мин. 20 символов)'); return; }
   const err = checkSafety(t); if (err) { toast('⚠️ ' + err); return; }
   let media_url = null, media_type = null;
@@ -2640,8 +2652,8 @@ async function submitCase(){
     media_url = sb.storage.from('evidence').getPublicUrl(path).data.publicUrl;
     media_type = isV ? 'video' : 'image';
   }
-  const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id, media_url, media_type });
-  $('fText').value = ''; pickedMedia = null; $('fMedia').value = ''; $('fMediaName').textContent = '';
+  const { error } = await sb.from('cases').insert({ text: t, category: cat, status: 'pending', user_id: me.id, media_url, media_type, short_title: shortT || null });
+  $('fText').value = ''; $('fShort').value = ''; pickedMedia = null; $('fMedia').value = ''; $('fMediaName').textContent = '';
   closeForm();
   if (!error) track('story');
   toast(error ? 'Ошибка: ' + error.message : 'Принято! Появится после проверки ✅');
@@ -3111,6 +3123,41 @@ async function shareStoryWrapped(id){
   let topData = null;
   if (top && likesOf(top.id) > 0) { const p = await profilesFor([top.user_id]); topData = { text: top.text, nick: (p[top.user_id] || {}).nick || 'аноним', likes: likesOf(top.id) }; }
   downloadOrShare(renderStoryWrapped(c, topData));
+}
+function renderShowcase(){
+  const box = $('showGrid'); if (!box) return;
+  const wrap = $('showWrap');
+  const list = allCases.filter(c => !c.hidden && !c.hype && visibleCase(c))
+    .map(c => ({ c, total: (c.condemn || 0) + (c.justify || 0) + (c.life || 0) }))
+    .filter(x => x.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 6);
+  if (!list.length) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  box.innerHTML = list.map(({ c, total }) => {
+    const pctC = Math.round((c.condemn || 0) * 100 / total), pctJ = Math.round((c.justify || 0) * 100 / total), pctL = Math.round((c.life || 0) * 100 / total);
+    const maj = Math.max(pctC, pctJ, pctL);
+    const lab = maj === pctC ? pctC + '% осуждают' : maj === pctJ ? pctJ + '% не осуждают' : pctL + '% жиза';
+    const col = maj === pctC ? 'var(--red)' : maj === pctJ ? 'var(--grn)' : 'var(--yel)';
+    const title = (c.short_title || flatText(c.text).replace(/\s+/g, ' ').slice(0, 60)).trim();
+    return '<div class="fitem gCard2' + (hotCases.has(c.id) ? ' hot' : '') + '" onclick="gOpen(' + c.id + ')">' +
+      '<div class="fart ' + (ART[catL(c)] || 'artD') + '"></div><div class="fbody">' +
+      '<div class="fmetaCat">' + (hotCases.has(c.id) ? '🔥 ' : '') + esc(catOf(c)) + '</div>' +
+      '<div class="ftxt">' + esc(title) + '</div>' +
+      '<div class="gBar"><span style="color:' + col + '">' + lab + '</span></div>' +
+      '</div></div>';
+  }).join('');
+}
+function gOpen(id){
+  showTab('court');
+  if (feedCat !== 'все') setFeedCat('все');
+  setTimeout(() => {
+    const el = document.querySelector('[data-case-id="' + id + '"]');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.outline = '2px solid var(--gold)';
+    setTimeout(() => el.style.outline = '', 1600);
+  }, 350);
 }
 function hypeEnd(c){ return new Date(c.created_at).getTime() + 7 * 864e5; }
 function hypeState(c){ return srvNow() >= hypeEnd(c) ? 'locked' : 'live'; }
