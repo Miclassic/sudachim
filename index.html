@@ -627,6 +627,33 @@ body.night .bell{background:transparent;box-shadow:none;animation:none}
 #tab-duels .fmeta:has(.fmC){position:relative}
 #tab-duels .fmeta:has(.fmC) .fmC{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap}
 #tab-duels .fmeta:has(.fmC) > span:last-child{margin-left:auto}
+.gsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+@media (min-width:700px){.gsGrid{grid-template-columns:repeat(3,1fr)}}
+.gsCard{background:var(--card);border-radius:20px;box-shadow:0 10px 26px rgba(20,24,32,.08);border:1px solid rgba(20,24,32,.05);overflow:hidden;cursor:pointer;height:280px}
+body.night .gsCard{box-shadow:0 10px 26px rgba(0,0,0,.4);border-color:rgba(255,255,255,.06)}
+.gsInner{display:flex;width:200%;height:100%;transition:transform .45s cubic-bezier(.4,.1,.2,1)}
+.gsCard.open .gsInner{transform:translateX(-50%)}
+.gsFront,.gsBack{width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box}
+.gsHead{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--gray)}
+.gsMore{color:var(--gold)}
+body.night .gsMore{color:#FF8A3D}
+.gsCover{position:relative;height:120px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background-image:var(--grad)}
+.gsCover::before{content:"";position:absolute;inset:-40px;background-image:var(--pat);background-size:96px 96px;opacity:.55}
+.gsCover img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1}
+.gsEmo{position:relative;font-size:48px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+.gsTitle{font-size:12px;font-weight:700;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body.night .gsTitle{color:#E8EAEE}
+.gsBar{border-radius:999px;padding:7px 8px;text-align:center;font-size:10.5px;font-weight:800;margin-top:auto}
+.gsBar.red{background:rgba(211,58,44,.12);color:var(--red)}
+.gsBar.grn{background:rgba(46,158,91,.12);color:var(--grn)}
+.gsBar.yel{background:rgba(224,164,0,.14);color:var(--yel)}
+body.night .gsBar.red{background:rgba(255,68,56,.14);color:#FF6B5E}
+body.night .gsBar.grn{background:rgba(61,214,140,.12);color:#3DD68C}
+body.night .gsBar.yel{background:rgba(255,176,32,.14);color:#FFB020}
+.gsBackTitle{font-size:11px;font-weight:800;color:var(--ink);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gsBackText{font-size:11px;line-height:1.45;color:var(--ink);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+body.night .gsBackTitle,body.night .gsBackText{color:#D5DAE2}
+.gsOpen{margin-top:auto;border:none;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px;font-weight:700;font-size:11px;cursor:pointer}
 .showGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
 @media (min-width:700px){.showGrid{grid-template-columns:repeat(3,1fr)}}
 .gCard{background:var(--card);border-radius:20px;box-shadow:0 10px 26px rgba(20,24,32,.08);border:1px solid rgba(20,24,32,.05);overflow:hidden;cursor:pointer;height:280px;position:relative}
@@ -2377,7 +2404,7 @@ async function loadFeed(){
   renderHype();
   renderHypeArchive();
   renderResearch();
-  renderShowcase();
+  renderShow();
 }
 function renderChips(){
   const cats = ['все', ...new Set(allCases.map(catL))];
@@ -3208,6 +3235,49 @@ function renderShowcase(){
   requestAnimationFrame(animateBars);
 }
 function gToggle(el){ el.classList.toggle('open'); }
+function gsToggle(el){ el.classList.toggle('open'); }
+function renderShow(){
+  const box = $('showGrid'); if (!box) return;
+  const wrap = $('showWrap');
+  const list = allCases.filter(c => !c.hidden && !c.hype && visibleCase(c))
+    .map(c => ({ c, total: (c.condemn || 0) + (c.justify || 0) + (c.life || 0) }))
+    .filter(x => x.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 6);
+  if (!list.length) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  box.className = 'gsGrid';
+  const MON = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
+  box.innerHTML = list.map(({ c, total }) => {
+    const pctC = Math.round((c.condemn || 0) * 100 / total), pctJ = Math.round((c.justify || 0) * 100 / total), pctL = Math.round((c.life || 0) * 100 / total);
+    const maj = Math.max(pctC, pctJ, pctL);
+    const lab = maj === pctC ? pctC + '% осуждают' : maj === pctJ ? pctJ + '% не осуждают' : pctL + '% жиза';
+    const cls = maj === pctC ? 'red' : maj === pctJ ? 'grn' : 'yel';
+    const d = new Date(c.created_at);
+    const date = String(d.getDate()).padStart(2, '0') + ' | ' + MON[d.getMonth()];
+    const title = (c.short_title || flatText(c.text).replace(/\s+/g, ' ').slice(0, 60)).trim();
+    const coverInner = c.cover_url
+      ? '<img src="' + c.cover_url + '" loading="lazy" decoding="async">'
+      : '<span class="gsEmo">' + (EMO[catL(c)] || '⚖️') + '</span>';
+    return '<div class="gsCard" onclick="gsToggle(this)">' +
+      '<div class="gsInner">' +
+      '<div class="gsFront">' +
+        '<div class="gsHead"><span>' + date + (hotCases.has(c.id) ? ' 🔥' : '') + '</span><span class="gsMore">подробнее →</span></div>' +
+        '<div class="gsCover ' + (ART[catL(c)] || 'artD') + '">' + coverInner + '</div>' +
+        '<div class="gsTitle">' + esc(title) + '</div>' +
+        '<div class="gsBar ' + cls + '">' + lab + '</div>' +
+      '</div>' +
+      '<div class="gsBack">' +
+        '<div class="gsBackTitle">' + esc(title) + '</div>' +
+        '<div class="gsBackText">' + esc(flatText(c.text)) + '</div>' +
+        fbarsHtml('gs' + c.id, pctC, pctL, pctJ) +
+        '<div class="fmeta" style="margin-top:4px;font-size:10px"><span style="color:var(--red)">осуждают ' + pctC + '%</span><span style="color:var(--grn)">не осуждают ' + pctJ + '%</span></div>' +
+        '<button class="gsOpen" onclick="event.stopPropagation();gOpen(' + c.id + ')">открыть в ленте →</button>' +
+      '</div>' +
+      '</div></div>';
+  }).join('');
+  requestAnimationFrame(animateBars);
+}
 function gOpen(id){
   if (feedCat !== 'все') setFeedCat('все');
   setTimeout(() => {
