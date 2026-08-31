@@ -3284,17 +3284,12 @@ function renderShow(){
 }
 function renderShowcase(){ renderShow(); }
 function gOpen(id){
-  if (feedCat !== 'все') {
-    setFeedCat('все');
-    setTimeout(() => gOpen(id), 600);
-    return;
-  }
+  const c = allById(id);
+  if (c && isMine(c)) { showTab('mine'); setTimeout(() => feedToggleComments(id, true), 600); return; }
+  if (feedCat !== 'все') { setFeedCat('все'); setTimeout(() => gOpen(id), 600); return; }
   setTimeout(() => {
     const el = document.querySelector('[data-case-id="' + id + '"]');
-    if (!el) {
-      toast('История не найдена в ленте — возможно, она в очереди свайпов');
-      return;
-    }
+    if (!el) { toast('История не найдена в ленте'); return; }
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     el.style.outline = '2px solid var(--gold)';
     setTimeout(() => el.style.outline = '', 1600);
