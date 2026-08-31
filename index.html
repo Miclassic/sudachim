@@ -3629,6 +3629,22 @@ function fixDuelMeta(){
 fixDuelMeta(); setInterval(fixDuelMeta, 1200);
 const dl = document.getElementById('duelsList');
 if (dl) new MutationObserver(() => fixDuelMeta()).observe(dl, { childList: true, subtree: true });
+document.addEventListener('click', function(e){
+  const t = e.target;
+  const card = t.closest ? t.closest('.gsCard, .gCard') : null;
+  if (!card) return;
+  if (t.closest('button')) return;
+  e.stopPropagation();
+  const open = !card.classList.contains('open');
+  card.classList.toggle('open', open);
+  card.style.height = '280px'; card.style.overflow = 'hidden'; card.style.borderRadius = '20px'; card.style.position = 'relative'; card.style.cursor = 'pointer';
+  const inner = card.firstElementChild;
+  if (inner) {
+    inner.style.display = 'flex'; inner.style.width = '200%'; inner.style.height = '100%'; inner.style.transition = 'transform .45s ease';
+    inner.style.transform = open ? 'translateX(-50%)' : 'translateX(0)';
+    for (const ch of inner.children) { ch.style.width = '50%'; ch.style.height = '100%'; ch.style.boxSizing = 'border-box'; ch.style.padding = '10px'; ch.style.display = 'flex'; ch.style.flexDirection = 'column'; ch.style.gap = '8px'; }
+  }
+}, true);
 load();
 (function(){
   const q = new URLSearchParams(location.search);
