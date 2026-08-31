@@ -3263,15 +3263,15 @@ function renderShow(){
     const coverInner = c.cover_url
       ? '<img src="' + c.cover_url + '" loading="lazy" decoding="async">'
       : '<span class="gsEmo">' + (EMO[catL(c)] || '⚖️') + '</span>';
-    return '<div class="gsCard" style="height:280px;overflow:hidden;border-radius:20px;background:var(--card);box-shadow:0 10px 26px rgba(20,24,32,.08);cursor:pointer;position:relative" onclick="gsToggle(this)">' +
-      '<div class="gsInner" style="display:flex;width:200%;height:100%;transition:transform .45s ease">' +
-      '<div class="gsFront" style="width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">' +
+    return '<div class="gsCard" data-showcase="1" style="height:280px;overflow:hidden;border-radius:20px;background:var(--card);box-shadow:0 10px 26px rgba(20,24,32,.08);cursor:pointer;position:relative">' +
+      '<div class="gsInner" data-showcase-inner="1" style="display:flex;width:200%;height:100%;transition:transform .45s ease">' +
+      '<div class="gsFront" data-showcase-front="1" style="width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">' +
         '<div class="gsHead"><span>' + date + (hotCases.has(c.id) ? ' 🔥' : '') + '</span><span class="gsMore">подробнее →</span></div>' +
         '<div class="gsCover ' + (ART[catL(c)] || 'artD') + '">' + coverInner + '</div>' +
         '<div class="gsTitle">' + esc(title) + '</div>' +
         '<div class="gsBar ' + cls + '">' + lab + '</div>' +
       '</div>' +
-      '<div class="gsBack" style="width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">' +
+      '<div class="gsBack" data-showcase-back="1" style="width:50%;height:100%;padding:10px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">' +
         '<div class="gsBackTitle">' + esc(title) + '</div>' +
         '<div class="gsBackText">' + esc(flatText(c.text)) + '</div>' +
         fbarsHtml('gs' + c.id, pctC, pctL, pctJ) +
@@ -3631,18 +3631,16 @@ const dl = document.getElementById('duelsList');
 if (dl) new MutationObserver(() => fixDuelMeta()).observe(dl, { childList: true, subtree: true });
 document.addEventListener('click', function(e){
   const t = e.target;
-  const card = t.closest ? t.closest('.gsCard, .gCard') : null;
+  const card = t.closest ? t.closest('[data-showcase="1"]') : null;
   if (!card) return;
   if (t.closest('button')) return;
+  e.preventDefault();
   e.stopPropagation();
   const open = !card.classList.contains('open');
   card.classList.toggle('open', open);
-  card.style.height = '280px'; card.style.overflow = 'hidden'; card.style.borderRadius = '20px'; card.style.position = 'relative'; card.style.cursor = 'pointer';
-  const inner = card.firstElementChild;
+  const inner = card.querySelector('[data-showcase-inner="1"]');
   if (inner) {
-    inner.style.display = 'flex'; inner.style.width = '200%'; inner.style.height = '100%'; inner.style.transition = 'transform .45s ease';
     inner.style.transform = open ? 'translateX(-50%)' : 'translateX(0)';
-    for (const ch of inner.children) { ch.style.width = '50%'; ch.style.height = '100%'; ch.style.boxSizing = 'border-box'; ch.style.padding = '10px'; ch.style.display = 'flex'; ch.style.flexDirection = 'column'; ch.style.gap = '8px'; }
   }
 }, true);
 load();
