@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>НА МНЕ — виртуальная примерочная</title>
+<style>
+:root{--bg:#FBF3F0;--card:#fff;--ink:#2A2024;--gray:#9A8A90;--acc:#E77C8D;--acc2:#C95D70}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);min-height:100vh}
+header{padding:18px 16px 6px;text-align:center}
+h1{font-size:22px;letter-spacing:3px;font-weight:800;color:var(--acc2)}
+.sub{color:var(--gray);font-size:12px;margin-top:4px}
+main{max-width:560px;margin:0 auto;padding:10px 16px 40px;display:flex;flex-direction:column;gap:14px}
+.step{background:var(--card);border-radius:20px;padding:14px;box-shadow:0 8px 24px rgba(42,32,36,.08)}
+.step h3{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;gap:6px;align-items:center}
+.step h3 b{color:var(--acc2)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.opt{flex:1;border:2px solid #eee;border-radius:14px;padding:10px 6px;font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:#fff;color:var(--gray)}
+.opt.on{border-color:var(--acc);color:var(--acc2);background:#FDEEF1}
+.btn{border:none;border-radius:999px;padding:12px 16px;font-weight:700;font-size:13px;cursor:pointer}
+.btn.acc{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff}
+.btn.soft{background:#F3E7EA;color:var(--acc2)}
+input[type=file]{display:none}
+.link{width:100%;border:2px solid #eee;border-radius:14px;padding:11px;font-size:13px;margin-top:8px}
+canvas{width:100%;border-radius:20px;background:#fff;box-shadow:0 12px 34px rgba(42,32,36,.12)}
+.hint{color:var(--gray);font-size:11px;margin-top:6px;line-height:1.4}
+</style>
+</head>
+<body>
+<header><h1>НА МНЕ</h1><div class="sub">примерь вещь с Wildberries / Ozon — не покупая</div></header>
+<main>
+  <div class="step"><h3><b>1</b> Твоя фигура</h3>
+    <div class="row" id="builds">
+      <div class="opt on" data-b="0">худая</div><div class="opt" data-b="1">средняя</div>
+      <div class="opt" data-b="2">пышная</div><div class="opt" data-b="3">плюс</div>
+    </div>
+  </div>
+  <div class="step"><h3><b>2</b> Твоё лицо <span style="color:var(--gray);font-weight:500">(опционально)</span></h3>
+    <button class="btn soft" onclick="$('face').click()">📷 загрузить фото</button>
+    <input type="file" id="face" accept="image/*" onchange="onFace(this)">
+    <div class="hint">Фото не сохраняется и никуда не отправляется — всё происходит у тебя в телефоне.</div>
+  </div>
+  <div class="step"><h3><b>3</b> Вещь</h3>
+    <div class="row" id="gtype">
+      <div class="opt on" data-g="top">верх</div><div class="opt" data-g="bottom">низ</div><div class="opt" data-g="dress">платье</div>
+    </div>
+    <button class="btn soft" style="margin-top:8px" onclick="$('garment').click()">👗 фото товара</button>
+    <input type="file" id="garment" accept="image/*" onchange="onGarment(this)">
+    <input class="link" id="wb" placeholder="ссылка / артикул с WB или Ozon (необязательно)">
+  </div>
+  <canvas id="cv" width="540" height="960"></canvas>
+  <div class="row">
+    <button class="btn acc" onclick="share()">📤 Поделиться</button>
+    <button class="btn soft" onclick="dl()">⬇ Скачать</button>
+  </div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let build=0, gtype='top', faceImg=null, garmentImg=null;
+document.querySelectorAll('#builds .opt').forEach(o=>o.onclick=()=>{setOn('#builds',o);build=+o.dataset.b;draw();});
+document.querySelectorAll('#gtype .opt').forEach(o=>o.onclick=()=>{setOn('#gtype',o);gtype=o.dataset.g;draw();});
+function setOn(sel,o){document.querySelectorAll(sel+' .opt').forEach(x=>x.classList.remove('on'));o.classList.add('on');}
+function loadImg(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src;});}
+async function onFace(inp){const f=inp.files[0];if(!f)return;faceImg=await loadImg(URL.createObjectURL(f));draw();}
+async function onGarment(inp){const f=inp.files[0];if(!f)return;garmentImg=await loadImg(URL.createObjectURL(f));draw();}
+function dollM(H){const t=60;return{headCY:t+40,neckY:t+78,shY:t+100,waY:t+210,hipY:t+272,kneeY:t+400,ankY:t+478};}
+function widths(){return[{sh:88,wa:56,hip:92},{sh:92,wa:70,hip:104},{sh:96,wa:86,hip:120},{sh:100,wa:102,hip:136}][build];}
+function draw(){
+  const cv=$('cv'),x=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2;
+  x.clearRect(0,0,W,H);x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  const M=dollM(H),w=widths(),skin='#E9D6CC',line='#D9BFB2';
+  // ноги
+  x.fillStyle=skin;x.strokeStyle=line;x.lineWidth=2;
+  leg(x,cx-w.hipW*0.22,M.hipY,cx-w.hipW*0.16,M.ankY,w.hip*0.20);
+  leg(x,cx+w.hipW*0.22,M.hipY,cx+w.hipW*0.16,M.ankY,w.hip*0.20);
+  // торс
+  x.beginPath();
+  x.moveTo(cx-w.sh/2,M.shY);
+  x.bezierCurveTo(cx-w.sh/2,M.waY-40,cx-w.wa/2,M.waY-20,cx-w.wa/2,M.waY);
+  x.bezierCurveTo(cx-w.hip/2,M.hipY-30,cx-w.hip/2,M.hipY,cx-w.hip/2,M.hipY+8);
+  x.lineTo(cx+w.hip/2,M.hipY+8);
+  x.bezierCurveTo(cx+w.hip/2,M.hipY,cx+w.hip/2,M.hipY-30,cx+w.wa/2,M.waY);
+  x.bezierCurveTo(cx+w.sh/2,M.waY-20,cx+w.sh/2,M.shY-40,cx+w.sh/2,M.shY);
+  x.closePath();x.fill();x.stroke();
+  // руки
+  arm(x,cx-w.sh/2,M.shY+4,cx-w.hip/2-8,M.hipY-10);arm(x,cx+w.sh/2,M.shY+4,cx+w.hip/2+8,M.hipY-10);
+  // шея+голова
+  x.fillRect(cx-9,M.neckY-6,18,26);
+  x.beginPath();x.arc(cx,M.headCY,34,0,7);x.fill();x.stroke();
+  // одежда
+  if(garmentImg){
+    let y0,y1,ww;
+    if(gtype==='top'){y0=M.shY-4;y1=M.hipY;ww=w.sh+26;}
+    else if(gtype==='bottom'){y0=M.waY+6;y1=M.kneeY;ww=w.hip+22;}
+    else{y0=M.shY-4;y1=M.kneeY;ww=w.hip+26;}
+    cover(x,garmentImg,cx-ww/2,y0,ww,y1-y0);
+  }
+  // лицо
+  if(faceImg){x.save();x.beginPath();x.ellipse(cx,M.headCY,30,38,0,0,7);x.clip();cover(x,faceImg,cx-34,M.headCY-42,68,84);x.restore();}
+  // подпись
+  x.fillStyle='#C95D70';x.font='700 26px system-ui';x.textAlign='center';x.fillText('НА МНЕ',cx,H-26);
+}
+function leg(x,x0,y0,x1,y1,wd){x.beginPath();x.moveTo(x0-wd,y0);x.lineTo(x0+wd,y0);x.lineTo(x1+wd*0.6,y1);x.lineTo(x1-wd*0.6,y1);x.closePath();x.fill();x.stroke();}
+function arm(x,x0,y0,x1,y1){x.lineWidth=14;x.strokeStyle='#E9D6CC';x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke();x.lineWidth=2;x.strokeStyle='#D9BFB2';}
+function cover(x,img,dx,dy,dw,dh){const r=Math.max(dw/img.width,dh/img.height),iw=img.width*r,ih=img.height*r;x.drawImage(img,dx+(dw-iw)/2,dy+(dh-ih)/2,iw,ih);}
+function blob(){return new Promise(r=>$('cv').toBlob(r,'image/png'));}
+async function dl(){const a=document.createElement('a');a.href=(await blob()).toString();a.download='na-mne.png';a.click();}
+async function share(){const b=await blob();const f=new File([b],'na-mne.png',{type:'image/png'});const link=$('wb').value.trim();const txt='Примерила на НА МНЕ'+(link?' · '+link:'');if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],text:txt});return;}catch(e){}}dl();}
+draw();
+</script>
+</body>
+</html>
