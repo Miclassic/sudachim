@@ -4,7 +4,7 @@ const SB = 'https://tfqsyovyshheqkslsjhx.supabase.co';
 const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmcXN5b3Z5c2hoZXFrc2xzamh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MTU3MTMsImV4cCI6MjEwMzA5MTcxM30.S5-0MVJ6HLyFs2TQ5tpE7IlRXum25j7Vwhvnab1pAIY';
 const SITE = 'https://miclassic.github.io/sudachim';
 
-const r = await fetch(SB + '/const r = await fetch(SB + '/rest/v1/cases?status=eq.approved&hidden=eq.false&select=id,text,hype_title,short_title,category&order=id.desc&limit=80', {', {
+const r = await fetch(SB + '/const r = await fetch(SB + '/rest/v1/cases?status=eq.approved&hidden=eq.false&select=id,text,hype_title,short_title,category,cover_url&order=id.desc&limit=80', {', {
   headers: { apikey: KEY, authorization: 'Bearer ' + KEY }
 });
 const cases = await r.json();
@@ -26,7 +26,7 @@ for (const c of cases) {
     '<meta property="og:description" content="' + desc + '">' +
     '<meta property="og:url" content="' + page + '">' +
     '<meta property="og:image" content="' + SITE + '/og.png">' +
-    '<meta property="og:image" content="' + SITE + '/og.png?v=3">' +
+    '<meta property="og:image" content="' + (c.cover_url || (SITE + '/og.png?v=3')) + '">' +
     '<scr' + 'ipt>setTimeout(function(){ location.replace("' + app + '") }, 1500);</scr' + 'ipt>' +
     '</head><body>Открываем народный суд… <a href="' + app + '">перейти</a></body></html>';
   writeFileSync('v/case-' + c.id + '.html', html);
