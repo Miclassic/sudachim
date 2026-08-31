@@ -3209,7 +3209,6 @@ function renderShowcase(){
 }
 function gToggle(el){ el.classList.toggle('open'); }
 function gOpen(id){
-  showTab('court');
   if (feedCat !== 'все') setFeedCat('все');
   setTimeout(() => {
     const el = document.querySelector('[data-case-id="' + id + '"]');
