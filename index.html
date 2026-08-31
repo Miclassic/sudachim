@@ -3276,7 +3276,7 @@ function renderShow(){
         '<div class="gsBackText">' + esc(flatText(c.text)) + '</div>' +
         fbarsHtml('gs' + c.id, pctC, pctL, pctJ) +
         '<div class="fmeta" style="margin-top:4px;font-size:10px"><span style="color:var(--red)">осуждают ' + pctC + '%</span><span style="color:var(--grn)">не осуждают ' + pctJ + '%</span></div>' +
-        '<button class="gsOpen" onclick="event.stopPropagation();gOpen(' + c.id + ')">открыть в ленте →</button>' +
+        '<button class="gsOpen" onclick="event.stopImmediatePropagation();gOpen(' + c.id + ')">открыть в ленте →</button>' +
       '</div>' +
       '</div></div>';
   }).join('');
@@ -3284,14 +3284,21 @@ function renderShow(){
 }
 function renderShowcase(){ renderShow(); }
 function gOpen(id){
-  if (feedCat !== 'все') setFeedCat('все');
+  if (feedCat !== 'все') {
+    setFeedCat('все');
+    setTimeout(() => gOpen(id), 600);
+    return;
+  }
   setTimeout(() => {
     const el = document.querySelector('[data-case-id="' + id + '"]');
-    if (!el) return;
+    if (!el) {
+      toast('История не найдена в ленте — возможно, она в очереди свайпов');
+      return;
+    }
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     el.style.outline = '2px solid var(--gold)';
     setTimeout(() => el.style.outline = '', 1600);
-  }, 350);
+  }, 400);
 }
 function hypeEnd(c){ return new Date(c.created_at).getTime() + 7 * 864e5; }
 function hypeState(c){ return srvNow() >= hypeEnd(c) ? 'locked' : 'live'; }
